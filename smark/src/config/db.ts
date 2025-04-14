@@ -1,7 +1,7 @@
 import mongoose, { Connection } from "mongoose";
 
 const MONGODB_URI: string | undefined = process.env.MONGODB_URI;
-if (!MONGODB_URI) throw new Error("MONGO_MONGODB_URI is not defined");
+if (!MONGODB_URI) throw new Error("MONGODB_URI is not defined");
 
 interface CachedConnection {
   conn: Connection | null;
