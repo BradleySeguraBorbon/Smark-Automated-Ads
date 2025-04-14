@@ -8,8 +8,8 @@ export interface AdInteractions {
 }
 
 export interface IClient extends Document {
-    name: string;
-    surname: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone: string;
     telegramUsername: string;

@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-interface Tag {
+interface CampaignTag {
     tagId: Types.ObjectId;
     priority: number;
 }
@@ -18,7 +18,7 @@ export interface IMarketingCampaign extends Document {
     status: 'active' | 'inactive' | 'completed';
     startDate: Date;
     endDate: Date;
-    tags: Tag[]; 
+    tags: CampaignTag[]; 
     audiencePreview: Types.ObjectId[]; 
     users: Types.ObjectId[]; 
     performance: Performance; 

@@ -3,20 +3,11 @@ import { ITag } from '../types/Tag';
 
 const tagSchema = new Schema<ITag>(
   {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    keywords: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    name: { type: String, required: true, unique: true },
+    keywords: [{ type: String, required: true }]
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 
