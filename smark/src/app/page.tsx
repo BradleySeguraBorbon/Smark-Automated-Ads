@@ -1,4 +1,4 @@
-import { connectDB } from "@/config/db";
+import  connectDB from "@/config/db";
 import User from "@/models/User";
 
 export default async function Home() {
