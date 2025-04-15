@@ -1,5 +1,4 @@
-
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
 export interface IUser extends Document {
     username: string;
