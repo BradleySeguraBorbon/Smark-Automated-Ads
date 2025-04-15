@@ -18,7 +18,7 @@ const clientSchema = new Schema<IClient>({
   birthDate: { type: Date, required: true },
   preferences: [{ type: String, required: true }],
   tags: [{ type: Types.ObjectId, ref: "Tags" }],
-  marketingCampaigns: [{ type: Types.ObjectId, ref: "MarketingCampaign" }],
+  marketingCampaigns: [{ type: Types.ObjectId, ref: "MarketingCampaigns" }],
   adInteractions: [adInteractionsSchema],
 }, {
   timestamps: true,

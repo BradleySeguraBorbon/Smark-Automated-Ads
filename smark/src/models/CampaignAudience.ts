@@ -3,8 +3,8 @@ import mongoose, { Schema, Model } from 'mongoose';
 
 const campaignAudienceSchema = new Schema<ICampaignAudience>(
   {
-    campaignId: { type: String, required: true },
-    audience: { type: [Schema.Types.ObjectId], ref: 'Client', required: true },
+    campaign: { type: Schema.Types.ObjectId, ref: 'MarketingCampaigns', required: true },
+    audience: { type: [Schema.Types.ObjectId], ref: 'Clients', required: true },
     status: { type: String, enum: ['approved', 'pending', 'rejected'], required: true },
   },
   { timestamps: true }
