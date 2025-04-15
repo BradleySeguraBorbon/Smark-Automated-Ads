@@ -22,7 +22,8 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'Invalid or missing id parameter' }, { status: 400 });
         }
 
-        const adMessage = await AdMessages.findById(id);
+        const adMessage = await AdMessages.findById(id)
+            .populate('MarketingCampaignId', ['name', 'description', 'status', 'endDate']).populate('templateId', ['name', 'type', 'html']);
 
         if (!adMessage) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -92,7 +93,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     try {
         await connectDB();
         const { id } = params;
-        
+
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json({ message: 'Invalid or missing id parameter' }, { status: 400 });
         }

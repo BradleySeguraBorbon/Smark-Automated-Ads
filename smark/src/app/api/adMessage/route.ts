@@ -20,7 +20,8 @@ export async function GET(request: Request) {
         const skip = (page - 1) * limit;
 
         const total = await AdMessages.countDocuments();
-        const adMessage = await AdMessages.find().skip(skip).limit(limit);
+        const adMessage = await AdMessages.find().skip(skip).limit(limit)
+            .populate('MarketingCampaignId', ['name', 'description', 'status']);
 
         if (adMessage.length === 0) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
