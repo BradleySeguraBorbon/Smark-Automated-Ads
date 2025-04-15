@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { connectDB } from '@/config/db';
-import AdMessages from '@/models/AdMessage';
+import  connectDB from '@/config/db';
+import { MarketingCampaigns, AdMessages, Templates } from '@/models/models';
 
 export async function GET(request: Request) {
     try {
@@ -21,7 +21,8 @@ export async function GET(request: Request) {
 
         const total = await AdMessages.countDocuments();
         const adMessage = await AdMessages.find().skip(skip).limit(limit)
-            .populate('MarketingCampaignId', ['name', 'description', 'status']);
+            .populate('marketingCampaignId', ['name', 'description', 'status'])
+            .populate('templateId', ['name', 'type']);
 
         if (adMessage.length === 0) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
 
         const requiredFields = [
             'name',
-            'MarketingCampaignId',
+            'marketingCampaignId',
             'type',
             'status',
             'content',

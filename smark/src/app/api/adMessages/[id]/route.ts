@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { connectDB } from '@/config/db';
+import connectDB from '@/config/db';
 import AdMessages from '@/models/AdMessage';
 
 function getMissingFields(body: any, requiredFields: string[]) {
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         }
 
         const adMessage = await AdMessages.findById(id)
-            .populate('MarketingCampaignId', ['name', 'description', 'status', 'endDate']).populate('templateId', ['name', 'type', 'html']);
+            .populate('marketingCampaignId', ['name', 'description', 'status', 'endDate']).populate('templateId', ['name', 'type', 'html']);
 
         if (!adMessage) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -50,23 +50,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         const body = await request.json();
 
-        const requiredFields = [
-            'name', 'MarketingCampaignId',
-            'type', 'status',
-            'content', 'attachments',
-            'templateId', 'sendDate'
-        ];
-
-        const missingFields = requiredFields.filter(field => body[field] === undefined || body[field] === null);
-
-        if (missingFields.length > 0) {
-            return NextResponse.json(
-                { message: `Missing fields: ${missingFields.join(', ')}` },
-                { status: 400 }
-            );
-        }
-
-        if (isNaN(Date.parse(body.sendDate))) {
+        if (body.sendDate && isNaN(Date.parse(body.sendDate))) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
         }
 

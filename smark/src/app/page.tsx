@@ -1,26 +1,26 @@
-import  connectDB from "@/config/db";
-import User from "@/models/User";
+import connectDB from "@/config/db";
+import Template from "@/models/Template";
 
 export default async function Home() {
   await connectDB();
 
-  const newUser = new User({
-    username: "testuser",
-    password: "123456",
-    marketingCampaigns: [],
-    rol: "employee",
+  const newTemplate = new Template({
+    name: "Welcome Email",
+    type: "email",
+    html: "<h1>Welcome {{name}}!</h1><p>Thank you for joining our platform. We're excited to have you on board.</p><p>{{customMessage}}</p>",
+    placeholders: ["name", "customMessage"]
   });
 
   try {
-    const savedUser = await newUser.save();
-    console.log("✅ User saved:", savedUser);
+    const savedTemplate = await newTemplate.save();
+    console.log("✅ Template saved:", savedTemplate);
   } catch (error) {
-    console.error("❌ Error saving user:", error);
+    console.error("❌ Error saving template:", error);
   }
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      ✅ User creation attempt finished. Check your DB and logs.
+      ✅ Template creation attempt finished. Check your DB and logs.
     </div>
   );
 }
