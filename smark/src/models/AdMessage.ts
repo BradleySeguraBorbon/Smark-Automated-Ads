@@ -36,4 +36,5 @@ const adMessagesSchema = new mongoose.Schema<IAdMessage>(
           }
         );
 
-export default mongoose.models.AdMessages as Model<IAdMessage> || mongoose.model<IAdMessage>('AdMessages', adMessagesSchema);
+const AdMessages = mongoose.models.AdMessages as Model<IAdMessage> || mongoose.model<IAdMessage>('AdMessages', adMessagesSchema);
+export default AdMessages;

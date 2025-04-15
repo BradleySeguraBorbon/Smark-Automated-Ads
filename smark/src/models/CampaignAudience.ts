@@ -10,4 +10,5 @@ const campaignAudienceSchema = new Schema<ICampaignAudience>(
   { timestamps: true }
 );
 
-export default mongoose.models.CampaignAudiences as Model<ICampaignAudience> || mongoose.model<ICampaignAudience>('CampaignAudiences', campaignAudienceSchema);
+const CampaignAudiences = mongoose.models.CampaignAudiences as Model<ICampaignAudience> || mongoose.model<ICampaignAudience>('CampaignAudiences', campaignAudienceSchema);
+export default CampaignAudiences;

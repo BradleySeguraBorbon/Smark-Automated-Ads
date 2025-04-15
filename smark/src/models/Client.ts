@@ -47,5 +47,5 @@ clientSchema.pre("validate", function (next) {
   next();
 });
 
-
-export default mongoose.models.Clients as Model<IClient> || mongoose.model<IClient>('Clients', clientSchema);
+const Clients = mongoose.models.Clients as Model<IClient> || mongoose.model<IClient>('Clients', clientSchema);
+export default Clients;

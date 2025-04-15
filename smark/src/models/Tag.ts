@@ -11,4 +11,5 @@ const tagSchema = new Schema<ITag>(
   }
 );
 
-export default mongoose.models.Tags as Model<ITag> || mongoose.model<ITag>('Tags', tagSchema);
+const Tags = mongoose.models.Tags as Model<ITag> || mongoose.model<ITag>('Tags', tagSchema);
+export default Tags;
