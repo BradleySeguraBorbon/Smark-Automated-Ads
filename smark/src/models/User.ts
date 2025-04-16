@@ -6,7 +6,7 @@ const userSchema = new Schema<IUser>(
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     marketingCampaigns: [
-      { type: Schema.Types.ObjectId, ref: "MarketingCampaign", required: true }
+      { type: Schema.Types.ObjectId, ref: "MarketingCampaigns", required: true }
     ],
     role: { type: String, required: true, enum: ["admin", "employee"] }
   },
