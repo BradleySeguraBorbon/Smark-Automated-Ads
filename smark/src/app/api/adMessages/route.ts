@@ -34,8 +34,8 @@ export async function GET(request: Request) {
         const adMessages = await AdMessages.find(filter)
             .skip(skip)
             .limit(limit)
-            .populate('marketingCampaignId', ['name', 'description', 'status'])
-            .populate('templateId', ['name', 'type']);
+            .populate('marketingCampaignId', 'name description status')
+            .populate('templateId', 'name type');
 
         if (adMessages.length === 0) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });

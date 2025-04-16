@@ -10,7 +10,7 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     if (!id || !isValidObjectId(id)) {
       return NextResponse.json(
@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const campaign = await MarketingCampaigns.findById(id)
       .populate('tags.tagId', 'name')
       .populate('audiencePreview', 'name email')
-      .populate('users', 'name email');
+      .populate('users', 'username');
 
     if (!campaign) {
       return NextResponse.json(

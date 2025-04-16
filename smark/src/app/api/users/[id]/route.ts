@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { Users } from '@/models/models';
+import { Users, MarketingCampaigns } from '@/models/models';
 import rollback from 'mongoose';
 
 function isValidObjectId(id: string) {
@@ -133,12 +133,11 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
             );
         }
 
-        const marketingCampaigns = await Users.find({ marketingCampaigns: id });//.session(session);
-
-        for (const campaign of marketingCampaigns) {
-            campaign.users.pull(id);
-            await campaign.save(/*{ session } */);
-        }
+        await MarketingCampaigns.updateMany(
+            { users: id }, 
+            { $pull: { users: id } }
+            // , { session } 
+          );
 
         //await session.commitTransaction();
 
