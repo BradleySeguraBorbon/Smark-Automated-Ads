@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import  connectDB from '@/config/db';
+import connectDB from '@/config/db';
+import mongoose from 'mongoose';
 import { MarketingCampaigns, AdMessages, Templates } from '@/models/models';
+
+function isValidObjectId(id: string) {
+    return mongoose.Types.ObjectId.isValid(id);
+}
 
 export async function GET(request: Request) {
     try {
@@ -21,12 +26,12 @@ export async function GET(request: Request) {
 
         const total = await AdMessages.countDocuments();
         const adMessage = await AdMessages.find().skip(skip).limit(limit)
-            .populate('marketingCampaignId', ['name', 'description', 'status'])
-            .populate('templateId', ['name', 'type']);
+            .populate('marketingCampaign', ['name', 'description', 'status'])
+            .populate('template', ['name', 'type']);
 
         if (adMessage.length === 0) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
-        }        
+        }
 
         const totalPages = Math.ceil(total / limit);
 
@@ -51,18 +56,18 @@ export async function POST(request: Request) {
 
         const requiredFields = [
             'name',
-            'marketingCampaignId',
+            'marketingCampaign',
             'type',
             'status',
             'content',
             'attachments',
-            'templateId',
+            'template',
             'sendDate'
         ];
 
         const missingFields = requiredFields.filter(field => body[field] === undefined || body[field] === null);
 
-        const { name, marketingCampaignId, type, status, content, attachments, templateId, sendDate } = body;
+        const { name, marketingCampaign, type, status, content, attachments, template, sendDate } = body;
 
         if (missingFields.length > 0) {
             return NextResponse.json(
@@ -75,14 +80,22 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
         }
 
+        if (!isValidObjectId(marketingCampaign) || !(await MarketingCampaigns.findById(marketingCampaign))) {
+            return NextResponse.json({ message: 'Invalid or non-existent marketingCampaign' }, { status: 400 });
+        }
+
+        if (!isValidObjectId(template) || !(await Templates.findById(template))) {
+            return NextResponse.json({ message: 'Invalid or non-existent template' }, { status: 400 });
+        }
+
         const adMessage = new AdMessages({
             name,
-            marketingCampaignId,
+            marketingCampaign,
             type,
             status,
             content,
             attachments,
-            templateId,
+            template,
             sendDate,
         });
 

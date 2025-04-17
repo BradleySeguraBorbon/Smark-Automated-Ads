@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
-import  connectDB  from '@/config/db';
+import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { MarketingCampaigns, AdMessages } from '@/models/models';
+import { MarketingCampaigns, AdMessages, Tags, Users, Clients } from '@/models/models';
 
 function isValidObjectId(id: string) {
-    return mongoose.Types.ObjectId.isValid(id);
-  }
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
+  const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+  const invalid = ids.filter(id => !foundIds.has(id));
+  return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
+}
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -92,6 +100,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
     }
 
+    const tagIds = body.tags?.map((tag: any) => tag.tagId) || [];
+    const audienceIds = body.audiencePreview || [];
+    const userIds = body.users || [];
+
+    const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
+      tagIds.length ? validateObjectIdsExist(tagIds, Tags, 'tags') : null,
+      audienceIds.length ? validateObjectIdsExist(audienceIds, Clients, 'audiencePreview') : null,
+      userIds.length ? validateObjectIdsExist(userIds, Users, 'users') : null,
+    ]);
+
+    const invalidRefs = [invalidTags, invalidAudience, invalidUsers].filter(Boolean);
+    if (invalidRefs.length > 0) {
+      return NextResponse.json({
+        message: 'Invalid references found in update',
+        details: invalidRefs
+      }, { status: 400 });
+    }
+
+
     const updatedCampaign = await MarketingCampaigns.findByIdAndUpdate(
       id,
       body,
@@ -143,7 +170,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     let remainingDocuments = true;
 
     while (remainingDocuments) {
-      const adMessagesBatch = await AdMessages.find({ MarketingCampaignId: id })
+      const adMessagesBatch = await AdMessages.find({ marketingCampaign: id })
         .limit(batchSize)
         .select('_id');
 
@@ -152,7 +179,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         break;
       }
       const adMessageIds = adMessagesBatch.map(doc => doc._id);
-      
+
       await AdMessages.deleteMany({ _id: { $in: adMessageIds } });
     }
 

@@ -22,7 +22,7 @@ export interface AdMessageContentTelegram {
 
 export interface IAdMessage extends Document {
   name: string;
-  marketingCampaignId: Types.ObjectId;
+  marketingCampaign: Types.ObjectId;
   type: ('email' | 'telegram')[];
   status?: 'sent' | 'editing' | 'programmed';
   content: {
@@ -30,6 +30,6 @@ export interface IAdMessage extends Document {
     telegram?: AdMessageContentTelegram;
   };
   attachments?: string[];
-  templateId?: Types.ObjectId;
+  template?: Types.ObjectId;
   sendDate: Date;
 };

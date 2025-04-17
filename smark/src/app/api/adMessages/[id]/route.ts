@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/config/db';
-import AdMessages from '@/models/AdMessage';
+import { AdMessages, MarketingCampaigns, Templates } from '@/models/models';
 
 function getMissingFields(body: any, requiredFields: string[]) {
     return requiredFields.filter(field => body[field] === undefined || body[field] === null);
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         }
 
         const adMessage = await AdMessages.findById(id)
-            .populate('marketingCampaignId', ['name', 'description', 'status', 'endDate']).populate('templateId', ['name', 'type', 'html']);
+            .populate('marketingCampaign', ['name', 'description', 'status', 'endDate']).populate('template', ['name', 'type', 'html']);
 
         if (!adMessage) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -52,6 +52,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         if (body.sendDate && isNaN(Date.parse(body.sendDate))) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
+        }
+
+        if (body.marketingCampaignId) {
+            if (!isValidObjectId(body.marketingCampaignId) || !(await MarketingCampaigns.findById(body.marketingCampaignId))) {
+                return NextResponse.json({ message: 'Invalid or non-existent marketingCampaignId' }, { status: 400 });
+            }
+        }
+
+        if (body.templateId) {
+            if (!isValidObjectId(body.templateId) || !(await Templates.findById(body.templateId))) {
+                return NextResponse.json({ message: 'Invalid or non-existent templateId' }, { status: 400 });
+            }
         }
 
         const adMessage = await AdMessages.findByIdAndUpdate(id, body, { new: true, runValidators: true });

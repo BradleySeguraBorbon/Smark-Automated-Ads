@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
-import  connectDB  from '@/config/db';
+import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Tags, Users, Clients, MarketingCampaigns } from '@/models/models';
 
+async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
+  const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+  const invalid = ids.filter(id => !foundIds.has(id));
+  return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
+}
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +19,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const filter: Record<string, any> = {};
-    
+
     if (searchParams.has('status')) {
       filter.status = searchParams.get('status');
     }
@@ -100,6 +107,24 @@ export async function POST(request: Request) {
         { message: 'End date must be after start date' },
         { status: 400 }
       );
+    }
+
+    const tagIds = body.tags.map((tag: any) => tag.tagId);
+    const audienceIds = body.audiencePreview || [];
+    const userIds = body.users || [];
+
+    const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
+      validateObjectIdsExist(tagIds, Tags, 'tags'),
+      validateObjectIdsExist(audienceIds, Clients, 'audiencePreview'),
+      validateObjectIdsExist(userIds, Users, 'users'),
+    ]);
+
+    const invalidRefs = [invalidTags, invalidAudience, invalidUsers].filter(Boolean);
+    if (invalidRefs.length > 0) {
+      return NextResponse.json({
+        message: 'Invalid references found in request',
+        details: invalidRefs
+      }, { status: 400 });
     }
 
     const existingCampaign = await MarketingCampaigns.findOne({ name: body.name });
