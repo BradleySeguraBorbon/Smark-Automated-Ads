@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 import { IClient } from '../types/Client';
 
 const adInteractionsSchema = new Schema({
-  ad_id: { type: String, required: true },
+  adMessage: { type: Types.ObjectId, ref: "AdMessages", required: true },
   status: { type: String, enum: ["opened", "received"], required: true },
 });
 

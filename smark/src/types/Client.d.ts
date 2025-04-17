@@ -2,9 +2,8 @@
 import { Types } from "mongoose";
 
 export interface AdInteractions {
-    ad_id: string;
+    adMessage: Types.ObjectId;
     status: "opened" | "received";
-
 }
 
 export interface IClient extends Document {
