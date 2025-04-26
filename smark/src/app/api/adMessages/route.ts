@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
+import { getUserFromToken } from '@/../lib/auth';
 import { MarketingCampaigns, AdMessages, Templates } from '@/models/models';
 
 function isValidObjectId(id: string) {
@@ -10,6 +11,14 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request) {
     try {
         await connectDB();
+
+        const user = await getUserFromToken(request);
+console.log('User:', user);
+        console.log('User role:', user.role);
+
+        if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
 
         const { searchParams } = new URL(request.url);
 
@@ -64,6 +73,13 @@ export async function POST(request: Request) {
 
     try {
         await connectDB();
+        
+        const user = await getUserFromToken(request);
+
+        if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const body = await request.json();
 
         const requiredFields = [
