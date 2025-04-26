@@ -11,8 +11,18 @@ export async function GET(request: Request) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const skip = (page - 1) * limit;
 
-        const total = await CampaignAudiences.countDocuments();
-        const results = await CampaignAudiences.find()
+        const filter: Record<string, any> = {};
+
+        if (searchParams.has('status')) {
+            filter.status = searchParams.get('status');
+        }
+
+        if (searchParams.has('campaignId')) {
+            filter.campaign = searchParams.get('campaignId');
+        }
+
+        const total = await CampaignAudiences.countDocuments(filter);
+        const results = await CampaignAudiences.find(filter)
             .populate('campaign')
             .populate('audience')
             .skip(skip)

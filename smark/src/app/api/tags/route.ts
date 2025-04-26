@@ -12,8 +12,23 @@ export async function GET(request: Request) {
 
         const skip = (page - 1) * limit;
 
-        const total = await Tags.countDocuments();
-        const tags = await Tags.find().skip(skip).limit(limit);
+        const filter: Record<string, any> = {};
+
+        if (searchParams.has('name')) {
+            filter.name = searchParams.get('name');
+        }
+
+        if (searchParams.has('keywords')) {
+            const keywords = searchParams.getAll('keywords');
+            filter.keywords = { $in: keywords };
+        }
+
+        const total = await Tags.countDocuments(filter);
+        const tags = await Tags.find(filter).skip(skip).limit(limit);
+
+        if (tags.length === 0) {
+            return NextResponse.json({ message: 'No tags found' }, { status: 404 });
+        }
 
         return NextResponse.json({
             message: 'Tags fetched successfully',
