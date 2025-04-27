@@ -20,7 +20,8 @@ export async function GET(request: Request) {
         }
 
         if (searchParams.has('type')) {
-            filter.type = searchParams.getAll('type');
+            const types = searchParams.getAll('type');
+            filter.type = { $in: types };
         }
 
         const page = parseInt(searchParams.get('page') || '1');
@@ -35,8 +36,8 @@ export async function GET(request: Request) {
 
         const skip = (page - 1) * limit;
 
-        const total = await AdMessages.countDocuments();
-        const adMessages = await AdMessages.find().skip(skip).limit(limit)
+        const total = await AdMessages.countDocuments(filter);
+        const adMessages = await AdMessages.find(filter).skip(skip).limit(limit)
             .populate('marketingCampaign', ['name', 'description', 'status'])
             .populate('template', ['name', 'type']);
 
@@ -66,14 +67,9 @@ export async function POST(request: Request) {
         const body = await request.json();
 
         const requiredFields = [
-            'name',
-            'marketingCampaign',
-            'type',
-            'status',
-            'content',
-            'attachments',
-            'template',
-            'sendDate'
+            'name', 'marketingCampaign', 'type',
+            'status', 'content', 'attachments',
+            'template', 'sendDate'
         ];
 
         const missingFields = requiredFields.filter(field => body[field] === undefined || body[field] === null);

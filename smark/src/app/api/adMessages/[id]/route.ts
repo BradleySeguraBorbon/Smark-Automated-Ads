@@ -48,7 +48,22 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Invalid or missing id parameter' }, { status: 400 });
         }
 
+        const requiredFields = [
+            'name', 'marketingCampaign', 'type',
+            'status', 'content', 'attachments',
+            'template', 'sendDate'
+        ];
+    
         const body = await request.json();
+        
+        const missingFields = requiredFields.filter(field => body[field] === undefined || body[field] === null);
+    
+        if (missingFields.length > 0) {
+            return NextResponse.json(
+                { message: 'Missing required fields.', missingFields },
+                { status: 400 }
+            );
+        }
 
         if (body.sendDate && isNaN(Date.parse(body.sendDate))) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
