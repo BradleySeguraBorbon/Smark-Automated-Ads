@@ -183,6 +183,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       await AdMessages.deleteMany({ _id: { $in: adMessageIds } });
     }
 
+    await Users.updateMany(
+      { marketingCampaigns: id },
+      { $pull: { marketingCampaigns: id } }
+    );
+
     const deletedCampaign = await MarketingCampaigns.findByIdAndDelete(id);
 
     if (!deletedCampaign) {

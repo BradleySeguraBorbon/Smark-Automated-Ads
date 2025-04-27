@@ -50,7 +50,7 @@ export async function GET(request: Request) {
 
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({        //cypress.io - playwright     Backend: supertest - Jest - RTL    HelmetJS - CORS
+    return NextResponse.json({    
       totalPages,
       page,
       limit,
