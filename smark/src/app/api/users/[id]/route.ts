@@ -2,16 +2,15 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Users, MarketingCampaigns } from '@/models/models';
-import rollback from 'mongoose';
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
@@ -42,7 +41,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
         const { id } = await params;
@@ -108,25 +107,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     await connectDB();
-    //const session = await mongoose.startSession();
-    //session.startTransaction();
     try {
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
-            //await session.abortTransaction();
             return NextResponse.json(
                 { message: 'Invalid or missing ID parameter' },
                 { status: 400 }
             );
         }
 
-        const deletedUser = await Users.findByIdAndDelete(id/*, { session } */);
+        const deletedUser = await Users.findByIdAndDelete(id);
 
         if (!deletedUser) {
-            //await session.abortTransaction();
             return NextResponse.json(
                 { message: 'User not found' },
                 { status: 404 }
@@ -136,10 +131,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         await MarketingCampaigns.updateMany(
             { users: id }, 
             { $pull: { users: id } }
-            // , { session } 
           );
-
-        //await session.commitTransaction();
 
         return NextResponse.json(
             { message: 'User deleted successfully' },
@@ -147,12 +139,9 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         );
     } catch (error: any) {
         console.error('Transaction error:', error);
-        //await session.abortTransaction();
         return NextResponse.json(
             { error: error.message || 'Error deleting user' },
             { status: 500 }
         );
-    } /*finally {
-        await session.endSession();
-    } */
+    }
 }

@@ -14,7 +14,6 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
 export async function GET(request: Request) {
   try {
     await connectDB();
-    console.log('Available models:', Object.keys(mongoose.models));
 
     const { searchParams } = new URL(request.url);
 
@@ -45,14 +44,13 @@ export async function GET(request: Request) {
     const campaigns = await MarketingCampaigns.find(filter)
       .skip(skip)
       .limit(limit)
-      .populate('tags.tagId', 'name')
-      .populate('audiencePreview', 'name email')
-      .populate('users', 'name email');
+      .populate('tags.tag', '_id name')
+      .populate('audiencePreview', '_id name email')
+      .populate('users', '_id name email');
 
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({
-      total,
+    return NextResponse.json({        //cypress.io - playwright     Backend: supertest - Jest - RTL    HelmetJS - CORS
       totalPages,
       page,
       limit,
@@ -109,12 +107,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const tagIds = body.tags.map((tag: any) => tag.tagId);
+    const tags = body.tags.map((tag: any) => tag.tag);
     const audienceIds = body.audiencePreview || [];
     const userIds = body.users || [];
 
     const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
-      validateObjectIdsExist(tagIds, Tags, 'tags'),
+      validateObjectIdsExist(tags, Tags, 'tags'),
       validateObjectIdsExist(audienceIds, Clients, 'audiencePreview'),
       validateObjectIdsExist(userIds, Users, 'users'),
     ]);

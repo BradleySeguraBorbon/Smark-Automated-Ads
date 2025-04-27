@@ -15,10 +15,10 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
     return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
@@ -52,10 +52,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
@@ -147,10 +147,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
