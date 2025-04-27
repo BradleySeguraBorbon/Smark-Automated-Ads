@@ -13,8 +13,6 @@ export async function GET(request: Request) {
         await connectDB();
 
         const user = await getUserFromToken(request);
-console.log('User:', user);
-        console.log('User role:', user.role);
 
         if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
