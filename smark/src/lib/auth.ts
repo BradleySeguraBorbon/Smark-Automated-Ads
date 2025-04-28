@@ -15,3 +15,14 @@ export async function getUserFromToken(request: Request) {
         return null;
     }
 }
+
+export function getUserFromRequest(request: Request) {
+    const username = request.headers.get('x-username');
+    const userRole = request.headers.get('x-user-role');
+
+    if (!username || !userRole) {
+        return null;
+    }
+
+    return { username: username, role: userRole };
+}

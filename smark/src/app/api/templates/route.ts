@@ -1,11 +1,22 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
-import mongoose from 'mongoose';
 import Templates from '@/models/Template';
+import { getUserFromRequest } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer', 'admin', 'employee'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
 
     const filter: Record<string, any> = {};
@@ -15,7 +26,7 @@ export async function GET(request: Request) {
 
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
-    
+
     if (isNaN(page) || page < 1 || isNaN(limit) || limit < 1) {
       return NextResponse.json(
         { message: 'Invalid parameters: page and limit should be greater than 0.' },
@@ -51,6 +62,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const body = await request.json();
 
     const requiredFields = ['name', 'type', 'html'];

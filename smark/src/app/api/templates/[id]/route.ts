@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import Templates from '@/models/Template';
+import { getUserFromRequest } from '@/lib/auth';
 
 function isValidObjectId(id: string) {
   return mongoose.Types.ObjectId.isValid(id);
@@ -10,6 +11,17 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer', 'admin', 'employee'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const { id } = params;
 
     if (!id || !isValidObjectId(id)) {
@@ -43,6 +55,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const { id } = params;
 
     if (!id || !isValidObjectId(id)) {
@@ -102,6 +125,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const { id } = params;
 
     if (!id || !isValidObjectId(id)) {

@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/config/db';
-import { getUserFromToken } from '@/../lib/auth';
+import { getUserFromRequest } from '@/lib/auth';
 import { AdMessages, MarketingCampaigns, Templates } from '@/models/models';
-
-function getMissingFields(body: any, requiredFields: string[]) {
-    return requiredFields.filter(field => body[field] === undefined || body[field] === null);
-}
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -16,13 +12,11 @@ export async function GET(request: Request) {
     try {
         await connectDB();
 
-        const user = await getUserFromToken(request);
-
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
         const allowedRoles = ['admin', 'developer', 'employee'];
+
+        const user = getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
@@ -57,13 +51,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     try {
         await connectDB();
 
-        const user = await getUserFromToken(request);
-
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
         const allowedRoles = ['admin', 'developer', 'employee'];
+
+        const user = getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
@@ -131,13 +123,11 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     try {
         await connectDB();
 
-        const user = await getUserFromToken(request);
+        const allowedRoles = ['admin', 'developer', 'employee'];
 
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const user = getUserFromRequest(request);
 
-        const allowedRoles = ['admin', 'developer'];
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });

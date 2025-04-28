@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import dbConnect from '@/config/db';
 import { IUser } from '@/types/User';
 import User from '@/models/User';
-import { getUserFromToken } from '@/../lib/auth';
+import { getUserFromToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
   await dbConnect();

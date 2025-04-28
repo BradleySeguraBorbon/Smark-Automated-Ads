@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, Tags, MarketingCampaigns, AdMessages } from '@/models/models';
-
-function isValidObjectId(id: string) {
-  return mongoose.Types.ObjectId.isValid(id);
-}
+import { getUserFromRequest } from '@/lib/auth';
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
   const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -18,6 +15,17 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
 export async function GET(request: Request) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer', 'admin', 'employee'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
 
     const filter: Record<string, any> = {};
@@ -76,6 +84,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer', 'admin'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const body = await request.json();
 
     const requiredFields = [
@@ -139,19 +158,19 @@ export async function POST(request: Request) {
     }
 
     if (body.adInteractions && body.adInteractions.length > 0) {
-        const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
-        const invalidAdMessages = await validateObjectIdsExist(
-          adMessageIds,
-          AdMessages,
-          'adInteractions'
+      const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
+      const invalidAdMessages = await validateObjectIdsExist(
+        adMessageIds,
+        AdMessages,
+        'adInteractions'
+      );
+      if (invalidAdMessages) {
+        return NextResponse.json(
+          { message: 'Invalid ad message references', details: invalidAdMessages },
+          { status: 400 }
         );
-        if (invalidAdMessages) {
-          return NextResponse.json(
-            { message: 'Invalid ad message references', details: invalidAdMessages },
-            { status: 400 }
-          );
-        }
       }
+    }
 
     const existingClient = await Clients.findOne({
       $or: [

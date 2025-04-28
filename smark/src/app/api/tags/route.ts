@@ -1,19 +1,17 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import { Tags } from '@/models/models';
-import { getUserFromToken } from '@/../lib/auth';
+import { getUserFromRequest } from '@/lib/auth';
 
 export async function GET(request: Request) {
     try {
         await connectDB();
 
-        const user = await getUserFromToken(request);
+        const allowedRoles = ['developer', 'admin', 'employee'];
 
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const user = getUserFromRequest(request);
 
-        const allowedRoles = ['admin', 'developer', 'employee'];
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
@@ -61,13 +59,11 @@ export async function POST(request: Request) {
     try {
         await connectDB();
 
-        const user = await getUserFromToken(request);
+        const allowedRoles = ['developer', 'admin', 'employee'];
 
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const user = getUserFromRequest(request);
 
-        const allowedRoles = ['admin', 'developer'];
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });

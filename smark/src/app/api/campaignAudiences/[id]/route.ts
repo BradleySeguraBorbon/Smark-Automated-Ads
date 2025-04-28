@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/config/db';
 import { CampaignAudiences } from '@/models/models';
+import { getUserFromRequest } from '@/lib/auth';
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -10,6 +11,17 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const allowedRoles = ['developer', 'admin', 'employee'];
+
+        const user = getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;
 
         if (!isValidObjectId(id)) {
@@ -34,6 +46,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const allowedRoles = ['developer', 'admin'];
+
+        const user = getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
@@ -83,6 +106,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const allowedRoles = ['developer', 'admin'];
+
+        const user = getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;
 
         if (!isValidObjectId(id)) {
