@@ -123,11 +123,21 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
         await MarketingCampaigns.updateMany(
             { "tags.tag": new mongoose.Types.ObjectId(id) },
-            { 
-              $pull: {
-                tags: {
-                  tag: new mongoose.Types.ObjectId(id),
-                  _id: { $exists: true }
+            {
+                $pull: {
+                    tags: {
+                        tag: new mongoose.Types.ObjectId(id),
+                        _id: { $exists: true }
+                    }
+                }
+            }
+        );
+
+        await Clients.updateMany(
+            { tags: new mongoose.Types.ObjectId(id) },
+            {
+                $pull: {
+                    tags: new mongoose.Types.ObjectId(id)
                 }
             }
         );
