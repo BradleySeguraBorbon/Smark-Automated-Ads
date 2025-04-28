@@ -12,13 +12,12 @@ const clientSchema = new Schema<IClient>({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  telegramUsername: { type: String, unique: true },
+  telegramChatId: { type: String, unique: true },
   preferredContactMethod: { type: String, enum: ["email", "telegram"], required: true },
   subscriptions: [{ type: String, enum: ["email", "telegram"], required: true }],
   birthDate: { type: Date, required: true },
   preferences: [{ type: String, required: true }],
   tags: [{ type: Types.ObjectId, ref: "Tags" }],
-  marketingCampaigns: [{ type: Types.ObjectId, ref: "MarketingCampaigns" }],
   adInteractions: [adInteractionsSchema],
 }, {
   timestamps: true,
@@ -30,10 +29,10 @@ clientSchema.pre("validate", function (next) {
   const client = this as IClient;
 
   const hasEmail = !!client.email;
-  const hasTelegram = !!client.telegramUsername;
+  const hasTelegram = !!client.telegramChatId;
 
   if (!hasEmail && !hasTelegram) {
-    return next(new Error("Client must have at least one contact method: email or telegramUsername."));
+    return next(new Error("Client must have at least one contact method: email or telegramChatId."));
   }
 
   if (client.preferredContactMethod === "email" && !hasEmail) {
@@ -41,7 +40,7 @@ clientSchema.pre("validate", function (next) {
   }
 
   if (client.preferredContactMethod === "telegram" && !hasTelegram) {
-    return next(new Error("Preferred contact method is telegram, but telegramUsername is missing."));
+    return next(new Error("Preferred contact method is telegram, but telegramChatId is missing."));
   }
 
   next();

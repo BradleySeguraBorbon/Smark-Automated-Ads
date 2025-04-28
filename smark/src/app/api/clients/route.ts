@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { Clients, Tags, MarketingCampaigns, AdMessages } from '@/models/models';
+import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
@@ -39,9 +39,6 @@ export async function GET(request: Request) {
     if (searchParams.has('tag')) {
       filter.tags = searchParams.get('tag');
     }
-    if (searchParams.has('campaign')) {
-      filter.marketingCampaigns = searchParams.get('campaign');
-    }
 
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -60,7 +57,6 @@ export async function GET(request: Request) {
       .skip(skip)
       .limit(limit)
       .populate('tags', 'name')
-      .populate('marketingCampaigns', 'name')
       .populate('adInteractions.adMessage', 'name status');
 
     const totalPages = Math.ceil(total / limit);
@@ -143,20 +139,6 @@ export async function POST(request: Request) {
       }
     }
 
-    if (body.marketingCampaigns && body.marketingCampaigns.length > 0) {
-      const invalidCampaigns = await validateObjectIdsExist(
-        body.marketingCampaigns,
-        MarketingCampaigns,
-        'marketingCampaigns'
-      );
-      if (invalidCampaigns) {
-        return NextResponse.json(
-          { message: 'Invalid marketing campaign references', details: invalidCampaigns },
-          { status: 400 }
-        );
-      }
-    }
-
     if (body.adInteractions && body.adInteractions.length > 0) {
       const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
       const invalidAdMessages = await validateObjectIdsExist(
@@ -175,7 +157,7 @@ export async function POST(request: Request) {
     const existingClient = await Clients.findOne({
       $or: [
         { email: body.email },
-        { telegramUsername: body.telegramUsername }
+        { telegramChatId: body.telegramChatId }
       ]
     });
 
@@ -191,13 +173,12 @@ export async function POST(request: Request) {
       lastName: body.lastName,
       email: body.email,
       phone: body.phone,
-      telegramUsername: body.telegramUsername,
+      telegramChatId: body.telegramChatId,
       preferredContactMethod: body.preferredContactMethod,
       subscriptions: body.subscriptions,
       birthDate: body.birthDate,
       preferences: body.preferences || [],
       tags: body.tags || [],
-      marketingCampaigns: body.marketingCampaigns || [],
       adInteractions: body.adInteractions || []
     });
 

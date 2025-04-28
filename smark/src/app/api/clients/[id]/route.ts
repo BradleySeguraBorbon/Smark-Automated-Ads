@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { Clients, MarketingCampaigns, AdMessages, Tags } from '@/models/models';
+import { Clients, AdMessages, Tags } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 
 function isValidObjectId(id: string) {
@@ -41,7 +41,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
         const client = await Clients.findById(id)
             .populate('tags', 'name')
-            .populate('marketingCampaigns', 'name')
             .populate('adInteractions.adMessage', 'name status');
 
         if (!client) {
@@ -106,20 +105,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             }
         }
 
-        if (body.marketingCampaigns && body.marketingCampaigns.length > 0) {
-            const invalidCampaigns = await validateObjectIdsExist(
-                body.marketingCampaigns,
-                MarketingCampaigns,
-                'marketingCampaigns'
-            );
-            if (invalidCampaigns) {
-                return NextResponse.json(
-                    { message: 'Invalid marketing campaign references', details: invalidCampaigns },
-                    { status: 400 }
-                );
-            }
-        }
-
         if (body.adInteractions && body.adInteractions.length > 0) {
             const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
             const invalidAdMessages = await validateObjectIdsExist(
@@ -141,7 +126,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             { new: true, runValidators: true }
         )
             .populate('tags', 'name')
-            .populate('marketingCampaigns', 'name')
             .populate('adInteractions.adMessage', 'name status');
 
         if (!updatedClient) {
