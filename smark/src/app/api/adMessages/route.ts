@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { getUserFromToken } from '@/../lib/auth';
+import { getUserFromRequest } from '@/lib/auth';
 import { MarketingCampaigns, AdMessages, Templates } from '@/models/models';
 
 function isValidObjectId(id: string) {
@@ -12,10 +12,14 @@ export async function GET(request: Request) {
     try {
         await connectDB();
 
-        const user = await getUserFromToken(request);
+        const allowedRoles = ['admin', 'employee', 'developer'];
 
-        if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        const user =  getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        if (!allowedRoles.includes(user.role as string)) {
+          return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -71,11 +75,15 @@ export async function POST(request: Request) {
 
     try {
         await connectDB();
-        
-        const user = await getUserFromToken(request);
 
-        if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        const allowedRoles = ['admin', 'employee', 'developer'];
+
+        const user =  getUserFromRequest(request);
+
+        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        if (!allowedRoles.includes(user.role as string)) {
+          return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const body = await request.json();

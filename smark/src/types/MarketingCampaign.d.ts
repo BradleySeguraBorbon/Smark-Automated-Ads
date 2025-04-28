@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 interface CampaignTag {
-    tagId: Types.ObjectId;
+    tag: Types.ObjectId;
     priority: number;
 }
 

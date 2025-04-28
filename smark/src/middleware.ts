@@ -24,8 +24,20 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    await jwtVerify(token, secret);
-    return NextResponse.next();
+    const { payload } = await jwtVerify(token, secret);
+
+    const requestHeaders = new Headers(request.headers);
+    if (payload.username) requestHeaders.set('x-username', payload.id as string);
+    if (payload.role) requestHeaders.set('x-user-role', payload.role as string);
+
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+    return response;
+
   } catch (err) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }

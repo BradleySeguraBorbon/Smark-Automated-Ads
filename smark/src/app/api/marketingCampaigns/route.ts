@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Tags, Users, Clients, MarketingCampaigns } from '@/models/models';
+import { getUserFromRequest } from '@/lib/auth';
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
   const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -14,7 +15,16 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
 export async function GET(request: Request) {
   try {
     await connectDB();
-    console.log('Available models:', Object.keys(mongoose.models));
+
+    const allowedRoles = ['developer', 'admin', 'employee'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
 
     const { searchParams } = new URL(request.url);
 
@@ -45,14 +55,13 @@ export async function GET(request: Request) {
     const campaigns = await MarketingCampaigns.find(filter)
       .skip(skip)
       .limit(limit)
-      .populate('tags.tagId', 'name')
-      .populate('audiencePreview', 'name email')
-      .populate('users', 'name email');
+      .populate('tags.tag', '_id name')
+      .populate('audiencePreview', '_id name email')
+      .populate('users', '_id name email');
 
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({
-      total,
+    return NextResponse.json({    
       totalPages,
       page,
       limit,
@@ -67,6 +76,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connectDB();
+
+    const allowedRoles = ['developer', 'admin'];
+
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!allowedRoles.includes(user.role as string)) {
+      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
     const body = await request.json();
 
     const requiredFields = [
@@ -109,12 +129,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const tagIds = body.tags.map((tag: any) => tag.tagId);
+    const tags = body.tags.map((tag: any) => tag.tag);
     const audienceIds = body.audiencePreview || [];
     const userIds = body.users || [];
 
     const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
-      validateObjectIdsExist(tagIds, Tags, 'tags'),
+      validateObjectIdsExist(tags, Tags, 'tags'),
       validateObjectIdsExist(audienceIds, Clients, 'audiencePreview'),
       validateObjectIdsExist(userIds, Users, 'users'),
     ]);
