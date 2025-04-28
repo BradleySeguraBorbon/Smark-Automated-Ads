@@ -191,7 +191,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(

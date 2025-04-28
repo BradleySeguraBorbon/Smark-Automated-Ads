@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
@@ -78,7 +78,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
@@ -184,7 +184,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(
