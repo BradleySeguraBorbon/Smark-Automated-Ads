@@ -55,14 +55,13 @@ export async function GET(request: Request) {
     const campaigns = await MarketingCampaigns.find(filter)
       .skip(skip)
       .limit(limit)
-      .populate('tags.tagId', 'name')
-      .populate('audiencePreview', 'name email')
-      .populate('users', 'name email');
+      .populate('tags.tag', '_id name')
+      .populate('audiencePreview', '_id name email')
+      .populate('users', '_id name email');
 
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({
-      total,
+    return NextResponse.json({    
       totalPages,
       page,
       limit,
@@ -130,12 +129,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const tagIds = body.tags.map((tag: any) => tag.tagId);
+    const tags = body.tags.map((tag: any) => tag.tag);
     const audienceIds = body.audiencePreview || [];
     const userIds = body.users || [];
 
     const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
-      validateObjectIdsExist(tagIds, Tags, 'tags'),
+      validateObjectIdsExist(tags, Tags, 'tags'),
       validateObjectIdsExist(audienceIds, Clients, 'audiencePreview'),
       validateObjectIdsExist(userIds, Users, 'users'),
     ]);

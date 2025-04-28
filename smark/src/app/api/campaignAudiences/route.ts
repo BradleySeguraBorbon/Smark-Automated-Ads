@@ -1,7 +1,20 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
+import mongoose from 'mongoose';
 import { CampaignAudiences } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+
+function isValidObjectId(id: string) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
+  const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+  const invalid = ids.filter(id => !foundIds.has(id));
+  return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
+}
 
 export async function GET(request: Request) {
     try {
@@ -76,6 +89,15 @@ export async function POST(request: Request) {
                 message: 'Missing required fields',
                 required: ['campaign', 'audience (array)', 'status']
             }, { status: 400 });
+        }
+
+        if (!isValidObjectId(campaign)) {
+            return NextResponse.json({ message: 'Invalid campaign ID' }, { status: 400 });
+        }
+
+        const audienceValidation = await validateObjectIdsExist(audience, CampaignAudiences, 'audience');
+        if (audienceValidation) {
+            return NextResponse.json({ message: `Invalid ${audienceValidation.field} IDs`, invalidIds: audienceValidation.invalidIds }, { status: 400 });
         }
 
         const validStatuses = ['approved', 'pending', 'rejected'];

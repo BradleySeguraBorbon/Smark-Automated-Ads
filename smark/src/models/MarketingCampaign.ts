@@ -12,7 +12,7 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     tags: [{
-      tagId: { type: mongoose.Schema.Types.ObjectId, ref: "Tags", required: true },
+      tag: { type: mongoose.Schema.Types.ObjectId, ref: "Tags", required: true },
       priority: { type: Number, required: true }
     }],
     audiencePreview: {

@@ -16,7 +16,7 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
   return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
 
@@ -40,7 +40,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     const campaign = await MarketingCampaigns.findById(id)
-      .populate('tags.tagId', 'name')
+      .populate('tags.tag', 'name')
       .populate('audiencePreview', 'name email')
       .populate('users', 'username');
 
@@ -64,7 +64,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
 
@@ -123,12 +123,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
     }
 
-    const tagIds = body.tags?.map((tag: any) => tag.tagId) || [];
+    const tags = body.tags?.map((tag: any) => tag.tag) || [];
     const audienceIds = body.audiencePreview || [];
     const userIds = body.users || [];
 
     const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
-      tagIds.length ? validateObjectIdsExist(tagIds, Tags, 'tags') : null,
+      tags.length ? validateObjectIdsExist(tags, Tags, 'tags') : null,
       audienceIds.length ? validateObjectIdsExist(audienceIds, Clients, 'audiencePreview') : null,
       userIds.length ? validateObjectIdsExist(userIds, Users, 'users') : null,
     ]);
@@ -147,7 +147,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       body,
       { new: true, runValidators: true }
     )
-      .populate('tags.tagId', 'name')
+      .populate('tags.tag', 'name')
       .populate('audiencePreview', 'name email')
       .populate('users', 'name email');
 
@@ -177,7 +177,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
 
@@ -216,6 +216,11 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
       await AdMessages.deleteMany({ _id: { $in: adMessageIds } });
     }
+
+    await Users.updateMany(
+      { marketingCampaigns: id },
+      { $pull: { marketingCampaigns: id } }
+    );
 
     const deletedCampaign = await MarketingCampaigns.findByIdAndDelete(id);
 

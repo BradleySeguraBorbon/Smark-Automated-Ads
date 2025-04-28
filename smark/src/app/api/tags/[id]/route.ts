@@ -8,7 +8,7 @@ function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
 
@@ -40,7 +40,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
 
@@ -102,7 +102,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
 
@@ -122,13 +122,12 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         }
 
         await MarketingCampaigns.updateMany(
-            { "tags.tagId": new mongoose.Types.ObjectId(id) },
-            {
-                $pull: {
-                    tags: {
-                        tagId: new mongoose.Types.ObjectId(id),
-                        _id: { $exists: true }
-                    }
+            { "tags.tag": new mongoose.Types.ObjectId(id) },
+            { 
+              $pull: {
+                tags: {
+                  tag: new mongoose.Types.ObjectId(id),
+                  _id: { $exists: true }
                 }
             }
         );
