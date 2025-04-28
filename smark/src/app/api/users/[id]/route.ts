@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Users, MarketingCampaigns } from '@/models/models';
 import rollback from 'mongoose';
+import { getUserFromToken } from '@/../lib/auth';
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -11,6 +12,19 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const userToken = await getUserFromToken(request);
+
+        if (!userToken) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'developer', 'employee'];
+
+        if (!allowedRoles.includes(userToken.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = params;
 
         if (!id || !isValidObjectId(id)) {
@@ -45,6 +59,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const user = await getUserFromToken(request);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'developer', 'employee'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
@@ -109,10 +136,23 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    await connectDB();
+
     //const session = await mongoose.startSession();
     //session.startTransaction();
     try {
+        await connectDB();
+        
+        const user = await getUserFromToken(request);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'developer'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
         const { id } = params;
 
         if (!id || !isValidObjectId(id)) {
@@ -134,10 +174,10 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         }
 
         await MarketingCampaigns.updateMany(
-            { users: id }, 
+            { users: id },
             { $pull: { users: id } }
             // , { session } 
-          );
+        );
 
         //await session.commitTransaction();
 

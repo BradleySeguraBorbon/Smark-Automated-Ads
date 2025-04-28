@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/config/db';
 import { Tags, MarketingCampaigns } from '@/models/models';
+import { getUserFromToken } from '@/../lib/auth';
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -10,6 +11,19 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const user = await getUserFromToken(request);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'developer', 'employee'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
@@ -31,6 +45,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const user = await getUserFromToken(request);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'developer'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;;
 
         if (!id || !isValidObjectId(id)) {
@@ -82,6 +109,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
     try {
         await connectDB();
+
+        const user = await getUserFromToken(request);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'developer'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        }
+
         const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
@@ -90,15 +130,15 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
         await MarketingCampaigns.updateMany(
             { "tags.tagId": new mongoose.Types.ObjectId(id) },
-            { 
-              $pull: {
-                tags: {
-                  tagId: new mongoose.Types.ObjectId(id),
-                  _id: { $exists: true }
+            {
+                $pull: {
+                    tags: {
+                        tagId: new mongoose.Types.ObjectId(id),
+                        _id: { $exists: true }
+                    }
                 }
-              }
             }
-          );
+        );
 
         const deleted = await Tags.findByIdAndDelete(id);
         if (!deleted) {

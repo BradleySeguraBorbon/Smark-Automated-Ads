@@ -13,11 +13,15 @@ export async function GET(request: Request) {
         await connectDB();
 
         const user = await getUserFromToken(request);
-console.log('User:', user);
-        console.log('User role:', user.role);
 
-        if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'employee', 'developer'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+          return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -73,11 +77,17 @@ export async function POST(request: Request) {
 
     try {
         await connectDB();
-        
+
         const user = await getUserFromToken(request);
 
-        if (user.role !== 'admin' && user.role !== 'employee' && user.role !== 'developer') {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const allowedRoles = ['admin', 'employee', 'developer'];
+
+        if (!allowedRoles.includes(user.role as string)) {
+          return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const body = await request.json();
