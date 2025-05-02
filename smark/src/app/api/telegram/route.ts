@@ -19,13 +19,13 @@ export async function sendToTelegram(chatId: string, message: string) {
             const retryAfter = data.parameters?.retry_after || 1;
             console.warn(`Rate limited. Retrying after ${retryAfter} seconds`);
             await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
-            return sendToTelegram(chatId, message); // retry
+            return sendToTelegram(chatId, message);
         }
         throw new Error(`Error sending message: ${response.statusText}`);
     }
 }
 
-export async function sendMultipleTelegram(chatIds: string[], message: string) {
+export async function sendTelegramMessages(chatIds: string[], message: string) {
     const limit = pLimit(30);
 
     const tasks = chatIds.map(chatId =>
