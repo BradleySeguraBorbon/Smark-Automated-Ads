@@ -13,4 +13,5 @@ const templateSchema = new Schema<ITemplate>(
   }
 );
 
-export default mongoose.models.Templates as Model<ITemplate> || mongoose.model<ITemplate>('Templates', templateSchema);
+const Templates = mongoose.models.Templates as Model<ITemplate> || mongoose.model<ITemplate>('Templates', templateSchema);
+export default Templates;

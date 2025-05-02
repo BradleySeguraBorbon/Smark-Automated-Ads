@@ -1,4 +1,7 @@
 import mongoose, { Model } from 'mongoose';
+import Tags from './Tag';
+import Clients from './Client';
+import Users from './User';
 import { IMarketingCampaign } from "../types/MarketingCampaign";
 
 const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
@@ -9,7 +12,7 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     tags: [{
-      tagId: { type: mongoose.Schema.Types.ObjectId, ref: "Tags", required: true },
+      tag: { type: mongoose.Schema.Types.ObjectId, ref: "Tags", required: true },
       priority: { type: Number, required: true }
     }],
     audiencePreview: {
@@ -42,4 +45,5 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
   }
 );
 
-export default mongoose.models.MarketingCampaigns as Model<IMarketingCampaign> || mongoose.model<IMarketingCampaign>('MarketingCampaigns', marketingCampaignSchema);
+ const MarketingCampaigns = mongoose.models.MarketingCampaigns as Model<IMarketingCampaign> || mongoose.model<IMarketingCampaign>('MarketingCampaigns', marketingCampaignSchema);
+ export default MarketingCampaigns;

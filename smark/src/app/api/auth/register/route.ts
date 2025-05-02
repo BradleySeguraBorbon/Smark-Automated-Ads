@@ -3,9 +3,22 @@ import bcrypt from 'bcrypt';
 import dbConnect from '@/config/db';
 import { IUser } from '@/types/User';
 import User from '@/models/User';
+import { getUserFromToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
   await dbConnect();
+
+  const user = await getUserFromToken(request);
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const allowedRoles = ['admin', 'developer'];
+
+  if (!allowedRoles.includes(user.role as string)) {
+    return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+  }
 
   const { username, password, role } = await request.json();
   if (!username || !password) {

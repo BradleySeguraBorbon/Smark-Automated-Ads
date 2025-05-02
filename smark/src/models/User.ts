@@ -6,7 +6,7 @@ const userSchema = new Schema<IUser>(
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     marketingCampaigns: [
-      { type: Schema.Types.ObjectId, ref: "MarketingCampaign", required: true }
+      { type: Schema.Types.ObjectId, ref: "MarketingCampaigns", required: true }
     ],
     role: { type: String, required: true, enum: ["admin", "employee"] }
   },
@@ -15,4 +15,5 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-export default mongoose.models.Users as Model<IUser> || mongoose.model<IUser>('Users', userSchema);
+const Users = mongoose.models.Users as Model<IUser> || mongoose.model<IUser>('Users', userSchema);
+export default Users;

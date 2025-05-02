@@ -1,7 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 const PUBLIC_FILE = /\.(.*)$/;
+
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,10 +24,22 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET as string);
-    return NextResponse.next();
+    const { payload } = await jwtVerify(token, secret);
+
+    const requestHeaders = new Headers(request.headers);
+    if (payload.username) requestHeaders.set('x-username', payload.id as string);
+    if (payload.role) requestHeaders.set('x-user-role', payload.role as string);
+
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+    return response;
+
   } catch (err) {
-    return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
 }
 

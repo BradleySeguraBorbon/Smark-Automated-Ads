@@ -4,7 +4,7 @@ import { IAdMessage } from '@/types/AdMessage';
 const adMessagesSchema = new mongoose.Schema<IAdMessage>(
     {
         name: { type: String, required: true },
-        MarketingCampaignId: { type: mongoose.Schema.Types.ObjectId, ref: "MarketingCampaign", required: true },
+        marketingCampaign: { type: mongoose.Schema.Types.ObjectId, ref: "MarketingCampaigns", required: true },
         type: [{ type: String, enum: ["email", "telegram"], required: true }],
         status: { type: String, enum: ["sent", "editing", "programmed"], default: "editing" },
         content: {
@@ -28,7 +28,7 @@ const adMessagesSchema = new mongoose.Schema<IAdMessage>(
               }
             },
             attachments: [{ type: String }],
-            templateId: { type: mongoose.Schema.Types.ObjectId, ref: "Templates" },
+            template: { type: mongoose.Schema.Types.ObjectId, ref: "Templates" },
             sendDate: { type: Date, required: true }
           },
           {
@@ -36,4 +36,5 @@ const adMessagesSchema = new mongoose.Schema<IAdMessage>(
           }
         );
 
-export default mongoose.models.AdMessages as Model<IAdMessage> || mongoose.model<IAdMessage>('AdMessages', adMessagesSchema);
+const AdMessages = mongoose.models.AdMessages as Model<IAdMessage> || mongoose.model<IAdMessage>('AdMessages', adMessagesSchema);
+export default AdMessages;

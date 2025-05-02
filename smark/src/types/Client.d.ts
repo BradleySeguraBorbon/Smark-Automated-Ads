@@ -2,9 +2,8 @@
 import { Types } from "mongoose";
 
 export interface AdInteractions {
-    ad_id: string;
+    adMessage: Types.ObjectId;
     status: "opened" | "received";
-
 }
 
 export interface IClient extends Document {
@@ -12,7 +11,7 @@ export interface IClient extends Document {
     lastName: string;
     email: string;
     phone: string;
-    telegramUsername: string;
+    telegramChatId: string;
     preferredContactMethod: string;
     subscriptions: ("email" | "telegram")[];
     birthDate: Date;
