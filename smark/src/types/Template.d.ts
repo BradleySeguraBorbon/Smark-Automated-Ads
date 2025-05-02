@@ -1,3 +1,5 @@
+import { Document } from 'mongoose';
+
 export interface ITemplate extends Document {
     name: string;
     type: 'email' | 'telegram';

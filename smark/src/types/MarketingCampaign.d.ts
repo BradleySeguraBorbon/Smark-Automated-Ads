@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, Document } from 'mongoose';
 
 interface CampaignTag {
     tag: Types.ObjectId;
