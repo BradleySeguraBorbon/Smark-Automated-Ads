@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { CampaignAudiences } from '@/models/models';
+import { CampaignAudiences, Clients } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 
 function isValidObjectId(id: string) {
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'Invalid campaign ID' }, { status: 400 });
         }
 
-        const audienceValidation = await validateObjectIdsExist(audience, CampaignAudiences, 'audience');
+        const audienceValidation = await validateObjectIdsExist(audience, Clients, 'audience');
         if (audienceValidation) {
             return NextResponse.json({ message: `Invalid ${audienceValidation.field} IDs`, invalidIds: audienceValidation.invalidIds }, { status: 400 });
         }
