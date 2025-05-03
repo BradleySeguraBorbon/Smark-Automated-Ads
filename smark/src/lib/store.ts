@@ -6,6 +6,7 @@ import { ICampaignAudience } from '@/types/CampaignAudience';
 import { IMarketingCampaign } from '@/types/MarketingCampaign';
 import { ITemplate } from '@/types/Template';
 import { IUser } from '@/types/User';
+import { persist } from 'zustand/middleware';
 
 interface ClientStore {
   clients: IClient[];
@@ -16,21 +17,27 @@ interface ClientStore {
   clearClients: () => void;
 }
 
-export const useClientStore = create<ClientStore>((set) => ({
-  clients: [],
-  setClients: (clients) => set({ clients }),
-  addClient: (client) => set((state) => ({ clients: [...state.clients, client] })),
-  updateClient: (id, updates) =>
-    set((state) => ({
-      clients: state.clients.map((c) =>
-        c._id === id ? { ...(c as any), ...updates } as IClient : c
-      ),
-    })),
-  removeClient: (id) =>
-    set((state) => ({ clients: state.clients.filter((c) => c._id !== id) })),
-  clearClients: () => set({ clients: [] }),
-}));
-
+export const useClientStore = create<ClientStore>()(
+  persist(
+    (set) => ({
+      clients: [],
+      setClients: (clients) => set({ clients }),
+      addClient: (client) => set((state) => ({ clients: [...state.clients, client] })),
+      updateClient: (id, updates) =>
+        set((state) => ({
+          clients: state.clients.map((c) =>
+            c._id === id ? { ...(c as any), ...updates } as IClient : c
+          ),
+        })),
+      removeClient: (id) =>
+        set((state) => ({ clients: state.clients.filter((c) => c._id !== id) })),
+      clearClients: () => set({ clients: [] }),
+    }),
+    {
+      name: 'client-storage', // Nombre clave para localStorage
+    }
+  )
+);
 interface AdMessageStore {
   adMessages: IAdMessage[];
   setAdMessages: (messages: IAdMessage[]) => void;
@@ -40,20 +47,24 @@ interface AdMessageStore {
   clearAdMessages: () => void;
 }
 
-export const useAdMessageStore = create<AdMessageStore>((set) => ({
-  adMessages: [],
-  setAdMessages: (messages) => set({ adMessages: messages }),
-  addAdMessage: (msg) => set((state) => ({ adMessages: [...state.adMessages, msg] })),
-  updateAdMessage: (id, updates) =>
-    set((state) => ({
-      adMessages: state.adMessages.map((m) =>
-        m._id === id ? { ...(m as any), ...updates } as IAdMessage : m
-      ),
-    })),
-  removeAdMessage: (id) =>
-    set((state) => ({ adMessages: state.adMessages.filter((m) => m._id !== id) })),
-  clearAdMessages: () => set({ adMessages: [] }),
-}));
+export const useAdMessageStore = create<AdMessageStore>()(
+  persist(
+    (set) => ({
+      adMessages: [],
+      setAdMessages: (messages) => set({ adMessages: messages }),
+      addAdMessage: (msg) => set((state) => ({ adMessages: [...state.adMessages, msg] })),
+      updateAdMessage: (id, updates) =>
+        set((state) => ({
+          adMessages: state.adMessages.map((m) =>
+            m._id === id ? { ...(m as any), ...updates } as IAdMessage : m
+          ),
+        })),
+      removeAdMessage: (id) => set((state) => ({ adMessages: state.adMessages.filter((m) => m._id !== id) })),
+      clearAdMessages: () => set({ adMessages: [] }),
+    }),
+    { name: 'ad-message-storage' }
+  )
+);
 
 interface CampaignAudienceStore {
   audiences: ICampaignAudience[];
@@ -64,20 +75,24 @@ interface CampaignAudienceStore {
   clearAudiences: () => void;
 }
 
-export const useCampaignAudienceStore = create<CampaignAudienceStore>((set) => ({
-  audiences: [],
-  setAudiences: (audiences) => set({ audiences }),
-  addAudience: (audience) => set((state) => ({ audiences: [...state.audiences, audience] })),
-  updateAudience: (id, updates) =>
-    set((state) => ({
-      audiences: state.audiences.map((a) =>
-        a._id === id ? { ...(a as any), ...updates } as ICampaignAudience : a
-      ),
-    })),
-  removeAudience: (id) =>
-    set((state) => ({ audiences: state.audiences.filter((a) => a._id !== id) })),
-  clearAudiences: () => set({ audiences: [] }),
-}));
+export const useCampaignAudienceStore = create<CampaignAudienceStore>()(
+  persist(
+    (set) => ({
+      audiences: [],
+      setAudiences: (audiences) => set({ audiences }),
+      addAudience: (audience) => set((state) => ({ audiences: [...state.audiences, audience] })),
+      updateAudience: (id, updates) =>
+        set((state) => ({
+          audiences: state.audiences.map((a) =>
+            a._id === id ? { ...(a as any), ...updates } as ICampaignAudience : a
+          ),
+        })),
+      removeAudience: (id) => set((state) => ({ audiences: state.audiences.filter((a) => a._id !== id) })),
+      clearAudiences: () => set({ audiences: [] }),
+    }),
+    { name: 'audience-storage' }
+  )
+);
 
 interface MarketingCampaignStore {
   campaigns: IMarketingCampaign[];
@@ -88,20 +103,24 @@ interface MarketingCampaignStore {
   clearCampaigns: () => void;
 }
 
-export const useMarketingCampaignStore = create<MarketingCampaignStore>((set) => ({
-  campaigns: [],
-  setCampaigns: (campaigns) => set({ campaigns }),
-  addCampaign: (campaign) => set((state) => ({ campaigns: [...state.campaigns, campaign] })),
-  updateCampaign: (id, updates) =>
-    set((state) => ({
-      campaigns: state.campaigns.map((c) =>
-        c._id === id ? { ...(c as any), ...updates } as IMarketingCampaign : c
-      ),
-    })),
-  removeCampaign: (id) =>
-    set((state) => ({ campaigns: state.campaigns.filter((c) => c._id !== id) })),
-  clearCampaigns: () => set({ campaigns: [] }),
-}));
+export const useMarketingCampaignStore = create<MarketingCampaignStore>()(
+  persist(
+    (set) => ({
+      campaigns: [],
+      setCampaigns: (campaigns) => set({ campaigns }),
+      addCampaign: (campaign) => set((state) => ({ campaigns: [...state.campaigns, campaign] })),
+      updateCampaign: (id, updates) =>
+        set((state) => ({
+          campaigns: state.campaigns.map((c) =>
+            c._id === id ? { ...(c as any), ...updates } as IMarketingCampaign : c
+          ),
+        })),
+      removeCampaign: (id) => set((state) => ({ campaigns: state.campaigns.filter((c) => c._id !== id) })),
+      clearCampaigns: () => set({ campaigns: [] }),
+    }),
+    { name: 'campaign-storage' }
+  )
+);
 
 interface TagStore {
   tags: ITag[];
@@ -112,20 +131,24 @@ interface TagStore {
   clearTags: () => void;
 }
 
-export const useTagStore = create<TagStore>((set) => ({
-  tags: [],
-  setTags: (tags) => set({ tags }),
-  addTag: (tag) => set((state) => ({ tags: [...state.tags, tag] })),
-  updateTag: (id, updates) =>
-    set((state) => ({
-      tags: state.tags.map((t) =>
-        t._id === id ? { ...(t as any), ...updates } as ITag : t
-      ),
-    })),
-  removeTag: (id) =>
-    set((state) => ({ tags: state.tags.filter((t) => t._id !== id) })),
-  clearTags: () => set({ tags: [] }),
-}));
+export const useTagStore = create<TagStore>()(
+  persist(
+    (set) => ({
+      tags: [],
+      setTags: (tags) => set({ tags }),
+      addTag: (tag) => set((state) => ({ tags: [...state.tags, tag] })),
+      updateTag: (id, updates) =>
+        set((state) => ({
+          tags: state.tags.map((t) =>
+            t._id === id ? { ...(t as any), ...updates } as ITag : t
+          ),
+        })),
+      removeTag: (id) => set((state) => ({ tags: state.tags.filter((t) => t._id !== id) })),
+      clearTags: () => set({ tags: [] }),
+    }),
+    { name: 'tag-storage' }
+  )
+);
 
 interface TemplateStore {
   templates: ITemplate[];
@@ -136,20 +159,24 @@ interface TemplateStore {
   clearTemplates: () => void;
 }
 
-export const useTemplateStore = create<TemplateStore>((set) => ({
-  templates: [],
-  setTemplates: (templates) => set({ templates }),
-  addTemplate: (template) => set((state) => ({ templates: [...state.templates, template] })),
-  updateTemplate: (id, updates) =>
-    set((state) => ({
-      templates: state.templates.map((t) =>
-        t._id === id ? { ...(t as any), ...updates } as ITemplate : t
-      ),
-    })),
-  removeTemplate: (id) =>
-    set((state) => ({ templates: state.templates.filter((t) => t._id !== id) })),
-  clearTemplates: () => set({ templates: [] }),
-}));
+export const useTemplateStore = create<TemplateStore>()(
+  persist(
+    (set) => ({
+      templates: [],
+      setTemplates: (templates) => set({ templates }),
+      addTemplate: (template) => set((state) => ({ templates: [...state.templates, template] })),
+      updateTemplate: (id, updates) =>
+        set((state) => ({
+          templates: state.templates.map((t) =>
+            t._id === id ? { ...(t as any), ...updates } as ITemplate : t
+          ),
+        })),
+      removeTemplate: (id) => set((state) => ({ templates: state.templates.filter((t) => t._id !== id) })),
+      clearTemplates: () => set({ templates: [] }),
+    }),
+    { name: 'template-storage' }
+  )
+);
 
 
 interface UserStore {
@@ -159,12 +186,17 @@ interface UserStore {
   clearUser: () => void;
 }
 
-export const useUserStore = create<UserStore>((set) => ({
-  user: null,
-  setUser: (u) => set({ user: u }),
-  updateUser: (u) =>
-    set((state) => ({
-      user: state.user ? { ...state.user, ...u } as IUser : null,
-    })),
-  clearUser: () => set({ user: null }),
-}));
+export const useUserStore = create<UserStore>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (u) => set({ user: u }),
+      updateUser: (u) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...u } as IUser : null,
+        })),
+      clearUser: () => set({ user: null }),
+    }),
+    { name: 'user-storage' }
+  )
+);
