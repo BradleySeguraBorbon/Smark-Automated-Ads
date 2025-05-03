@@ -1,5 +1,5 @@
 
-import { Types } from "mongoose";
+import { Types, Document} from "mongoose";
 
 export interface AdInteractions {
     adMessage: Types.ObjectId;
