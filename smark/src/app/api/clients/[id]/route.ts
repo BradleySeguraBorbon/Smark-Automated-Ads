@@ -40,8 +40,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const client = await Clients.findById(id)
-            .populate('tags', 'name')
-            .populate('adInteractions.adMessage', 'name status');
+            .populate('tags', ['_id', 'name'])
+            .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
 
         if (!client) {
             return NextResponse.json(
@@ -125,8 +125,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             body,
             { new: true, runValidators: true }
         )
-            .populate('tags', 'name')
-            .populate('adInteractions.adMessage', 'name status');
+            .populate('tags', ['_id', 'name'])
+            .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
 
         if (!updatedClient) {
             return NextResponse.json(

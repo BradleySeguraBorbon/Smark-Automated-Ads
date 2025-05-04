@@ -56,8 +56,8 @@ export async function GET(request: Request) {
       .skip(skip)
       .limit(limit)
       .populate('tags.tag', '_id name')
-      .populate('audiencePreview', '_id name email')
-      .populate('users', '_id name email');
+      .populate('audiencePreview', '_id email firstName lastName')
+      .populate('users', '_id username role');
 
     const totalPages = Math.ceil(total / limit);
 
@@ -172,8 +172,13 @@ export async function POST(request: Request) {
       }
     });
 
+    const campaign = await newCampaign
+    .populate('tags.tag', '_id name')
+    .populate('audiencePreview', '_id email firstName lastName')
+    .populate('users', '_id username role');
+
     return NextResponse.json(
-      { message: 'Marketing campaign created successfully', result: newCampaign },
+      { message: 'Marketing campaign created successfully', result: campaign },
       { status: 201 }
     );
   } catch (error) {

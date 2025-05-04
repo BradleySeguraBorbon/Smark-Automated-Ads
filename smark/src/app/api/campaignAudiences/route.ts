@@ -47,8 +47,8 @@ export async function GET(request: Request) {
 
         const total = await CampaignAudiences.countDocuments(filter);
         const results = await CampaignAudiences.find(filter)
-            .populate('campaign')
-            .populate('audience')
+            .populate('campaign', ['_id', 'name', 'description', 'status'])
+            .populate('audience', ['_id', 'email', 'firstName', 'lastName'])
             .skip(skip)
             .limit(limit);
 
@@ -109,9 +109,12 @@ export async function POST(request: Request) {
 
         const newAudience = await CampaignAudiences.create({ campaign, audience, status });
 
+        const campaignAudience = newAudience.populate('campaign', ['_id', 'name', 'description', 'status'])
+        .populate('audience', ['_id', 'email', 'firstName', 'lastName']);
+
         return NextResponse.json({
             message: 'Campaign audience created successfully',
-            result: newAudience
+            result: campaignAudience
         }, { status: 201 });
 
     } catch (error) {

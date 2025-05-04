@@ -9,11 +9,11 @@ function isValidObjectId(id: string) {
 }
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
-  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
-  const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
-  const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
-  const invalid = ids.filter(id => !foundIds.has(id));
-  return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
+    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
+    const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+    const invalid = ids.filter(id => !foundIds.has(id));
+    return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -37,8 +37,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const campaignAudience = await CampaignAudiences.findById(id)
-            .populate('campaign')
-            .populate('audience');
+            .populate('campaign', ['_id', 'name', 'description', 'status'])
+            .populate('audience', ['_id', 'email', 'firstName', 'lastName']);
 
         if (!campaignAudience) {
             return NextResponse.json({ message: 'Campaign audience not found' }, { status: 404 });
@@ -100,17 +100,21 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
         }
 
-        const updated = await CampaignAudiences.findByIdAndUpdate(
+        const updatedCampaignAudience = await CampaignAudiences.findByIdAndUpdate(
             id,
             { campaign, audience, status },
             { new: true, runValidators: true }
         );
 
-        if (!updated) {
+        if (!updatedCampaignAudience) {
             return NextResponse.json({ message: 'Campaign audience not found' }, { status: 404 });
         }
 
-        return NextResponse.json({ message: 'Campaign audience updated successfully', result: updated });
+        const campaignAudience = await updatedCampaignAudience
+            .populate('campaign', ['_id', 'name', 'description', 'status'])
+            .populate('audience', ['_id', 'email', 'firstName', 'lastName'])
+
+        return NextResponse.json({ message: 'Campaign audience updated successfully', result: campaignAudience });
     } catch (error: any) {
         console.error(error);
         return NextResponse.json(

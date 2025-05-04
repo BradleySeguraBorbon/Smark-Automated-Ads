@@ -50,7 +50,7 @@ export async function GET(request: Request) {
         const total = await AdMessages.countDocuments(filter);
         const adMessages = await AdMessages.find(filter).skip(skip).limit(limit)
             .populate('marketingCampaign', ['name', 'description', 'status'])
-            .populate('template', ['name', 'type']);
+            .populate('template', ['_id', 'name', 'type']);
 
         if (adMessages.length === 0) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -128,8 +128,10 @@ export async function POST(request: Request) {
             sendDate,
         });
 
-        await adMessage.save();
-        return NextResponse.json({ message: 'AdMessage created successfully', adMessage },
+        const savedAdMessage = await adMessage.populate('marketingCampaign', ['name', 'description', 'status'])
+        .populate('template', ['_id', 'name', 'type']);
+
+        return NextResponse.json({ message: 'AdMessage created successfully', savedAdMessage },
             { status: 201 }
         );
 

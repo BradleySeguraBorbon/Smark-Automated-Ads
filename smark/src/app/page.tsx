@@ -11,10 +11,10 @@ export default function Home() {
   const currentPath = usePathname();
   const routes = [
     { href: "/", label: "Dashboard" },
-    { href: "/campaigns", label: "Campaigns" },
+    { href: "/marketingCampaigns", label: "Campaigns" },
     { href: "/adMessages", label: "Ad-Messages" },
     { href: "/clients", label: "Clients" },
-    { href: "/analytics", label: "Analytics" },
+    { href: "/tags", label: "Tags" }
   ];
 
   return (
@@ -37,7 +37,7 @@ export default function Home() {
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/analytics">View Analytics</Link>
+                <Link href="/analytics">View Tags</Link>
               </Button>
             </div>
           </div>

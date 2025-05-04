@@ -1,7 +1,10 @@
 import { Types, Document } from 'mongoose';
+import { TagRef } from './Tag';
+import { ClientRef } from './Client';
+import { UserRef } from './User';
 
 interface CampaignTag {
-    tag: Types.ObjectId;
+    tag: TagRef;
     priority: number;
 }
 
@@ -12,6 +15,13 @@ interface Performance {
     telegramMessagesOpened: number;
 }
 
+export interface MarketingCampaignRef {
+    _id: Types.ObjectId;
+    name: string;
+    description: string;
+    status: 'active' | 'inactive' | 'completed';
+}
+
 export interface IMarketingCampaign extends Document {
     name: string;
     description: string;
@@ -19,8 +29,8 @@ export interface IMarketingCampaign extends Document {
     startDate: Date;
     endDate: Date;
     tags: CampaignTag[]; 
-    audiencePreview: Types.ObjectId[]; 
-    users: Types.ObjectId[]; 
+    audiencePreview: ClientRef[]; 
+    users: UserRef[]; 
     performance: Performance; 
     createdAt?: Date;
     updatedAt?: Date; 

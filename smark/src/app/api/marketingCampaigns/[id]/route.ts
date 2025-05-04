@@ -41,7 +41,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     const campaign = await MarketingCampaigns.findById(id)
       .populate('tags.tag', 'name')
-      .populate('audiencePreview', 'name email')
+      .populate('audiencePreview', '_id email firstName lastName')
       .populate('users', 'username');
 
     if (!campaign) {
@@ -148,7 +148,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       { new: true, runValidators: true }
     )
       .populate('tags.tag', 'name')
-      .populate('audiencePreview', 'name email')
+      .populate('audiencePreview', '_id email firstName lastName')
       .populate('users', 'name email');
 
     if (!updatedCampaign) {
