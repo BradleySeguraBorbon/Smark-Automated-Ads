@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
-        const user = await Users.findById(id).populate('marketingCampaigns', 'name startDate endDate');
+        const user = await Users.findById(id).populate('marketingCampaigns', ['_id', 'name', 'description', 'status']);
 
         if (!user) {
             return NextResponse.json(
@@ -102,7 +102,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             id,
             body,
             { new: true, runValidators: true }
-        ).populate('marketingCampaigns', 'name description startDate endDate');
+        ).populate('marketingCampaigns', ['_id', 'name', 'description', 'status']);
 
         if (!updatedUser) {
             return NextResponse.json(

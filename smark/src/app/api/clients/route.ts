@@ -56,8 +56,8 @@ export async function GET(request: Request) {
     const clients = await Clients.find(filter)
       .skip(skip)
       .limit(limit)
-      .populate('tags', 'name')
-      .populate('adInteractions.adMessage', 'name status');
+      .populate('tags', ['_id', 'name'])
+      .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
 
     const totalPages = Math.ceil(total / limit);
 
@@ -182,8 +182,12 @@ export async function POST(request: Request) {
       adInteractions: body.adInteractions || []
     });
 
+    const client = await newClient
+      .populate('tags', ['_id', 'name'])
+      .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
+
     return NextResponse.json(
-      { message: 'Client created successfully', result: newClient },
+      { message: 'Client created successfully', result: client },
       { status: 201 }
     );
   } catch (error: any) {

@@ -1,4 +1,6 @@
 import { Types, Document } from 'mongoose';
+import { MarketingCampaignRef } from './MarketingCampaign';
+import { TemplateRef } from './Template';
 
 export interface AdMessageContentEmail {
     subject: string;
@@ -20,9 +22,15 @@ export interface AdMessageContentTelegram {
     clicks?: number;
 }
 
+export interface AdMessageRef {
+  _id: Types.ObjectId;
+  name: string;
+  type: "email" | "telegram";
+}
+
 export interface IAdMessage extends Document {
   name: string;
-  marketingCampaign: Types.ObjectId;
+  marketingCampaign: MarketingCampaignRef;
   type: ('email' | 'telegram')[];
   status?: 'sent' | 'editing' | 'programmed';
   content: {
@@ -30,6 +38,6 @@ export interface IAdMessage extends Document {
     telegram?: AdMessageContentTelegram;
   };
   attachments?: string[];
-  template?: Types.ObjectId;
+  template?: TemplateRef;
   sendDate: Date;
 };
