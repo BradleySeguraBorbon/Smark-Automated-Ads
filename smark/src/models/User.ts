@@ -8,7 +8,7 @@ const userSchema = new Schema<IUser>(
     marketingCampaigns: [
       { type: Schema.Types.ObjectId, ref: "MarketingCampaigns", required: true }
     ],
-    role: { type: String, required: true, enum: ["admin", "employee"] }
+    role: { type: String, required: true, enum: ["admin", "employee", "developer"] }
   },
   {
     timestamps: true
