@@ -53,7 +53,7 @@ export default function EditClientPage() {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzNDIwNTAsImV4cCI6MTc0NjM0NTY1MH0.nlz-U9egiYW1EsxZ42kEKR5rcOEnqVtqcPFOzqN2l7k`
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzOTU1NzUsImV4cCI6MTc0NjM5OTE3NX0.6g2V5CedFUQqZDUqlsMaNbirTz75bxxjuT3LhgG9-NE`
                     },
                 });
 
@@ -96,7 +96,7 @@ export default function EditClientPage() {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzNDIwNTAsImV4cCI6MTc0NjM0NTY1MH0.nlz-U9egiYW1EsxZ42kEKR5rcOEnqVtqcPFOzqN2l7k`
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzOTU1NzUsImV4cCI6MTc0NjM5OTE3NX0.6g2V5CedFUQqZDUqlsMaNbirTz75bxxjuT3LhgG9-NE`
                     },
                 });
                 const result = await response.json();
@@ -124,7 +124,7 @@ export default function EditClientPage() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzNDIwNTAsImV4cCI6MTc0NjM0NTY1MH0.nlz-U9egiYW1EsxZ42kEKR5rcOEnqVtqcPFOzqN2l7k`
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzOTU1NzUsImV4cCI6MTc0NjM5OTE3NX0.6g2V5CedFUQqZDUqlsMaNbirTz75bxxjuT3LhgG9-NE`
                 },
                 body: JSON.stringify(data)
             });
@@ -132,7 +132,7 @@ export default function EditClientPage() {
             console.log('Client Updated:', result);
 
             if (response.ok) {
-                router.push("/pages/clients")
+                router.push("/clients")
             } else {
                 console.error('Failed updating client', result);
             }

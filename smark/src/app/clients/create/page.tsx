@@ -63,7 +63,7 @@ export default function CreateClientPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzMzUyNzYsImV4cCI6MTc0NjMzODg3Nn0.w2Qigl5eY70X_yw7ct--SHDmYpMk9PuN2WeOC0uNRcw`
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzOTU1NzUsImV4cCI6MTc0NjM5OTE3NX0.6g2V5CedFUQqZDUqlsMaNbirTz75bxxjuT3LhgG9-NE`
                 },
                 body: JSON.stringify(data),
             });
