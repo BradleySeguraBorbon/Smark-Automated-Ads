@@ -101,6 +101,7 @@ interface MarketingCampaignStore {
   updateCampaign: (id: string, updates: Partial<IMarketingCampaign>) => void;
   removeCampaign: (id: string) => void;
   clearCampaigns: () => void;
+  hasHydrated: boolean;
 }
 
 export const useMarketingCampaignStore = create<MarketingCampaignStore>()(
@@ -117,8 +118,20 @@ export const useMarketingCampaignStore = create<MarketingCampaignStore>()(
         })),
       removeCampaign: (id) => set((state) => ({ campaigns: state.campaigns.filter((c) => c._id !== id) })),
       clearCampaigns: () => set({ campaigns: [] }),
+      hasHydrated: false
     }),
-    { name: 'campaign-storage' }
+    { 
+      name: 'campaign-storage',
+      partialize: (state) => ({
+        campaigns: state.campaigns
+      }),
+      onRehydrateStorage: () => (state, error) => {
+        if (!error) {
+          console.log('✅ Zustand hydration complete');
+          useMarketingCampaignStore.setState({ hasHydrated: true });
+        }
+      }
+    }
   )
 );
 
