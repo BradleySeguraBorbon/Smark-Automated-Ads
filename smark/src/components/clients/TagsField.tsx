@@ -4,7 +4,7 @@ import { UseFormReturn } from "react-hook-form"
 import { IClient } from "@/types/Client"
 import { ITag } from "@/types/Tag"
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
-import { TagSelector } from "@/components/TagSelector"
+import { TagSelector } from "@/components/clients/TagSelector"
 
 interface TagsFieldProps {
     form: UseFormReturn<IClient>

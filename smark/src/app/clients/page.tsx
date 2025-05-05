@@ -2,28 +2,34 @@
 
 import {useState, useEffect} from "react"
 import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {PlusCircle} from "lucide-react"
 import Link from "next/link"
-import {IClient} from "@/types/Client";
+import {IClient} from "@/types/Client"
+import ClientsList from "@/components/clients/ClientList"
+import SearchInput from "@/components/SearchInput"
+import {usePathname} from "next/navigation";
+import {Navbar} from "@/components/Navbar";
+import LoadingSpinner from "@/components/LoadingSpinner"
 
 export default function ClientsPage() {
     const [searchTerm, setSearchTerm] = useState("")
     const [apiError, setApiError] = useState<string | null>(null)
-    const [fetchedClients, setFetchedClients] = useState([]) // nuevo estado para los clientes
+    const [fetchedClients, setFetchedClients] = useState<IClient[]>([])
+    const [loadingIds, setLoadingIds] = useState<string[]>([])
+    const [loading, setLoading] = useState(true)
 
     const fetchClients = async () => {
         try {
+            setLoading(true)
             const response = await fetch('/api/clients', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDYzOTU1NzUsImV4cCI6MTc0NjM5OTE3NX0.6g2V5CedFUQqZDUqlsMaNbirTz75bxxjuT3LhgG9-NE`
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`
                 },
             })
 
             const result = await response.json()
-            console.log('API response:', result)
 
             if (!response.ok) {
                 console.error(result)
@@ -34,10 +40,11 @@ export default function ClientsPage() {
             setFetchedClients(result.results)
             setApiError(null)
             console.log('Fetched clients:', result.results)
-
         } catch (error) {
-            console.error('Network or unexpected error:', error)
+            console.error('Fetch error:', error)
             setApiError('Unexpected error occurred.')
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -45,15 +52,54 @@ export default function ClientsPage() {
         fetchClients()
     }, [])
 
-    const filteredClients = Array.isArray(fetchedClients)
-        ? fetchedClients.filter((client: IClient) => {
-            const fullName = `${client.firstName} ${client.lastName}`.toLowerCase()
-            return fullName.includes(searchTerm.toLowerCase())
-        })
-        : []
+    const handleDelete = async (clientId: string) => {
+        setLoadingIds((prev) => [...prev, clientId])
+
+        try {
+            const response = await fetch(`/api/clients/${clientId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`
+                },
+            })
+
+            const result = await response.json()
+
+            if (!response.ok) {
+                const errorMessage = result.message || result.error || 'Error deleting client.'
+                setApiError(errorMessage)
+            } else {
+                setFetchedClients((prev) => prev.filter((client) => client._id !== clientId))
+                setApiError(null)
+            }
+        } catch (error) {
+            console.error('Delete error:', error)
+            setApiError('Unexpected error occurred while deleting.')
+        } finally {
+            setLoadingIds((prev) => prev.filter((id) => id !== clientId))
+        }
+    }
+
+    const filteredClients = fetchedClients.filter((client) => {
+        const fullName = `${client.firstName} ${client.lastName}`.toLowerCase()
+        return fullName.includes(searchTerm.toLowerCase())
+    })
+
+    const currentPath = usePathname()
+    const routes = [
+        { href: "/", label: "Dashboard" },
+        { href: "/campaigns", label: "Campaigns" },
+        { href: "/adMessages", label: "Ad-Messages" },
+        { href: "/clients", label: "Clients" },
+        { href: "/analytics", label: "Analytics" },
+    ]
 
     return (
         <div className="container mx-auto py-10">
+            <header>
+                <Navbar currentPath={currentPath} routes={routes} />
+            </header>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Client Management</h1>
                 <Link href="/clients/create">
@@ -64,55 +110,16 @@ export default function ClientsPage() {
                 </Link>
             </div>
 
-            <div className="mb-6">
-                <input
-                    type="text"
-                    placeholder="Search clients..."
-                    className="w-full p-2 border rounded-md"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
+            <SearchInput value={searchTerm} onChange={setSearchTerm}/>
 
             {apiError && (
-                <div className="text-center py-4 text-red-500">{apiError}</div>
+                <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
             )}
 
-            {filteredClients.length === 0 ? (
-                <div className="text-center py-10">
-                    <p className="text-gray-500">No clients found matching your search.</p>
-                </div>
+            {loading ? (
+                <LoadingSpinner />
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredClients.map((client: any) => (
-                        <Link href={`/clients/${client._id}/edit`} key={client._id}>
-                            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                                <CardHeader>
-                                    <CardTitle>
-                                        {client.firstName} {client.lastName}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <p className="text-sm">
-                                            <span className="font-medium">Email:</span> {client.email}
-                                        </p>
-                                        <p className="text-sm">
-                                            <span className="font-medium">Phone:</span> {client.phone}
-                                        </p>
-                                        <p className="text-sm">
-                                            <span className="font-medium">Telegram:</span> {client.telegramChatId}
-                                        </p>
-                                        <p className="text-sm">
-                                            <span
-                                                className="font-medium">Subscriptions:</span> {client.subscriptions.join(", ")}
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))}
-                </div>
+                <ClientsList clients={filteredClients} loadingIds={loadingIds} onDelete={handleDelete} />
             )}
         </div>
     )
