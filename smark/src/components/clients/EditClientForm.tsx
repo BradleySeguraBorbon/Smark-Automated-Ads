@@ -5,7 +5,7 @@ import { IClient } from "@/types/Client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import ClientInfoFields from "./ClientInfoFields"
+import ClientInfoFields from "@/components/clients/ClientInfoFields"
 import TagsField from "@/components/clients/TagsField"
 import { ITag } from "@/types/Tag"
 

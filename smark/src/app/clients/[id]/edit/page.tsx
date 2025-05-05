@@ -1,15 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import {useRouter, useParams, usePathname} from "next/navigation"
 import { useForm } from "react-hook-form"
 import { IClient } from "@/types/Client"
 import { ITag } from "@/types/Tag"
 import EditClientForm from "@/components/clients/EditClientForm"
+import ClientAdditionalInfo from "@/components/clients/ClientAdditionalInfo"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
+import {Navbar} from "@/components/Navbar";
 
 export default function EditClientPage() {
     const params = useParams()
@@ -126,6 +128,15 @@ export default function EditClientPage() {
         }
     }
 
+    const currentPath = usePathname()
+    const routes = [
+        { href: "/", label: "Dashboard" },
+        { href: "/campaigns", label: "Campaigns" },
+        { href: "/adMessages", label: "Ad-Messages" },
+        { href: "/clients", label: "Clients" },
+        { href: "/analytics", label: "Analytics" },
+    ]
+
     if (loading) {
         return (
             <div className="container mx-auto py-10">
@@ -155,11 +166,22 @@ export default function EditClientPage() {
 
     return (
         <div className="container mx-auto py-10">
-            <BreadcrumbHeader backHref="/clients" title="Edit Client" />
-            {apiError && (
-                <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mb-6">{apiError}</div>
-            )}
-            <EditClientForm form={form} onSubmit={onSubmit} tags={fetchedTags} router={router} />
+            <header>
+                <Navbar currentPath={currentPath} routes={routes} />
+            </header>
+            <div className="max-w-3xl mx-auto space-y-8 mt-6">
+                <BreadcrumbHeader backHref="/clients" title="Edit Client" />
+                {apiError && (
+                    <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mb-6">{apiError}</div>
+                )}
+                <EditClientForm form={form} onSubmit={onSubmit} tags={fetchedTags} router={router} />
+                <ClientAdditionalInfo
+                    className="mt-8 max-w-2xl mx-auto"
+                    preferences={form.getValues("preferences")}
+                    subscriptions={form.getValues("subscriptions")}
+                    preferredContactMethod={form.getValues("preferredContactMethod")}
+                />
+            </div>
         </div>
     )
 }
