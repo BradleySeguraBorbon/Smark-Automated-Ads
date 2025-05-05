@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'deepseek/deepseek-prover-v2:free', // Asegúrate que este sea el modelo correcto
+      model: 'deepseek/deepseek-prover-v2:free',
       messages: [
         {
           role: 'user',
@@ -26,9 +26,13 @@ export async function POST(request: Request) {
       ],
     });
 
-    const idsClientes = completion.choices[0].message?.content?.trim() || '';
+    console.log("Completion: ",completion);
 
-    return NextResponse.json({ response :idsClientes });
+    const chatResponse = completion.choices[0].message?.content?.trim() || '';
+
+    console.log("Respuesta de Chat",chatResponse);
+
+    return NextResponse.json({ ok: true, response: chatResponse });
   } catch (error: any) {
     console.error('Error en la API:', error.message || error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
