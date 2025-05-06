@@ -1,8 +1,8 @@
-import {NextResponse} from 'next/server';
+import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import {Clients, Tags, AdMessages} from '@/models/models';
-import {getUserFromRequest} from '@/lib/auth';
+import { Clients, Tags, AdMessages } from '@/models/models';
+import { getUserFromRequest } from '@/lib/auth';
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -39,6 +39,14 @@ export async function GET(request: Request) {
         if (searchParams.has('tag')) {
             filter.tags = {$in: [searchParams.get('tag')]};
         }
+
+    const tagIds = searchParams.getAll('tagIds[]');
+    if (tagIds.length > 0) {
+      const validTagIds = tagIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+      if (validTagIds.length > 0) {
+        filter.tags = { $in: validTagIds };
+      }
+    }
 
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');

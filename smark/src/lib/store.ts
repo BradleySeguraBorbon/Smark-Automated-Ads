@@ -143,6 +143,7 @@ interface TagStore {
   updateTag: (id: string, updates: Partial<ITag>) => void;
   removeTag: (id: string) => void;
   clearTags: () => void;
+  hasHydrated: boolean;
 }
 
 export const useTagStore = create<TagStore>()(
@@ -159,8 +160,17 @@ export const useTagStore = create<TagStore>()(
         })),
       removeTag: (id) => set((state) => ({ tags: state.tags.filter((t) => t._id !== id) })),
       clearTags: () => set({ tags: [] }),
+      hasHydrated: false
     }),
-    { name: 'tag-storage' }
+    {
+      name: 'tag-storage',
+      onRehydrateStorage: () => (state, error) => {
+        if (!error) {
+          console.log('✅ Tags store hydration complete');
+          useTagStore.setState({ hasHydrated: true });
+        }
+      }
+     }
   )
 );
 
@@ -195,7 +205,7 @@ export const useTemplateStore = create<TemplateStore>()(
 
 interface UserStore {
   user: IUser | null;
-  setUser: (u: { _id: string; username: string; role: string }) => void;
+  setUser: (u: IUser) => void;
   updateUser: (u: Partial<IUser>) => void;
   clearUser: () => void;
 }
@@ -214,6 +224,45 @@ export const useUserStore = create<UserStore>()(
     { name: 'user-storage' }
   )
 );
+
+interface UserListStore {
+  users: IUser[];
+  setUsers: (users: IUser[]) => void;
+  addUser: (user: IUser) => void;
+  updateUser: (id: string, updates: Partial<IUser>) => void;
+  removeUser: (id: string) => void;
+  clearUsers: () => void;
+  hasHydrated: boolean;
+}
+
+export const useUserListStore = create<UserListStore>()(
+  persist(
+    (set) => ({
+      users: [],
+      setUsers: (users) => set({ users }),
+      addUser: (user) => set((state) => ({ users: [...state.users, user] })),
+      updateUser: (id, updates) =>
+        set((state) => ({
+          users: state.users.map((u) =>
+            u._id === id ? { ...(u as any), ...updates } as IUser : u
+          ),
+        })),
+      removeUser: (id) => set((state) => ({ users: state.users.filter((u) => u._id !== id) })),
+      clearUsers: () => set({ users: [] }),
+      hasHydrated: false
+    }),
+    {
+      name: 'user-list-storage',
+      onRehydrateStorage: () => (state, error) => {
+        if (!error) {
+          console.log('✅ UsersList store hydration complete');
+          useUserListStore.setState({ hasHydrated: true });
+        }
+      }
+    }
+  )
+);
+
 
 interface AuthStore {
     token: string | null;
