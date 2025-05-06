@@ -4,10 +4,10 @@ import { ClientRef } from './Client';
 import { UserRef } from './User';
 
 interface Performance {
-    totalEmailsSent: number;
-    totalEmailsOpened: number;
-    telegramMessagesSent: number;
-    telegramMessagesOpened: number;
+    totalEmailsSent: number | 0;
+    totalEmailsOpened: number | 0;
+    telegramMessagesSent: number | 0;
+    telegramMessagesOpened: number | 0;
 }
 
 export interface MarketingCampaignRef {
@@ -28,4 +28,16 @@ export interface IMarketingCampaign extends Document {
     performance: Performance; 
     createdAt?: Date;
     updatedAt?: Date; 
+}
+
+export interface MarketingCampaignFormData {
+    _id?: Types.ObjectId;
+    name: string;
+    description: string;
+    status: 'active' | 'inactive' | 'completed';
+    startDate: Date;
+    endDate: Date;
+    tags: TagRef[];
+    users: UserRef[]; 
+    performance: Performance;
 }
