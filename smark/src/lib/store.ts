@@ -7,6 +7,7 @@ import { IMarketingCampaign } from '@/types/MarketingCampaign';
 import { ITemplate } from '@/types/Template';
 import { IUser } from '@/types/User';
 import { persist } from 'zustand/middleware';
+import {decodeToken} from "@/lib/utils/decodeToken";
 
 interface ClientStore {
   clients: IClient[];
@@ -120,7 +121,7 @@ export const useMarketingCampaignStore = create<MarketingCampaignStore>()(
       clearCampaigns: () => set({ campaigns: [] }),
       hasHydrated: false
     }),
-    { 
+    {
       name: 'campaign-storage',
       partialize: (state) => ({
         campaigns: state.campaigns
@@ -194,7 +195,7 @@ export const useTemplateStore = create<TemplateStore>()(
 
 interface UserStore {
   user: IUser | null;
-  setUser: (u: IUser) => void;
+  setUser: (u: { _id: string; username: string; role: string }) => void;
   updateUser: (u: Partial<IUser>) => void;
   clearUser: () => void;
 }
@@ -212,4 +213,35 @@ export const useUserStore = create<UserStore>()(
     }),
     { name: 'user-storage' }
   )
+);
+
+interface AuthStore {
+    token: string | null;
+    user: { username: string; role: string; id: string } | null;
+    setToken: (token: string | null) => void;
+    clearAuth: () => void;
+}
+
+export const useAuthStore = create<AuthStore>()(
+    persist(
+        (set) => ({
+            token: null,
+            user: null,
+            setToken: async (token) => {
+                set({ token });
+                if (token) {
+                    const decoded = await decodeToken(token);
+                    if (decoded) {
+                        set({ user: decoded });
+                    } else {
+                        set({ token: null });
+                    }
+                } else {
+                    set({ user: null });
+                }
+            },
+            clearAuth: () => set({ token: null, user: null }),
+        }),
+        { name: 'auth-storage', partialize: (state) => ({ token: state.token }) }
+    )
 );

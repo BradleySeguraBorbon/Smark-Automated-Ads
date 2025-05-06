@@ -1,34 +1,67 @@
+'use client'
+
 import {
     NavigationMenu,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList
 } from "@/components/ui/navigation-menu";
-
+import {useRouter} from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import {Button} from "@/components/ui/button";
+import {cn} from "@/lib/utils";
+import {Moon, Sun} from "lucide-react";
+import {useTheme} from "next-themes";
+import {useAuthStore} from "@/lib/store";
+import {useEffect, useState} from "react";
+import {decodeToken} from '@/lib/utils/decodeToken';
 
 interface NavbarProps {
     currentPath: string;
-    routes: Array<{ href: string; label: string }>;
 }
 
 export function Navbar(
-    { currentPath, routes }: NavbarProps
+    {currentPath}: NavbarProps
 ) {
-    const { theme, setTheme } = useTheme();
+    const routes = [
+        {href: "/", label: "Dashboard"},
+        {href: "/marketingCampaigns", label: "Campaigns"},
+        {href: "/adMessages", label: "Ad-Messages"},
+        {href: "/clients", label: "Clients"},
+        {href: "/tags", label: "Tags"}
+    ];
+
+    const {theme, setTheme} = useTheme();
+    const router = useRouter();
+
+    const token = useAuthStore((state) => state.token);
+    //const hasHydrated = useAuthStore((state) => state.hasHydrated);
+    const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
+
+    useEffect(() => {
+        //if(!hasHydrated) return;
+        if (!token) {
+            setUserInfo(null);
+            return;
+        }
+
+        async function checkToken() {
+            const user = await decodeToken(token);
+            console.log("User: ", user);
+            setUserInfo(user);
+        }
+
+        checkToken();
+    }, [token/*, hasHydrated*/]);
 
     return (
-        <div className="flex items-center justify-between px-50 py-4 border-b">
+        <div className="flex items-center justify-between px-5 py-4 border-b">
             <Link href="/" className="text-lg font-bold">
                 AutoSmark
             </Link>
 
             <NavigationMenu>
-                <NavigationMenuList className="gap-5">
+                <NavigationMenuList className="gap-3">
                     {routes.map((route) => (
                         <NavigationMenuItem key={route.href}>
                             <Link href={route.href} legacyBehavior passHref>
@@ -52,13 +85,22 @@ export function Navbar(
                     size="icon"
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <Sun
+                        className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"/>
+                    <Moon
+                        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
                     <span className="sr-only">Toggle theme</span>
                 </Button>
-                <Button variant="outline">
-                    Sign In
-                </Button>
+
+                {userInfo ? (
+                    <Button variant="outline" onClick={() => router.push(`/users/${userInfo.id}`)}>
+                        {userInfo.username} ({userInfo.role})
+                    </Button>
+                ) : (
+                    <Button variant="outline" onClick={() => router.push("/auth/login")}>
+                        Sign In
+                    </Button>
+                )}
             </div>
         </div>
     );
