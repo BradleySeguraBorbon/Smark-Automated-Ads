@@ -3,11 +3,6 @@ import { TagRef } from './Tag';
 import { ClientRef } from './Client';
 import { UserRef } from './User';
 
-interface CampaignTag {
-    tag: TagRef;
-    priority: number;
-}
-
 interface Performance {
     totalEmailsSent: number;
     totalEmailsOpened: number;
@@ -28,8 +23,7 @@ export interface IMarketingCampaign extends Document {
     status: 'active' | 'inactive' | 'completed';
     startDate: Date;
     endDate: Date;
-    tags: CampaignTag[]; 
-    audiencePreview: ClientRef[]; 
+    tags: TagRef[];  
     users: UserRef[]; 
     performance: Performance; 
     createdAt?: Date;

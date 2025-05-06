@@ -122,13 +122,10 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         }
 
         await MarketingCampaigns.updateMany(
-            { "tags.tag": new mongoose.Types.ObjectId(id) },
+            { tags: new mongoose.Types.ObjectId(id) },
             {
                 $pull: {
-                    tags: {
-                        tag: new mongoose.Types.ObjectId(id),
-                        _id: { $exists: true }
-                    }
+                    tags: new mongoose.Types.ObjectId(id)
                 }
             }
         );

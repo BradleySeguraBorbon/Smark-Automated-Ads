@@ -11,23 +11,7 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
     status: { type: String, enum: ["active", "inactive", "completed"], default: "inactive" },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    tags: [{
-      tag: { type: mongoose.Schema.Types.ObjectId, ref: "Tags", required: true },
-      priority: { type: Number, required: true }
-    }],
-    audiencePreview: {
-      type: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Clients",
-        required: true
-      }],
-      validate: {
-        validator: function (value: mongoose.Types.ObjectId[]) {
-          return value.length <= 10;
-        },
-        message: "You can only have a maximum of 10 clients in the audience preview."
-      }
-    },
+    tags: [{ type: mongoose.Types.ObjectId, ref: "Tags" }],
     users: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
