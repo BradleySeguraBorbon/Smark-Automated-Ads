@@ -41,11 +41,11 @@ console.log("Antes de useAuthStore")
 
     useEffect(() => {
         if (!hasHydrated) {
-            console.log("Esperando hidratación...");
+            console.log("Waiting Hydration...");
             return;
         }
 
-        console.log("Token después de hidratar:", token);
+        console.log("Token after hydrated:", token);
 
         if (!token) {
             setUserInfo(null);
@@ -53,7 +53,7 @@ console.log("Antes de useAuthStore")
         }
 
         async function checkToken() {
-            console.log("Antes de decodeToken");
+            //console.log("Antes de decodeToken");
             const user = await decodeToken(token);
             console.log("User: ", user);
             setUserInfo(user);

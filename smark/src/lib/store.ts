@@ -250,7 +250,7 @@ export const useAuthStore = create<AuthStore>()(
             name: 'auth-storage',
             partialize: (state) => ({ token: state.token }),
             onRehydrateStorage: () => (state) => {
-                console.log('✅ Hydration complete in AuthStore, state:', state);
+                //console.log('✅ Hydration complete in AuthStore, state:', state);
                 state?.setHasHydrated(true);
             },
         }
