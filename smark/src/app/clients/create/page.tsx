@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
@@ -10,23 +10,20 @@ import { Navbar } from "@/components/Navbar"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
+import CustomAlertDialog from "@/components/CustomAlertDialog"
 
 export default function CreateClientPage() {
     const router = useRouter()
     const { addClient } = useClientStore()
     const [mounted, setMounted] = useState(false)
     const [newPreference, setNewPreference] = useState("")
-    const [apiError, setApiError] = useState<string | null>(null)
+    const [successOpen, setSuccessOpen] = useState(false)
+    const [errorOpen, setErrorOpen] = useState(false)
+    const [infoOpen, setInfoOpen] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+    const [infoMessage, setInfoMessage] = useState("")
 
     const currentPath = usePathname()
-    const routes = [
-        { href: "/", label: "Dashboard" },
-        { href: "/campaigns", label: "Campaigns" },
-        { href: "/adMessages", label: "Ad-Messages" },
-        { href: "/clients", label: "Clients" },
-        { href: "/analytics", label: "Analytics" },
-    ]
-
     const form = useForm<IClient>({
         defaultValues: {
             firstName: "",
@@ -63,18 +60,30 @@ export default function CreateClientPage() {
 
             if (!response.ok) {
                 console.log("Response is not ok: ", result)
-                const errorMessage = result.message || result.error || "Unknown error occurred"
-                setApiError(errorMessage)
+                const errorMessage = result.message || result.error || "Ocurrió un error desconocido."
+                setErrorMessage(errorMessage)
+                setErrorOpen(true)
                 return
             }
 
             console.log("Client created:", result)
-            setApiError(null)
             addClient(data)
-            router.back()
-        } catch (error) {
+
+            // Si hay warning tipo aiError, mostrar info modal
+            if (result.warning) {
+                setInfoMessage(result.warning)
+                setInfoOpen(true)
+            }
+
+            setSuccessOpen(true)
+
+            setTimeout(() => {
+                router.push("/clients")
+            }, 4000)
+        } catch (error: unknown) {
             console.error("Network or unexpected error:", error)
-            alert("Unexpected error occurred.")
+            setErrorMessage("An unexpected error has occurred on network or server.")
+            setErrorOpen(true)
         }
     }
 
@@ -89,14 +98,10 @@ export default function CreateClientPage() {
     return (
         <div className="container mx-auto py-10">
             <header>
-                <Navbar currentPath={currentPath} routes={routes} />
+                <Navbar currentPath={currentPath}/>
             </header>
 
             <BreadcrumbHeader backHref="/clients" title="Create New Client" />
-
-            {apiError && (
-                <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mb-6">{apiError}</div>
-            )}
 
             <Card>
                 <CardHeader>
@@ -111,6 +116,39 @@ export default function CreateClientPage() {
                     />
                 </CardContent>
             </Card>
+
+            <CustomAlertDialog
+                open={successOpen}
+                type="success"
+                title="¡Client created successfully!"
+                description="The new client has been added to the data base."
+                confirmLabel="Go to clients"
+                onConfirm={() => {
+                    setSuccessOpen(false)
+                    router.push("/clients")
+                }}
+                onOpenChange={setSuccessOpen}
+            />
+
+            <CustomAlertDialog
+                open={errorOpen}
+                type="error"
+                title="Error creating client"
+                description={errorMessage}
+                confirmLabel="Ok"
+                onConfirm={() => setErrorOpen(false)}
+                onOpenChange={setErrorOpen}
+            />
+
+            <CustomAlertDialog
+                open={infoOpen}
+                type="info"
+                title="Attention"
+                description={infoMessage}
+                confirmLabel="Ok"
+                onConfirm={() => setInfoOpen(false)}
+                onOpenChange={setInfoOpen}
+            />
         </div>
     )
 }

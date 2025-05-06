@@ -221,6 +221,13 @@ export async function POST(request: Request) {
             }
         }
 
+        if (Array.isArray(body.preferences) && body.preferences.length <= 0) {
+            return NextResponse.json(
+                {message: 'No preferences provided'},
+                {status: 400}
+            );
+        }
+
         const existingClient = await Clients.findOne({
             $or: [
                 {email: body.email},
@@ -247,7 +254,7 @@ export async function POST(request: Request) {
             }, token);
         } catch (err) {
             console.error("AI error:", err);
-            return NextResponse.json({error: "Error generating tags"}, {status: 500});
+            //return NextResponse.json({error: "Error generating tags"}, {status: 500});
             aiError = `Tags could not be generated automatically: ${err.message}`;
         }
 
@@ -272,7 +279,8 @@ export async function POST(request: Request) {
             {message: 'Client created successfully', result: client, warning: aiError},
             {status: 201}
         );
-    } catch (error: any) {
+    } catch
+        (error: any) {
         console.error(error);
         if (error.name === 'ValidationError') {
             return NextResponse.json(
