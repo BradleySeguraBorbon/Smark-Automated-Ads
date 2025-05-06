@@ -33,26 +33,35 @@ export function Navbar(
 
     const {theme, setTheme} = useTheme();
     const router = useRouter();
-
+console.log("Antes de useAuthStore")
     const token = useAuthStore((state) => state.token);
-    //const hasHydrated = useAuthStore((state) => state.hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
 
+    const hasHydrated = useAuthStore((state) => state._hasHydrated);
+
     useEffect(() => {
-        //if(!hasHydrated) return;
+        if (!hasHydrated) {
+            console.log("Esperando hidratación...");
+            return;
+        }
+
+        console.log("Token después de hidratar:", token);
+
         if (!token) {
             setUserInfo(null);
             return;
         }
 
         async function checkToken() {
+            console.log("Antes de decodeToken");
             const user = await decodeToken(token);
             console.log("User: ", user);
             setUserInfo(user);
         }
 
         checkToken();
-    }, [token/*, hasHydrated*/]);
+    }, [token, hasHydrated]);
+
 
     return (
         <div className="flex items-center justify-between px-5 py-4 border-b">

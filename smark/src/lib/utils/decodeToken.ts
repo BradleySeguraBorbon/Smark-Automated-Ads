@@ -1,28 +1,28 @@
-import {jwtVerify} from 'jose';
-
 export async function decodeToken(token: string | null | undefined) {
-    console.log(token);
+    console.log('Token recibido:', token);
     if (!token || token.trim() === '') {
         return null;
     }
 
     try {
-        const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET);
-        const { payload } = await jwtVerify(token, secret);
-        const currentTime = Date.now() / 1000;
-        if (payload.exp && payload.exp > currentTime) {
-            console.log("Token: ", token);
-            console.log("User id: ", payload.id);
-            return {
-                username: payload.username,
-                role: payload.role,
-                id: payload.uid,
-            };
-        } else {
+        const res = await fetch('/api/auth/decode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!res.ok) {
+            console.error('Error verificando el token en el servidor');
             return null;
         }
+
+        const data = await res.json();
+        console.log('Token decodificado en servidor:', data);
+        return data;
     } catch (error) {
-        console.log("Failed to decode token: ", error);
+        console.log('Failed to decode token via API:', error);
         return null;
     }
 }

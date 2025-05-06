@@ -218,8 +218,10 @@ export const useUserStore = create<UserStore>()(
 interface AuthStore {
     token: string | null;
     user: { username: string; role: string; id: string } | null;
-    setToken: (token: string | null) => void;
+    _hasHydrated: boolean;
+    setToken: (token: string | null) => Promise<void>;
     clearAuth: () => void;
+    setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -227,6 +229,7 @@ export const useAuthStore = create<AuthStore>()(
         (set) => ({
             token: null,
             user: null,
+            _hasHydrated: false,
             setToken: async (token) => {
                 set({ token });
                 if (token) {
@@ -234,14 +237,22 @@ export const useAuthStore = create<AuthStore>()(
                     if (decoded) {
                         set({ user: decoded });
                     } else {
-                        set({ token: null });
+                        set({ token: null, user: null });
                     }
                 } else {
                     set({ user: null });
                 }
             },
             clearAuth: () => set({ token: null, user: null }),
+            setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
         }),
-        { name: 'auth-storage', partialize: (state) => ({ token: state.token }) }
+        {
+            name: 'auth-storage',
+            partialize: (state) => ({ token: state.token }),
+            onRehydrateStorage: () => (state) => {
+                console.log('✅ Hydration complete in AuthStore, state:', state);
+                state?.setHasHydrated(true);
+            },
+        }
     )
 );
