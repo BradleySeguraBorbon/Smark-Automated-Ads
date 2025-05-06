@@ -39,6 +39,13 @@ export async function GET(request: Request) {
     if (searchParams.has('tag')) {
       filter.tags = searchParams.get('tag');
     }
+    const tagIds = searchParams.getAll('tagIds[]');
+    if (tagIds.length > 0) {
+      const validTagIds = tagIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+      if (validTagIds.length > 0) {
+        filter.tags = { $in: validTagIds };
+      }
+    }
 
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
