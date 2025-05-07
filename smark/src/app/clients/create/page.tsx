@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { IClient } from "@/types/Client"
-import { useClientStore } from "@/lib/store"
+import { useClientStore, useAuthStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Navbar } from "@/components/Navbar"
 import ClientForm from "@/components/clients/ClientForm"
@@ -39,9 +39,14 @@ export default function CreateClientPage() {
         },
     })
 
+    const token = useAuthStore((state) => state.token);
+
     useEffect(() => {
+        if (!token) {
+            return;
+        }
         setMounted(true)
-    }, [])
+    }, [token])
 
     async function onSubmit(data: IClient) {
         data.tags = []
@@ -51,7 +56,7 @@ export default function CreateClientPage() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`,
+                    Authorization: `Bearer ` + token,
                 },
                 body: JSON.stringify(data),
             })
@@ -60,7 +65,7 @@ export default function CreateClientPage() {
 
             if (!response.ok) {
                 console.log("Response is not ok: ", result)
-                const errorMessage = result.message || result.error || "Ocurrió un error desconocido."
+                const errorMessage = result.message || result.error || "An unknow error has happened."
                 setErrorMessage(errorMessage)
                 setErrorOpen(true)
                 return
@@ -69,7 +74,6 @@ export default function CreateClientPage() {
             console.log("Client created:", result)
             addClient(data)
 
-            // Si hay warning tipo aiError, mostrar info modal
             if (result.warning) {
                 setInfoMessage(result.warning)
                 setInfoOpen(true)
@@ -90,32 +94,37 @@ export default function CreateClientPage() {
     if (!mounted) {
         return (
             <div className="container mx-auto py-10">
-                <LoadingSpinner />
+                <LoadingSpinner/>
             </div>
         )
     }
 
     return (
-        <div className="container mx-auto py-10">
+        <div className="container mx-auto py-2 mb-4">
             <header>
                 <Navbar currentPath={currentPath}/>
             </header>
 
-            <BreadcrumbHeader backHref="/clients" title="Create New Client" />
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Client Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ClientForm
-                        form={form}
-                        onSubmit={onSubmit}
-                        newPreference={newPreference}
-                        setNewPreference={setNewPreference}
-                    />
-                </CardContent>
-            </Card>
+
+            <div className="max-w-3xl mx-auto px-4 mt-4">
+                <div className="mb-4">
+                <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
+                </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Client Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ClientForm
+                            form={form}
+                            onSubmit={onSubmit}
+                            newPreference={newPreference}
+                            setNewPreference={setNewPreference}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
 
             <CustomAlertDialog
                 open={successOpen}

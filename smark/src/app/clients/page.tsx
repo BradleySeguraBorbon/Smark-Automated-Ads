@@ -111,49 +111,44 @@ export default function ClientsPage() {
     })
 
     const currentPath = usePathname()
-    const routes = [
-        {href: "/", label: "Dashboard"},
-        {href: "/campaigns", label: "Campaigns"},
-        {href: "/adMessages", label: "Ad-Messages"},
-        {href: "/clients", label: "Clients"},
-        {href: "/analytics", label: "Analytics"},
-    ]
 
     return (
-        <div className="max-w-3xl mx-auto mt-8">
+        <>
             <header>
                 <Navbar currentPath={currentPath}/>
             </header>
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
-                <h1 className="text-3xl font-bold">Client Management</h1>
-                <Link href="/clients/create">
-                    <Button className="w-full sm:w-auto">
-                        <PlusCircle className="mr-2 h-4 w-4"/>
-                        Add New Client
-                    </Button>
-                </Link>
+            <div className="max-w-6xl mx-auto mt-8">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
+                    <h1 className="text-3xl font-bold">Client Management</h1>
+                    <Link href="/clients/create">
+                        <Button className="w-full sm:w-auto">
+                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            Add New Client
+                        </Button>
+                    </Link>
+                </div>
+
+                <SearchInput value={searchTerm} onChange={setSearchTerm}/>
+
+                {apiError && (
+                    <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
+                )}
+
+                {loading ? (
+                    <LoadingSpinner/>
+                ) : (
+                    <>
+                        <ClientsList clients={filteredClients} loadingIds={loadingIds} onDelete={handleDelete}/>
+                        {totalPages > 1 && (
+                            <PaginationControls
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={(page) => setCurrentPage(page)}
+                            />
+                        )}
+                    </>
+                )}
             </div>
-
-            <SearchInput value={searchTerm} onChange={setSearchTerm}/>
-
-            {apiError && (
-                <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
-            )}
-
-            {loading ? (
-                <LoadingSpinner/>
-            ) : (
-                <>
-                    <ClientsList clients={filteredClients} loadingIds={loadingIds} onDelete={handleDelete}/>
-                    {totalPages > 1 && (
-                        <PaginationControls
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={(page) => setCurrentPage(page)}
-                        />
-                    )}
-                </>
-            )}
-        </div>
+        </>
     )
 }

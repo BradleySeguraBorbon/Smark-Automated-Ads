@@ -11,14 +11,14 @@ interface BreadcrumbHeaderProps {
 
 export default function BreadcrumbHeader({ backHref, title }: BreadcrumbHeaderProps) {
     return (
-        <div className="mb-6 relative mt-4">
-            <Link href={backHref}>
-                <Button variant="ghost" size="sm" className="absolute left-0 top-1/2 -translate-y-1/2 text-2xl">
-                    <ChevronLeft className="mr-2 h-4 w-4" />
+        <div className="flex items-center mb-6">
+            <Button variant="ghost" size="sm" asChild className="mr-2">
+                <Link href={backHref}>
+                    <ChevronLeft className="h-4 w-4 mr-1" />
                     Back
-                </Button>
-            </Link>
-            <h1 className="text-3xl font-bold text-center">{title}</h1>
+                </Link>
+            </Button>
+            <h1 className="text-2xl font-bold ml-3">{title}</h1>
         </div>
-    )
+    );
 }
