@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMarketingCampaignStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { CampaignCard } from '@/components/CampaignCard'
-import { PlusCircle, Mail, MessageSquare, Filter } from 'lucide-react'
+import { PlusCircle, Filter } from 'lucide-react'
 import Link from 'next/link'
 import { IMarketingCampaign } from '@/types/MarketingCampaign'
-import { useStore } from 'zustand';
 import { usePathname } from 'next/navigation';
 import { Navbar } from '@/components/Navbar'
+import PaginationControls from '@/components/PaginationControls'
 
 export default function MarketingCampaignsPage() {
     const currentPath = usePathname();
@@ -18,11 +18,16 @@ export default function MarketingCampaignsPage() {
         { href: "/marketingCampaigns", label: "Campaigns" },
         { href: "/adMessages", label: "Ad-Messages" },
         { href: "/clients", label: "Clients" },
-        { href: "/analytics", label: "Analytics" },
+        { href: "/tags", label: "Tags" }
     ];
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
 
     const campaigns = useMarketingCampaignStore((state) => state.campaigns);
     const setCampaigns = useMarketingCampaignStore((state) => state.setCampaigns);
+    const clearCampaigns = useMarketingCampaignStore((state) => state.clearCampaigns);
     const hasHydrated = useMarketingCampaignStore((state) => state.hasHydrated);
 
     console.log('Campaigns:', campaigns);
@@ -33,31 +38,53 @@ export default function MarketingCampaignsPage() {
         if (!hasHydrated) return;
 
         const fetchCampaigns = async () => {
+            setLoading(true);
             try {
-                const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2N2ZkOTc3ODEzMTBjMTE5MTRhNzExMmEiLCJ1c2VybmFtZSI6ImJyYWRsZXkiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDYzMTYzNjAsImV4cCI6MTc0NjMxOTk2MH0.CkT_CcvH9r5rndvY20OGZN_JTwrxm2P5MrpwekXwXAA";
-                const response = await fetch('/api/marketingCampaigns', {
+                const response = await fetch(`/api/marketingCampaigns?page=${currentPage}&limit=10`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
                     }
                 })
-                const data = await response.json()
-                setCampaigns(data.results as IMarketingCampaign[])
+                const data = await response.json();
+                setCampaigns(data.results as IMarketingCampaign[]);
+                setTotalPages(data.totalPages);
             } catch (error) {
-                console.error('Failed to fetch campaigns:', error)
+                console.error('Failed to fetch campaigns:', error);
+                clearCampaigns();
+            } finally {
+                setLoading(false);
             }
         }
 
-        if (!campaigns || !Array.isArray(campaigns) || campaigns.length === 0) {
-            fetchCampaigns();
-        }
-    }, [hasHydrated, setCampaigns, campaigns])
+        fetchCampaigns();
+    }, [currentPage, hasHydrated])
 
     useEffect(() => {
         if (campaigns !== undefined) {
-            console.log('✅ Detected campaigns loaded, setting hasHydrated');
             useMarketingCampaignStore.setState({ hasHydrated: true });
         }
     }, [campaigns]);
+
+    const handleDelete = async (campaignId: string) => {
+        try {
+            const response = await fetch(`/api/marketingCampaigns/${campaignId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to delete campaign");
+            }
+
+            const updatedCampaigns = campaigns.filter((c: IMarketingCampaign) => c._id !== campaignId);
+            setCampaigns(updatedCampaigns);
+        } catch (error) {
+            console.error("Error deleting campaign:", error);
+        }
+    };
 
     if (!hasHydrated) {
         return <div>Loading...</div>;
@@ -81,18 +108,35 @@ export default function MarketingCampaignsPage() {
                                 Filter
                             </Button>
                             <Button asChild>
-                                <Link href="/campaigns/new">
+                                <Link href="/marketingCampaigns/new">
                                     <PlusCircle className="h-4 w-4 mr-2" />
                                     New Campaign
                                 </Link>
                             </Button>
                         </div>
                     </div>
-                    <div className="grid gap-6">
-                        {campaigns?.map((campaign) => (
-                            <CampaignCard campaign={campaign} />
-                        ))}
-                    </div>
+                    {loading ? (
+                        <p className="text-center">Loading campaigns...</p>
+                    ) : (
+                        <>
+                            <div className="grid gap-6">
+                                {campaigns?.map((campaign) => (
+                                    <CampaignCard
+                                        key={String(campaign._id)}
+                                        campaign={campaign}
+                                        onDelete={() => handleDelete(String(campaign._id))}
+                                    />
+                                ))}
+                            </div>
+                            {totalPages > 1 && (
+                                <PaginationControls
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={(page) => setCurrentPage(page)}
+                                />
+                            )}
+                        </>
+                    )}
                 </div>
             </main>
         </div>

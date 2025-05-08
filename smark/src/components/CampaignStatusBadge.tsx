@@ -9,7 +9,7 @@ export function CampaignStatusBadge({ status }: CampaignStatusBadgeProps) {
 
     switch (status) {
         case 'active':
-            colorVariant = 'default';  // could also use 'success' if you have it
+            colorVariant = 'default';
             break;
         case 'completed':
             colorVariant = 'secondary';
