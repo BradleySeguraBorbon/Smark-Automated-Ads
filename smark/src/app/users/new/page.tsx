@@ -3,13 +3,12 @@
 import {useAuthStore} from '@/lib/store';
 import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
-import {usePathname, useRouter} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {Card, CardContent} from '@/components/ui/card';
 import UserForm from '@/components/users/UserForm';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import {decodeToken} from "@/lib/utils/decodeToken";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
-import {Navbar} from "@/components/Navbar";
 import CustomAlertDialog from "@/components/CustomAlertDialog";
 
 interface CreateUserFormData {
@@ -25,7 +24,6 @@ export default function CreateUserPage() {
     const [apiError, setApiError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
-    const currentPath = usePathname();
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertType, setAlertType] = useState<"success" | "error">("success");
     const [alertMessage, setAlertMessage] = useState("");
@@ -118,11 +116,9 @@ export default function CreateUserPage() {
 
     return (
         <>
-            <Navbar currentPath={currentPath} />
-
             <div className="container mx-auto py-10 max-w-lg">
                 <header>
-                    <BreadcrumbHeader backHref="/users" title="Create a New User" />
+                    <BreadcrumbHeader backHref="/users" title="Create a New User"/>
                 </header>
 
                 <Card>
@@ -145,10 +141,12 @@ export default function CreateUserPage() {
                 title={alertType === "success" ? "Success" : "Error"}
                 description={alertMessage}
                 confirmLabel="OK"
-                onConfirm={() => setAlertOpen(false)}
+                onConfirm={() => {
+                    setAlertOpen(false);
+                    router.back();
+                }}
                 onOpenChange={setAlertOpen}
             />
-
         </>
     );
 }

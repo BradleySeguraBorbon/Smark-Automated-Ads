@@ -64,9 +64,9 @@ export default function UserForm({ form, onSubmit, userRole, isSubmitting }: Use
                                         tabIndex={-1}
                                     >
                                         {showPassword ? (
-                                            <EyeOff className="h-5 w-5" />
-                                        ) : (
                                             <Eye className="h-5 w-5" />
+                                        ) : (
+                                            <EyeOff className="h-5 w-5" />
                                         )}
                                     </button>
                                 </div>
@@ -100,7 +100,7 @@ export default function UserForm({ form, onSubmit, userRole, isSubmitting }: Use
                                         <SelectContent>
                                             <SelectItem value="employee">Employee</SelectItem>
                                             <SelectItem value="admin">Admin</SelectItem>
-                                            <SelectItem value="admin">Developer</SelectItem>
+                                            <SelectItem value="developer">Developer</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </FormControl>

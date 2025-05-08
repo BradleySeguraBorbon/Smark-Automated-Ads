@@ -90,14 +90,14 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
+/*
     if (!['admin', 'employee'].includes(body.role)) {
       return NextResponse.json(
         { message: 'Invalid Rol. Should "admin" or "employee".' },
         { status: 400 }
       );
     }
-
+*/
     const existingUser = await Users.findOne({ username: body.username });
     if (existingUser) {
       return NextResponse.json(
