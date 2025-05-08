@@ -26,7 +26,8 @@ export async function GET(request: Request) {
         const filter: Record<string, any> = {};
 
         if (searchParams.has('name')) {
-            filter.name = searchParams.get('name');
+            const name = searchParams.get('name') as string;
+            filter.name = { $regex: name, $options: 'i' };
         }
 
         if (searchParams.has('keywords')) {
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     try {
         await connectDB();
 
-        const allowedRoles = ['developer', 'admin', 'employee'];
+        const allowedRoles = ['developer', 'admin'];
 
         const user = getUserFromRequest(request);
 

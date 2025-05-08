@@ -101,7 +101,7 @@ export default function LoginForm() {
                                                     type={showPassword ? "text" : "password"}
                                                     placeholder="Enter your password"
                                                     {...field}
-                                                    className="pr-10" // espacio extra para el icono
+                                                    className="pr-10"
                                                 />
                                                 <button
                                                     type="button"
