@@ -7,12 +7,12 @@ import Link from "next/link"
 import {IClient} from "@/types/Client"
 import ClientsList from "@/components/clients/ClientList"
 import SearchInput from "@/components/SearchInput"
-import {usePathname} from "next/navigation"
-import {Navbar} from "@/components/Navbar"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import PaginationControls from "@/components/PaginationControls"
 import {useAuthStore} from '@/lib/store';
-import {decodeToken} from '@/lib/utils/decodeToken';
+import {decodeToken} from "@/lib/utils/decodeToken";
+import {useRouter} from "next/navigation";
+import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 
 export default function ClientsPage() {
     const [searchTerm, setSearchTerm] = useState("")
@@ -23,8 +23,10 @@ export default function ClientsPage() {
 
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
+    const router = useRouter();
 
     const token = useAuthStore((state) => state.token);
+    const _hasHydrated = useAuthStore((state) => state._hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
 
     const fetchClients = async (page: number = 1) => {
@@ -60,21 +62,26 @@ export default function ClientsPage() {
     }
 
     useEffect(() => {
+        if (!_hasHydrated) return;
 
-        if (!token) {
-            setUserInfo(null);
-            return;
-        }
+        const init = async () => {
+            if (!token) {
+                router.push('/auth/login');
+                return;
+            }
 
-        async function checkToken() {
             const user = await decodeToken(token);
-            console.log("User: ", user);
-            setUserInfo(user);
-        }
+            if (!user) {
+                router.push('/auth/login');
+                return;
+            }
 
-        checkToken();
-        fetchClients(currentPage)
-    }, [token, currentPage])
+            setUserInfo(user);
+            fetchClients(currentPage);
+        };
+
+        init();
+    }, [_hasHydrated, token, currentPage]);
 
     const handleDelete = async (clientId: string) => {
         setLoadingIds((prev) => [...prev, clientId])
@@ -110,45 +117,39 @@ export default function ClientsPage() {
         return fullName.includes(searchTerm.toLowerCase())
     })
 
-    const currentPath = usePathname()
-
     return (
-        <>
-            <header>
-                <Navbar currentPath={currentPath}/>
-            </header>
-            <div className="max-w-6xl mx-auto mt-8">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
-                    <h1 className="text-3xl font-bold">Client Management</h1>
-                    <Link href="/clients/create">
-                        <Button className="w-full sm:w-auto">
-                            <PlusCircle className="mr-2 h-4 w-4"/>
-                            Add New Client
-                        </Button>
-                    </Link>
-                </div>
+        <div className="max-w-6xl mx-auto mt-8">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
 
-                <SearchInput value={searchTerm} onChange={setSearchTerm}/>
-
-                {apiError && (
-                    <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
-                )}
-
-                {loading ? (
-                    <LoadingSpinner/>
-                ) : (
-                    <>
-                        <ClientsList clients={filteredClients} loadingIds={loadingIds} onDelete={handleDelete}/>
-                        {totalPages > 1 && (
-                            <PaginationControls
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={(page) => setCurrentPage(page)}
-                            />
-                        )}
-                    </>
-                )}
+                <BreadcrumbHeader backHref={'/'} title={"Client Management"}/>
+                {userInfo && userInfo?.role !== 'employee' && <Link href="/clients/create">
+                    <Button className="w-full sm:w-auto">
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        Add New Client
+                    </Button>
+                </Link>}
             </div>
-        </>
+
+            <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={"Search Clients..."}/>
+
+            {apiError && (
+                <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
+            )}
+
+            {loading ? (
+                <LoadingSpinner/>
+            ) : (
+                <>
+                    <ClientsList clients={filteredClients} loadingIds={loadingIds} onDelete={handleDelete} userRole={userInfo?.role as string}/>
+                    {totalPages > 1 && (
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => setCurrentPage(page)}
+                        />
+                    )}
+                </>
+            )}
+        </div>
     )
 }

@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import Link from "next/link"
 import {useAuthStore} from "@/lib/store";
+import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 
 export default function ClientViewPage() {
     const params = useParams()
@@ -18,8 +19,10 @@ export default function ClientViewPage() {
     const [apiError, setApiError] = useState<string | null>(null)
 
     const token = useAuthStore((state) => state.token);
+    const hydrated = useAuthStore((state) => state._hasHydrated);
 
     useEffect(() => {
+        if(!hydrated)return;
         const fetchClient = async () => {
             setLoading(true)
             try {
@@ -40,6 +43,7 @@ export default function ClientViewPage() {
                 }
 
                 setClient(result.result)
+                console.log("Client response", result.result)
             } catch (error) {
                 console.error("Fetch error:", error)
                 setApiError("Unexpected error occurred.")
@@ -49,7 +53,7 @@ export default function ClientViewPage() {
         }
 
         fetchClient()
-    }, [id, token])
+    }, [token, hydrated, id])
 
     if (loading) {
         return (
@@ -77,6 +81,7 @@ export default function ClientViewPage() {
 
     return (
         <div className="container mx-auto py-10 space-y-6 max-w-3xl">
+            <BreadcrumbHeader backHref="/clients" title="Visualice Client"/>
             <Card>
                 <CardHeader>
                     <CardTitle>{client.firstName} {client.lastName}</CardTitle>
@@ -144,8 +149,8 @@ export default function ClientViewPage() {
                     <CardTitle>Metadata</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p><span className="font-medium">Created:</span> {new Date(client.createdAt ? new Date(client.createdAt).toLocaleString() : "—").toLocaleString()}</p>
-                    <p><span className="font-medium">Last Updated:</span> {new Date(client.createdAt ? new Date(client.createdAt).toLocaleString() : "—").toLocaleString()}</p>
+                    <p><span className="font-medium">Created:</span> {client.createdAt ? new Date(client.createdAt).toLocaleString() : "—"}</p>
+                    <p><span className="font-medium">Last Updated:</span> {client.updatedAt ? new Date(client.updatedAt).toLocaleString() : "—"}</p>
                 </CardContent>
             </Card>
         </div>

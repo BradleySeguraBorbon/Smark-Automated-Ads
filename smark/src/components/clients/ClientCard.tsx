@@ -1,9 +1,9 @@
 "use client"
 
-import { IClient } from "@/types/Client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Trash2, Pencil } from "lucide-react"
+import {IClient} from "@/types/Client"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Button} from "@/components/ui/button"
+import {Trash2, Pencil, Eye} from "lucide-react"
 import Link from "next/link"
 import CustomAlertDialog from "@/components/CustomAlertDialog"
 import {useState} from "react";
@@ -12,9 +12,10 @@ interface ClientCardProps {
     client: IClient
     onDelete: (id: string) => void
     isLoading: boolean
+    userRole: string
 }
 
-export default function ClientCard({ client, onDelete, isLoading }: ClientCardProps) {
+export default function ClientCard({client, onDelete, isLoading, userRole}: ClientCardProps) {
     const [alertOpen, setAlertOpen] = useState(false)
 
     const handleDelete = () => {
@@ -32,21 +33,27 @@ export default function ClientCard({ client, onDelete, isLoading }: ClientCardPr
                         </CardTitle>
                     </div>
                     <div className="flex gap-2">
-                        <Link href={`/clients/${client._id}/edit`}>
+                        {userRole !== 'employee' && <Link href={`/clients/${client._id}/edit`}>
                             <Button variant="secondary" size="icon">
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="h-4 w-4"/>
                                 <span className="sr-only">Edit</span>
                             </Button>
-                        </Link>
-                        <Button
+                        </Link>}
+                        {userRole === 'employee' && <Link href={`/clients/${client._id}`}>
+                            <Button variant="secondary" size="icon">
+                                <Eye className="h-4 w-4"/>
+                                <span className="sr-only">View</span>
+                            </Button>
+                        </Link>}
+                        {userRole !== 'employee' && <Button
                             variant="destructive"
                             size="icon"
                             onClick={() => setAlertOpen(true)}
                             disabled={isLoading}
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4"/>
                             <span className="sr-only">Delete</span>
-                        </Button>
+                        </Button>}
                     </div>
                 </CardHeader>
 

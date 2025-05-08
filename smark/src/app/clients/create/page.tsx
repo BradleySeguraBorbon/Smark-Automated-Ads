@@ -1,12 +1,11 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { IClient } from "@/types/Client"
 import { useClientStore, useAuthStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Navbar } from "@/components/Navbar"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
@@ -23,7 +22,6 @@ export default function CreateClientPage() {
     const [errorMessage, setErrorMessage] = useState("")
     const [infoMessage, setInfoMessage] = useState("")
 
-    const currentPath = usePathname()
     const form = useForm<IClient>({
         defaultValues: {
             firstName: "",
@@ -101,13 +99,7 @@ export default function CreateClientPage() {
 
     return (
         <div className="container mx-auto py-2 mb-4">
-            <header>
-                <Navbar currentPath={currentPath}/>
-            </header>
-
-
-
-            <div className="max-w-3xl mx-auto px-4 mt-4">
+            <div className="lg:max-w-3xl mx-auto px-4 mt-4">
                 <div className="mb-4">
                 <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
                 </div>
