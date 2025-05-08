@@ -62,11 +62,14 @@ export function Navbar({ currentPath }: NavbarProps) {
     const handleLogout = () => {
         clearToken();
         setUserInfo(null);
+        setTimeout(() => {
+            router.push('/');
+        }, 10);
     };
 
     return (
         <div className="flex items-center justify-between w-full px-4 py-4 border-b overflow-x-auto">
-            <Link href="/" className="text-lg font-bold whitespace-nowrap">
+            <Link href="/" className="text-lg font-bold whitespace-nowrap flex-shrink-0 mr-4">
                 AutoSmark
             </Link>
 
@@ -123,7 +126,7 @@ export function Navbar({ currentPath }: NavbarProps) {
                 </NavigationMenu>
             </div>
 
-            <div className="flex items-center gap-2 whitespace-nowrap">
+            <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                 <Button
                     variant="ghost"
                     size="icon"

@@ -1,21 +1,14 @@
 'use client'
 
-import { Navbar } from '@/components/Navbar';
 import { FeatureCard } from '@/components/FeatureCard';
 import Link from "next/link";
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Mail, MessageSquare, Users } from 'lucide-react';
-import { usePathname } from 'next/navigation';
 
 export default function Home() {
 
-  const currentPath = usePathname();
-
   return (
       <div>
-        <header>
-          <Navbar currentPath={currentPath}/>
-        </header>
         <main>
           <section className="container mx-auto py-12 px-4">
             <div className="max-w-3xl mx-auto text-center">
