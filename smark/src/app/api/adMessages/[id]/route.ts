@@ -31,8 +31,8 @@ export async function GET(request: Request) {
         }
 
         const adMessage = await AdMessages.findById(id)
-            .populate('marketingCampaign', ['_id', 'name', 'description', 'status'])
-            .populate('template', ['_id', 'name', 'type']);
+            .populate('marketingCampaign', '_id name description status')
+            .populate('template', '_id name type');
 
         if (!adMessage) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -107,8 +107,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'AdMessage not found' }, { status: 404 });
         }
 
-        const updatedAdMessage = await adMessage.populate('marketingCampaign', ['name', 'description', 'status'])
-        .populate('template', ['_id', 'name', 'type']);
+        const updatedAdMessage = await adMessage
+        .populate('marketingCampaign', 'name description status')
+        .populate('template', '_id name type');
 
         return NextResponse.json({
             message: 'AdMessage updated successfully',

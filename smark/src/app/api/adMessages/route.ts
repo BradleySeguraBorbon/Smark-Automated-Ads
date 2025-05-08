@@ -14,12 +14,12 @@ export async function GET(request: Request) {
 
         const allowedRoles = ['admin', 'employee', 'developer'];
 
-        const user =  getUserFromRequest(request);
+        const user = getUserFromRequest(request);
 
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
-          return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -78,12 +78,12 @@ export async function POST(request: Request) {
 
         const allowedRoles = ['admin', 'employee', 'developer'];
 
-        const user =  getUserFromRequest(request);
+        const user = getUserFromRequest(request);
 
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(user.role as string)) {
-          return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const body = await request.json();
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'Invalid or non-existent template' }, { status: 400 });
         }
 
-        const adMessage = new AdMessages({
+        const adMessage = await AdMessages.create({
             name,
             marketingCampaign,
             type,
@@ -128,10 +128,12 @@ export async function POST(request: Request) {
             sendDate,
         });
 
-        const savedAdMessage = await adMessage.populate('marketingCampaign', ['name', 'description', 'status'])
-        .populate('template', ['_id', 'name', 'type']);
+        const savedAdMessage = await AdMessages.findById(adMessage._id)
+            .populate('marketingCampaign', 'name description status')
+            .populate('template', '_id name type');
 
-        return NextResponse.json({ message: 'AdMessage created successfully', savedAdMessage },
+        return NextResponse.json({ 
+            message: 'AdMessage created successfully', savedAdMessage },
             { status: 201 }
         );
 

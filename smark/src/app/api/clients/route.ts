@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     const allowedRoles = ['developer', 'admin', 'employee'];
 
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
 
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -63,8 +63,8 @@ export async function GET(request: Request) {
     const clients = await Clients.find(filter)
       .skip(skip)
       .limit(limit)
-      .populate('tags', ['_id', 'name'])
-      .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
+      .populate('tags', '_id name')
+      .populate('adInteractions.adMessage', '_id name type');
 
     const totalPages = Math.ceil(total / limit);
 
@@ -189,9 +189,9 @@ export async function POST(request: Request) {
       adInteractions: body.adInteractions || []
     });
 
-    const client = await newClient
-      .populate('tags', ['_id', 'name'])
-      .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
+    const client = await Clients.findById(newClient._id)
+      .populate('tags', '_id name')
+      .populate('adInteractions.adMessage', '_id name type');
 
     return NextResponse.json(
       { message: 'Client created successfully', result: client },
