@@ -2,21 +2,24 @@
 
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useTagStore } from '@/lib/store';
-import { useUserListStore } from '@/lib/store';
+import { useTagStore, useUserListStore } from '@/lib/store';
 import { useEffect, useState } from 'react';
 import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
-import { transformMarketingCampaignForSave } from '@/lib/transformers';
 import { useForm, FormProvider } from 'react-hook-form';
-import CustomAlertDialog from '@/components/CustomAlertDialog'
+import { transformMarketingCampaignForSave } from '@/lib/transformers';
+import CustomAlertDialog from '@/components/CustomAlertDialog';
+import { TagRef } from '@/types/Tag';
+import { UserRef } from '@/types/User';
+import { ObjectId } from 'mongodb';
 import { IClient, ClientRef } from '@/types/Client';
 
-export default function NewCampaignPage() {
+export default function EditCampaignPage() {
+    const { id } = useParams();
     const form = useForm<MarketingCampaignFormData>({
         defaultValues: {
             name: '',
@@ -34,9 +37,10 @@ export default function NewCampaignPage() {
             }
         }
     });
+    const { setValue } = form;
 
+    const [successOpen, setSuccessOpen] = useState(false);
 
-    console.log('CreateCampaignPage mounted!');
     const allTags = useTagStore((state) => state.tags);
     const setTags = useTagStore((state) => state.setTags);
     const tagsHydrated = useTagStore((state) => state.hasHydrated);
@@ -44,18 +48,44 @@ export default function NewCampaignPage() {
     const allUsers = useUserListStore((state) => state.users);
     const setUsers = useUserListStore((state) => state.setUsers);
     const usersHydrated = useUserListStore((state) => state.hasHydrated);
-    const [audience, setAudience] = useState<ClientRef[]>([]);
-
-    const [successOpen, setSuccessOpen] = useState(false);
 
     const currentPath = usePathname();
     const routes = [
-        { href: "/", label: "Dashboard" },
-        { href: "/marketingCampaigns", label: "Campaigns" },
-        { href: "/adMessages", label: "Ad-Messages" },
-        { href: "/clients", label: "Clients" },
-        { href: "/tags", label: "Tags" }
+        { href: '/', label: 'Dashboard' },
+        { href: '/marketingCampaigns', label: 'Campaigns' },
+        { href: '/adMessages', label: 'Ad-Messages' },
+        { href: '/clients', label: 'Clients' },
+        { href: '/tags', label: 'Tags' },
     ];
+
+    useEffect(() => {
+        const fetchCampaign = async () => {
+            try {
+                const response = await fetch(`/api/marketingCampaigns/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    },
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    const campaign = {
+                        ...data.result,
+                        startDate: data.result.startDate ? new Date(data.result.startDate) : new Date(),
+                        endDate: data.result.endDate ? new Date(data.result.endDate) : new Date(),
+                    };
+                    Object.entries(campaign).forEach(([key, value]) => {
+                        setValue(key as keyof MarketingCampaignFormData, value as string | Date | TagRef[] | UserRef[] | ObjectId | undefined);
+                    });
+                } else {
+                    console.error('Failed to fetch campaign:', data);
+                }
+            } catch (error) {
+                console.error('Error fetching campaign:', error);
+            }
+        };
+
+        fetchCampaign();
+    }, [id, setValue]);
 
     useEffect(() => {
         if (!tagsHydrated) return;
@@ -63,9 +93,8 @@ export default function NewCampaignPage() {
             try {
                 const response = await fetch('/api/tags', {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    }
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    },
                 });
                 const data = await response.json();
                 setTags(data.results);
@@ -73,17 +102,8 @@ export default function NewCampaignPage() {
                 console.error('Failed to fetch tags:', error);
             }
         };
-
-        if (!allTags || !Array.isArray(allTags) || allTags.length === 0) {
-            fetchTags();
-        }
+        if (!allTags || allTags.length === 0) fetchTags();
     }, [tagsHydrated, allTags, setTags]);
-
-    useEffect(() => {
-        if (allTags && allTags.length > 0) {
-            useTagStore.setState({ hasHydrated: true });
-        }
-    }, [allTags]);
 
     useEffect(() => {
         if (!usersHydrated) return;
@@ -91,8 +111,8 @@ export default function NewCampaignPage() {
             try {
                 const response = await fetch('/api/users', {
                     headers: {
-                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    }
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    },
                 });
                 const data = await response.json();
                 setUsers(data.results);
@@ -100,24 +120,14 @@ export default function NewCampaignPage() {
                 console.error('Failed to fetch users:', error);
             }
         };
-
-        if (!allUsers || !Array.isArray(allUsers) || allUsers.length === 0) {
-            fetchUsers();
-        }
+        if (!allUsers || allUsers.length === 0) fetchUsers();
     }, [usersHydrated, allUsers, setUsers]);
 
-    useEffect(() => {
-        if (allUsers && allUsers.length > 0) {
-            useUserListStore.setState({ hasHydrated: true });
-        }
-    }, [allUsers]);
-
-    const handleCreate = async (data: MarketingCampaignFormData) => {
+    const handleUpdate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
-        console.log("Submitting payload:", payload);
         try {
             const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
-            const clientRes = await fetch(`/api/clients?${tagQuery}`, {
+            const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
                 headers: {
                     Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
                 },
@@ -125,41 +135,42 @@ export default function NewCampaignPage() {
             const clientData = await clientRes.json();
             const allClientIds = clientData.results.map((c: IClient) => c._id);
 
-            const response = await fetch('/api/marketingCampaigns', {
-                method: 'POST',
+            const response = await fetch(`/api/marketingCampaigns/${id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
                 },
                 body: JSON.stringify(payload),
             });
 
             const result = await response.json();
             if (!response.ok) {
-                console.error('Create failed:', result);
+                console.error('Update failed:', result);
                 return;
             }
 
-            const createdCampaignId = result.result._id;
+            console.log('Campaign updated:', result.result);
 
-            await fetch('/api/campaignAudiences', {
-                method: 'POST',
+            await fetch(`/api/campaignAudiences/${id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
                 },
                 body: JSON.stringify({
-                    campaign: createdCampaignId,
+                    campaign: id,
                     audience: allClientIds,
                     status: 'approved',
                 }),
             });
+
             setSuccessOpen(true);
         } catch (error) {
-            console.error('Error creating campaign:', error);
+            console.error('Error updating campaign:', error);
         }
     };
-    console.log('Hydration flags — tags:', tagsHydrated, 'users:', usersHydrated);
+
     if (!tagsHydrated || !usersHydrated) {
         return <div>Loading...</div>;
     }
@@ -178,37 +189,37 @@ export default function NewCampaignPage() {
                                 Back
                             </Link>
                         </Button>
-                        <h1 className="text-2xl font-bold ml-3">Create New Campaign</h1>
+                        <h1 className="text-2xl font-bold ml-3">Edit Campaign</h1>
                     </div>
                     <FormProvider {...form}>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 w-full">
+                            <div className="lg:col-span-2">
                                 <CampaignFormTabs
-                                    mode="new"
-                                    onSubmit={handleCreate}
+                                    mode="edit"
+                                    onSubmit={handleUpdate}
                                     allTags={allTags}
                                     allUsers={allUsers}
                                     form={form}
                                 />
                             </div>
                             <div className="lg:col-span-1">
-                                <CampaignSummary onSubmit={handleCreate} mode="new" />
+                                <CampaignSummary onSubmit={handleUpdate} mode="edit" />
                             </div>
                         </div>
                     </FormProvider>
+                    <CustomAlertDialog
+                        open={successOpen}
+                        type="success"
+                        title="Campaign Updated"
+                        description="The marketing campaign was successfully updated."
+                        confirmLabel="Back to Campaigns"
+                        onConfirm={() => {
+                            setSuccessOpen(false);
+                            window.location.href = "/marketingCampaigns";
+                        }}
+                        onOpenChange={setSuccessOpen}
+                    />
                 </div>
-                <CustomAlertDialog
-                    open={successOpen}
-                    type="success"
-                    title="Campaign Created"
-                    description="The marketing campaign was successfully created."
-                    confirmLabel="Go to Campaigns"
-                    onConfirm={() => {
-                        setSuccessOpen(false);
-                        window.location.href = "/marketingCampaigns";
-                    }}
-                    onOpenChange={setSuccessOpen}
-                />
             </main>
         </div>
     );

@@ -14,7 +14,7 @@ import { IMarketingCampaign } from "@/types/MarketingCampaign";
 import { format } from 'date-fns';
 import { useEffect, useState } from "react";
 import { ClientRef } from "@/types/Client";
-import CustomAlertDialog from "./CustomAlertDialog";
+import CustomAlertDialog from "../CustomAlertDialog";
 
 interface CampaignCardProps {
     campaign: IMarketingCampaign;

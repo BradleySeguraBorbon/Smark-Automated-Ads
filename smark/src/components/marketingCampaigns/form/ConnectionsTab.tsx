@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useFormContext } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import { TagSelector } from "@/components/TagSelector";
+import { TagSelector } from "@/components/marketingCampaigns/form/TagSelector";
 import { MarketingCampaignFormData } from "@/types/MarketingCampaign";
 import { ITag, TagRef } from "@/types/Tag";
 import { TeamMemberSelector } from './TeamMemberSelector';

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useMarketingCampaignStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
-import { CampaignCard } from '@/components/CampaignCard'
+import { CampaignCard } from '@/components/marketingCampaigns/CampaignCard'
 import { PlusCircle, Filter } from 'lucide-react'
 import Link from 'next/link'
 import { IMarketingCampaign } from '@/types/MarketingCampaign'
