@@ -1,0 +1,150 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
+import { IClient } from "@/types/Client"
+import { ITag } from "@/types/Tag"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import LoadingSpinner from "@/components/LoadingSpinner"
+import Link from "next/link"
+
+export default function ClientViewPage() {
+    const params = useParams()
+    const id = params.id
+    const [client, setClient] = useState<IClient | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [apiError, setApiError] = useState<string | null>(null)
+
+    useEffect(() => {
+        const fetchClient = async () => {
+            setLoading(true)
+            try {
+                const response = await fetch(`/api/clients/${id}/`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`
+                    },
+                })
+
+                const result = await response.json()
+
+                if (!response.ok) {
+                    const errorMessage = result.message || result.error || "Unknown error occurred"
+                    setApiError(errorMessage)
+                    return
+                }
+
+                setClient(result.result)
+            } catch (error) {
+                console.error("Fetch error:", error)
+                setApiError("Unexpected error occurred.")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchClient()
+    }, [id])
+
+    if (loading) {
+        return (
+            <div className="container mx-auto py-10">
+                <LoadingSpinner />
+            </div>
+        )
+    }
+
+    if (apiError || !client) {
+        return (
+            <div className="container mx-auto py-10">
+                <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                        {apiError || "Client not found."}{" "}
+                        <Link href="/clients" className="underline">
+                            Return to clients list
+                        </Link>
+                    </AlertDescription>
+                </Alert>
+            </div>
+        )
+    }
+
+    return (
+        <div className="container mx-auto py-10 space-y-6 max-w-3xl">
+            <Card>
+                <CardHeader>
+                    <CardTitle>{client.firstName} {client.lastName}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <p><span className="font-medium">Email:</span> {client.email}</p>
+                    <p><span className="font-medium">Phone:</span> {client.phone}</p>
+                    <p><span className="font-medium">Telegram ID:</span> {client.telegramChatId || "—"}</p>
+                    <p><span className="font-medium">Preferred Contact:</span> {client.preferredContactMethod}</p>
+                    <p><span className="font-medium">Subscriptions:</span> {client.subscriptions.join(", ")}</p>
+                    <p><span className="font-medium">Birth Date:</span> {new Date(client.birthDate).toLocaleDateString()}</p>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Preferences</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                    {client.preferences.length > 0 ? (
+                        client.preferences.map((pref, idx) => (
+                            <span key={idx} className="px-3 py-1 bg-blue-900 rounded-full text-sm">{pref}</span>
+                        ))
+                    ) : (
+                        <p className="text-muted-foreground">No preferences set.</p>
+                    )}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Tags</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                    {client.tags.length > 0 ? (
+                        (client.tags as ITag[]).map((tag) => (
+                            <span key={tag._id} className="px-3 py-1 bg-emerald-950 rounded-full text-sm">{tag.name}</span>
+                        ))
+                    ) : (
+                        <p className="text-muted-foreground">No tags assigned.</p>
+                    )}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Ad Interactions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {client.adInteractions.length > 0 ? (
+                        client.adInteractions.map((interaction, idx) => (
+                            <div key={idx} className="border p-2 rounded-md">
+                                <p><span className="font-medium">Ad Message:</span> {interaction.adMessage?.name || interaction.adMessage}</p>
+                                <p><span className="font-medium">Status:</span> {interaction.status}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-muted-foreground">No ad interactions.</p>
+                    )}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Metadata</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p><span className="font-medium">Created:</span> {new Date(client.createdAt).toLocaleString()}</p>
+                    <p><span className="font-medium">Last Updated:</span> {new Date(client.updatedAt).toLocaleString()}</p>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
