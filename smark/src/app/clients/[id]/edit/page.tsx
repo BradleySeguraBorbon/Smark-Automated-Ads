@@ -1,17 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import {useRouter, useParams, usePathname} from "next/navigation"
-import { useForm } from "react-hook-form"
-import { IClient } from "@/types/Client"
-import { ITag } from "@/types/Tag"
+import {useEffect, useState} from "react"
+import {useRouter, useParams} from "next/navigation"
+import {useForm} from "react-hook-form"
+import {IClient} from "@/types/Client"
+import {ITag} from "@/types/Tag"
 import EditClientForm from "@/components/clients/EditClientForm"
 import ClientAdditionalInfo from "@/components/clients/ClientAdditionalInfo"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
 import Link from "next/link"
-import {Navbar} from "@/components/Navbar";
+import {IUser} from "@/types/User"
+import {useAuthStore} from "@/lib/store";
+import {decodeToken} from "@/lib/utils/decodeToken";
 
 export default function EditClientPage() {
     const params = useParams()
@@ -21,6 +23,9 @@ export default function EditClientPage() {
     const [notFound, setNotFound] = useState(false)
     const [loading, setLoading] = useState(true)
     const [fetchedTags, setFetchedTags] = useState<ITag[]>([])
+    const token = useAuthStore((state) => state.token);
+    const [userInfo, setUserInfo] = useState<IUser | null>(null)
+    const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
     const form = useForm<IClient>({
         defaultValues: {
@@ -39,6 +44,7 @@ export default function EditClientPage() {
     })
 
     useEffect(() => {
+        if (!_hasHydrated) return
         const fetchClient = async () => {
             setLoading(true)
             try {
@@ -46,7 +52,7 @@ export default function EditClientPage() {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`,
+                        Authorization: `Bearer ` + token,
                     },
                 })
 
@@ -85,7 +91,7 @@ export default function EditClientPage() {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`,
+                        Authorization: `Bearer ` + token,
                     },
                 })
                 const result = await response.json()
@@ -100,9 +106,25 @@ export default function EditClientPage() {
             }
         }
 
-        fetchClient()
-        fetchTags()
-    }, [params.id, form])
+        const init = async () => {
+            if (!token) {
+                router.push('/auth/login');
+                return;
+            }
+
+            const user = await decodeToken(token);
+            if (!user || user.role === 'employee') {
+                router.push('/auth/login');
+                return;
+            }
+
+            setUserInfo(user);
+            fetchClient()
+            fetchTags()
+        };
+
+        init();
+    }, [_hasHydrated, token, params.id, form])
 
     async function onSubmit(data: IClient) {
         try {
@@ -128,19 +150,10 @@ export default function EditClientPage() {
         }
     }
 
-    const currentPath = usePathname()
-    const routes = [
-        { href: "/", label: "Dashboard" },
-        { href: "/campaigns", label: "Campaigns" },
-        { href: "/adMessages", label: "Ad-Messages" },
-        { href: "/clients", label: "Clients" },
-        { href: "/analytics", label: "Analytics" },
-    ]
-
     if (loading) {
         return (
             <div className="container mx-auto py-10">
-                <LoadingSpinner />
+                <LoadingSpinner/>
                 {apiError && (
                     <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mt-6">{apiError}</div>
                 )}
@@ -166,17 +179,13 @@ export default function EditClientPage() {
 
     return (
         <div className="container mx-auto py-10">
-            <header>
-                <Navbar currentPath={currentPath} routes={routes} />
-            </header>
-            <div className="max-w-3xl mx-auto space-y-8 mt-6">
-                <BreadcrumbHeader backHref="/clients" title="Edit Client" />
+            <div className="max-w-3xl mx-auto space-y-8">
+                <BreadcrumbHeader backHref="/clients" title="Edit Client"/>
                 {apiError && (
                     <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mb-6">{apiError}</div>
                 )}
-                <EditClientForm form={form} onSubmit={onSubmit} tags={fetchedTags} router={router} />
+                <EditClientForm form={form} onSubmit={onSubmit} tags={fetchedTags} router={router}/>
                 <ClientAdditionalInfo
-                    className="mt-8 max-w-2xl mx-auto"
                     preferences={form.getValues("preferences")}
                     subscriptions={form.getValues("subscriptions")}
                     preferredContactMethod={form.getValues("preferredContactMethod")}

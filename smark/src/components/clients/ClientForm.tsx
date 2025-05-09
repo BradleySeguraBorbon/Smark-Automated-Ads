@@ -205,12 +205,29 @@ export default function ClientForm({ form, onSubmit, newPreference, setNewPrefer
                     )}
                 />
 
-                <PreferenceManager
-                    fieldName="preferences"
+                <FormField
                     control={form.control}
-                    newPreference={newPreference}
-                    setNewPreference={setNewPreference}
+                    name="preferences"
+                    rules={{
+                        validate: (value: string[]) => {
+                            if (!value || value.length >= 1) {
+                                return "At least two preference is required"
+                            }
+                            return true
+                        },
+                    }}
+                    render={({ field, fieldState }) => (
+                        <PreferenceManager
+                            fieldName="preferences"
+                            control={form.control}
+                            newPreference={newPreference}
+                            setNewPreference={setNewPreference}
+                            field={field}
+                            error={fieldState.error?.message}
+                        />
+                    )}
                 />
+
 
                 <SubscriptionsSelector control={form.control} />
 

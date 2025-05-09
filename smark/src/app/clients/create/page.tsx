@@ -1,31 +1,26 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { IClient } from "@/types/Client"
-import { useClientStore } from "@/lib/store"
+import { useClientStore, useAuthStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Navbar } from "@/components/Navbar"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
+import CustomAlertDialog from "@/components/CustomAlertDialog"
 
 export default function CreateClientPage() {
     const router = useRouter()
     const { addClient } = useClientStore()
     const [mounted, setMounted] = useState(false)
     const [newPreference, setNewPreference] = useState("")
-    const [apiError, setApiError] = useState<string | null>(null)
-
-    const currentPath = usePathname()
-    const routes = [
-        { href: "/", label: "Dashboard" },
-        { href: "/campaigns", label: "Campaigns" },
-        { href: "/adMessages", label: "Ad-Messages" },
-        { href: "/clients", label: "Clients" },
-        { href: "/analytics", label: "Analytics" },
-    ]
+    const [successOpen, setSuccessOpen] = useState(false)
+    const [errorOpen, setErrorOpen] = useState(false)
+    const [infoOpen, setInfoOpen] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+    const [infoMessage, setInfoMessage] = useState("")
 
     const form = useForm<IClient>({
         defaultValues: {
@@ -42,9 +37,14 @@ export default function CreateClientPage() {
         },
     })
 
+    const token = useAuthStore((state) => state.token);
+
     useEffect(() => {
+        if (!token) {
+            return;
+        }
         setMounted(true)
-    }, [])
+    }, [token])
 
     async function onSubmit(data: IClient) {
         data.tags = []
@@ -54,7 +54,7 @@ export default function CreateClientPage() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`,
+                    Authorization: `Bearer ` + token,
                 },
                 body: JSON.stringify(data),
             })
@@ -63,54 +63,93 @@ export default function CreateClientPage() {
 
             if (!response.ok) {
                 console.log("Response is not ok: ", result)
-                const errorMessage = result.message || result.error || "Unknown error occurred"
-                setApiError(errorMessage)
+                const errorMessage = result.message || result.error || "An unknow error has happened."
+                setErrorMessage(errorMessage)
+                setErrorOpen(true)
                 return
             }
 
             console.log("Client created:", result)
-            setApiError(null)
             addClient(data)
-            router.back()
-        } catch (error) {
+
+            if (result.warning) {
+                setInfoMessage(result.warning)
+                setInfoOpen(true)
+            }
+
+            setSuccessOpen(true)
+
+            setTimeout(() => {
+                router.push("/clients")
+            }, 4000)
+        } catch (error: unknown) {
             console.error("Network or unexpected error:", error)
-            alert("Unexpected error occurred.")
+            setErrorMessage("An unexpected error has occurred on network or server.")
+            setErrorOpen(true)
         }
     }
 
     if (!mounted) {
         return (
             <div className="container mx-auto py-10">
-                <LoadingSpinner />
+                <LoadingSpinner/>
             </div>
         )
     }
 
     return (
-        <div className="container mx-auto py-10">
-            <header>
-                <Navbar currentPath={currentPath} routes={routes} />
-            </header>
+        <div className="container mx-auto py-2 mb-4">
+            <div className="lg:max-w-3xl mx-auto px-4 mt-4">
+                <div className="mb-4">
+                <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
+                </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Client Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ClientForm
+                            form={form}
+                            onSubmit={onSubmit}
+                            newPreference={newPreference}
+                            setNewPreference={setNewPreference}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
 
-            <BreadcrumbHeader backHref="/clients" title="Create New Client" />
+            <CustomAlertDialog
+                open={successOpen}
+                type="success"
+                title="¡Client created successfully!"
+                description="The new client has been added to the data base."
+                confirmLabel="Go to clients"
+                onConfirm={() => {
+                    setSuccessOpen(false)
+                    router.push("/clients")
+                }}
+                onOpenChange={setSuccessOpen}
+            />
 
-            {apiError && (
-                <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mb-6">{apiError}</div>
-            )}
+            <CustomAlertDialog
+                open={errorOpen}
+                type="error"
+                title="Error creating client"
+                description={errorMessage}
+                confirmLabel="Ok"
+                onConfirm={() => setErrorOpen(false)}
+                onOpenChange={setErrorOpen}
+            />
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Client Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ClientForm
-                        form={form}
-                        onSubmit={onSubmit}
-                        newPreference={newPreference}
-                        setNewPreference={setNewPreference}
-                    />
-                </CardContent>
-            </Card>
+            <CustomAlertDialog
+                open={infoOpen}
+                type="info"
+                title="Attention"
+                description={infoMessage}
+                confirmLabel="Ok"
+                onConfirm={() => setInfoOpen(false)}
+                onOpenChange={setInfoOpen}
+            />
         </div>
     )
 }

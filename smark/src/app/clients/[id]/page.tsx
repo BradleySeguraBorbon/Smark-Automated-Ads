@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import Link from "next/link"
+import {useAuthStore} from "@/lib/store";
+import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 
 export default function ClientViewPage() {
     const params = useParams()
@@ -16,7 +18,11 @@ export default function ClientViewPage() {
     const [loading, setLoading] = useState(true)
     const [apiError, setApiError] = useState<string | null>(null)
 
+    const token = useAuthStore((state) => state.token);
+    const hydrated = useAuthStore((state) => state._hasHydrated);
+
     useEffect(() => {
+        if(!hydrated)return;
         const fetchClient = async () => {
             setLoading(true)
             try {
@@ -24,7 +30,7 @@ export default function ClientViewPage() {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODE2YmI0YzcwZDdhNjY4ZGY0ZDc4YTYiLCJ1c2VybmFtZSI6IlNlYmFzdGlhbiIsInJvbGUiOiJkZXZlbG9wZXIiLCJpYXQiOjE3NDY0MTYyNzgsImV4cCI6MTc0Njc3NjI3OH0.ZOTimuCUNqAQWQgYiz1YJSWL5ly1jYxv753YGnK5EIo`
+                        Authorization: `Bearer ` + token
                     },
                 })
 
@@ -37,6 +43,7 @@ export default function ClientViewPage() {
                 }
 
                 setClient(result.result)
+                console.log("Client response", result.result)
             } catch (error) {
                 console.error("Fetch error:", error)
                 setApiError("Unexpected error occurred.")
@@ -46,7 +53,7 @@ export default function ClientViewPage() {
         }
 
         fetchClient()
-    }, [id])
+    }, [token, hydrated, id])
 
     if (loading) {
         return (
@@ -74,6 +81,7 @@ export default function ClientViewPage() {
 
     return (
         <div className="container mx-auto py-10 space-y-6 max-w-3xl">
+            <BreadcrumbHeader backHref="/clients" title="Visualice Client"/>
             <Card>
                 <CardHeader>
                     <CardTitle>{client.firstName} {client.lastName}</CardTitle>
@@ -109,8 +117,8 @@ export default function ClientViewPage() {
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                     {client.tags.length > 0 ? (
-                        (client.tags as ITag[]).map((tag) => (
-                            <span key={tag._id} className="px-3 py-1 bg-emerald-950 rounded-full text-sm">{tag.name}</span>
+                        (client.tags as ITag[]).map((tag: ITag) => (
+                            <span key={String(tag._id)} className="px-3 py-1 bg-emerald-950 rounded-full text-sm">{tag.name}</span>
                         ))
                     ) : (
                         <p className="text-muted-foreground">No tags assigned.</p>
@@ -126,7 +134,7 @@ export default function ClientViewPage() {
                     {client.adInteractions.length > 0 ? (
                         client.adInteractions.map((interaction, idx) => (
                             <div key={idx} className="border p-2 rounded-md">
-                                <p><span className="font-medium">Ad Message:</span> {interaction.adMessage?.name || interaction.adMessage}</p>
+                                <p><span className="font-medium">Ad Message:</span> {typeof interaction.adMessage === "object" && "name" in interaction.adMessage ? interaction.adMessage.name : interaction.adMessage || "—"}</p>
                                 <p><span className="font-medium">Status:</span> {interaction.status}</p>
                             </div>
                         ))
@@ -141,8 +149,8 @@ export default function ClientViewPage() {
                     <CardTitle>Metadata</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p><span className="font-medium">Created:</span> {new Date(client.createdAt).toLocaleString()}</p>
-                    <p><span className="font-medium">Last Updated:</span> {new Date(client.updatedAt).toLocaleString()}</p>
+                    <p><span className="font-medium">Created:</span> {client.createdAt ? new Date(client.createdAt).toLocaleString() : "—"}</p>
+                    <p><span className="font-medium">Last Updated:</span> {client.updatedAt ? new Date(client.updatedAt).toLocaleString() : "—"}</p>
                 </CardContent>
             </Card>
         </div>

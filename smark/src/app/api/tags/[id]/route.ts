@@ -44,7 +44,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     try {
         await connectDB();
 
-        const allowedRoles = ['developer', 'admin', 'employee'];
+        const allowedRoles = ['developer', 'admin'];
 
         const user = getUserFromRequest(request);
 
@@ -106,7 +106,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     try {
         await connectDB();
 
-        const allowedRoles = ['developer', 'admin', 'employee'];
+        const allowedRoles = ['developer', 'admin'];
         const user = getUserFromRequest(request);
 
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

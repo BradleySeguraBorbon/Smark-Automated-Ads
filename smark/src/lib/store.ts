@@ -7,6 +7,7 @@ import { IMarketingCampaign } from '@/types/MarketingCampaign';
 import { ITemplate } from '@/types/Template';
 import { IUser } from '@/types/User';
 import { persist } from 'zustand/middleware';
+import {decodeToken} from "@/lib/utils/decodeToken";
 
 interface ClientStore {
   clients: IClient[];
@@ -161,7 +162,7 @@ export const useTagStore = create<TagStore>()(
       clearTags: () => set({ tags: [] }),
       hasHydrated: false
     }),
-    { 
+    {
       name: 'tag-storage',
       onRehydrateStorage: () => (state, error) => {
         if (!error) {
@@ -262,3 +263,45 @@ export const useUserListStore = create<UserListStore>()(
   )
 );
 
+
+interface AuthStore {
+    token: string | null;
+    user: { username: string; role: string; id: string } | null;
+    _hasHydrated: boolean;
+    setToken: (token: string | null) => Promise<void>;
+    clearAuth: () => void;
+    setHasHydrated: (state: boolean) => void;
+}
+
+export const useAuthStore = create<AuthStore>()(
+    persist(
+        (set) => ({
+            token: null,
+            user: null,
+            _hasHydrated: false,
+            setToken: async (token) => {
+                set({ token });
+                if (token) {
+                    const decoded = await decodeToken(token);
+                    if (decoded) {
+                        set({ user: decoded });
+                    } else {
+                        set({ token: null, user: null });
+                    }
+                } else {
+                    set({ user: null });
+                }
+            },
+            clearAuth: () => set({ token: null, user: null }),
+            setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
+        }),
+        {
+            name: 'auth-storage',
+            partialize: (state) => ({ token: state.token }),
+            onRehydrateStorage: () => (state) => {
+                //console.log('✅ Hydration complete in AuthStore, state:', state);
+                state?.setHasHydrated(true);
+            },
+        }
+    )
+);
