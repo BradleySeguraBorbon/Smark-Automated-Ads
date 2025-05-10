@@ -8,75 +8,128 @@ import { IMarketingCampaign } from "@/types/MarketingCampaign"
 import { Button } from "@/components/ui/button"
 import { Pencil, ChevronLeft } from "lucide-react"
 import Link from "next/link"
-import { useParams, usePathname } from "next/navigation"
-import { Navbar } from "@/components/Navbar"
+import { useParams, usePathname, useRouter } from "next/navigation"
+import LoadingSpinner from "@/components/LoadingSpinner"
+import { useAuthStore } from "@/lib/store"
+import { decodeToken } from "@/lib/utils/decodeToken"
+import { ClientRef } from "@/types/Client"
+
 
 export default function MarketingCampaignDetailPage({ params }: { params: { id: string } }) {
     const { id } = useParams();
     const currentPath = usePathname();
+    const router = useRouter();
 
-    const [campaign, setCampaign] = useState<IMarketingCampaign | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [campaign, setCampaign] = useState<IMarketingCampaign | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const token = useAuthStore((state) => state.token);
+    const hydrated = useAuthStore((state) => state._hasHydrated);
+
+    const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
+    const [audience, setAudience] = useState<ClientRef[]>([]);
+    const [audiencePage, setAudiencePage] = useState(1);
+    const [audienceTotalPages, setAudienceTotalPages] = useState(1);
+
+    const fetchCampaign = async () => {
+        try {
+            const res = await fetch(`/api/marketingCampaigns/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            if (!res.ok) throw new Error('Failed to fetch campaign');
+            const data = await res.json();
+            setCampaign(data.result);
+        } catch (err) {
+            console.error(err);
+            setCampaign(null);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const fetchAudience = async () => {
+        try {
+            const res = await fetch(`/api/campaignAudiences?campaignId=${id}&page=${audiencePage}&limit=10`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.result?.audience) {
+                setAudience(data.result.audience);
+                setAudienceTotalPages(data.totalPages || 1);
+            }
+        } catch (err) {
+            console.error('Failed to fetch audience:', err);
+            setAudience([]);
+            setAudienceTotalPages(1);
+        }
+    };
 
     useEffect(() => {
-        const fetchCampaign = async () => {
-            try {
-                const res = await fetch(`/api/marketingCampaigns/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    },
-                })
-                if (!res.ok) throw new Error('Failed to fetch campaign')
-                const data = await res.json()
-                setCampaign(data.result)
-            } catch (err) {
-                console.error(err)
-                setCampaign(null)
-            } finally {
-                setLoading(false)
+        if (!hydrated) return;
+
+        const init = async () => {
+            if (!token) {
+                router.push('/auth/login');
+                return;
             }
-        }
 
-        if (id) fetchCampaign()
-    }, [id])
+            const user = await decodeToken(token);
+            if (!user) {
+                router.push('/auth/login');
+                return;
+            }
 
-    if (loading) return <div className="p-4">Loading campaign...</div>
-    if (!campaign) return notFound()
+            setUserInfo(user);
+            fetchCampaign();
+            fetchAudience();
+        };
 
-    const routes = [
-        { href: "/", label: "Dashboard" },
-        { href: "/marketingCampaigns", label: "Campaigns" },
-        { href: "/adMessages", label: "Ad-Messages" },
-        { href: "/clients", label: "Clients" },
-        { href: "/tags", label: "Tags" }
-    ];
+        init();
+    }, [id, token, hydrated, audiencePage])
+
+    if (loading) {
+        return (
+            <div className="container mx-auto py-10">
+                <LoadingSpinner />
+            </div>
+        )
+    }
+    if (!campaign) {
+        return notFound()
+    }
 
     return (
         <>
-            <header>
-                <Navbar currentPath={currentPath} routes={routes} />
-            </header >
             <main>
                 <div className="container mx-auto py-8 px-4">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center">
                             <Button variant="ghost" size="sm" asChild className="mr-2">
-                                <Link href="/campaigns">
+                                <Link href="/marketingCampaigns">
                                     <ChevronLeft className="h-4 w-4 mr-1" />
                                     Back
                                 </Link>
                             </Button>
                             <h1 className="text-2xl font-bold">{campaign.name}</h1>
                         </div>
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={`/marketingCampaigns/${campaign._id}/edit`}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Edit Campaign
-                            </Link>
-                        </Button>
+                        {userInfo?.role !== 'employee' &&
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={`/marketingCampaigns/${campaign._id}/edit`}>
+                                    <Pencil className="h-4 w-4 mr-2" />
+                                    Edit Campaign
+                                </Link>
+                            </Button>}
                     </div>
                     <CampaignHeader campaign={campaign} />
-                    <CampaignInfoTabs campaign={campaign} />
+                    <CampaignInfoTabs
+                        campaign={campaign}
+                        audience={audience}
+                        audienceAudienceTotalPages={audienceTotalPages}
+                        audienceCurrentPage={audiencePage}
+                        onAudiencePageChange={setAudiencePage}
+                    />
                 </div>
             </main>
         </>

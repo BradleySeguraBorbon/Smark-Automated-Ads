@@ -3,37 +3,19 @@
 import { useEffect, useState } from 'react'
 import { Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { IClient } from '@/types/Client'
+import { ClientRef } from '@/types/Client'
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import PaginationControls from '@/components/PaginationControls'
 
-export default function CampaignAudienceCard({ campaignId }: { campaignId: string }) {
-    const [audience, setAudience] = useState<IClient[]>([])
-    const [page, setPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(1)
+interface AudienceCardProps {
+    audience: ClientRef[];
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+}
 
-    useEffect(() => {
-        const fetchAudience = async () => {
-            try {
-                const res = await fetch(`/api/campaignAudiences?campaignId=${campaignId}&page=${page}&limit=10`, {
-                    headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}` },
-                })
-                const data = await res.json()
-                if (data.result?.audience) {
-                    setAudience(data.result.audience)
-                    setTotalPages(data.totalPages || 1)
-                }
-            } catch (err) {
-                console.error('Failed to fetch audience:', err)
-                setAudience([])
-                setTotalPages(1)
-            }
-        }
-
-        fetchAudience()
-    }, [campaignId, page])
-
+export default function CampaignAudienceCard({ audience, currentPage, totalPages, onPageChange }: AudienceCardProps) {
     return (
         <Card>
             <CardHeader>
@@ -58,7 +40,7 @@ export default function CampaignAudienceCard({ campaignId }: { campaignId: strin
                         </TableHeader>
                         <TableBody>
                             {audience.map((client) => (
-                                <TableRow key={ String(client._id)}>
+                                <TableRow key={String(client._id)}>
                                     <TableCell>
                                         {client.firstName} {client.lastName}
                                     </TableCell>
@@ -70,9 +52,9 @@ export default function CampaignAudienceCard({ campaignId }: { campaignId: strin
                 </div>
                 {totalPages > 1 && (
                     <PaginationControls
-                        currentPage={page}
+                        currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={setPage}
+                        onPageChange={(page) => onPageChange(page)}
                     />
                 )}
             </CardContent>

@@ -37,6 +37,7 @@ export function DetailsTab({ form }: { form: ReturnType<typeof useFormContext<Ma
         <FormField
           control={form.control}
           name="description"
+          rules={{ required: 'Campaign description is required' }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Description</FormLabel>
@@ -51,6 +52,7 @@ export function DetailsTab({ form }: { form: ReturnType<typeof useFormContext<Ma
         <FormField
           control={form.control}
           name="status"
+          rules={{ required: 'Campaign status is required' }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
@@ -75,6 +77,7 @@ export function DetailsTab({ form }: { form: ReturnType<typeof useFormContext<Ma
           <FormField
             control={form.control}
             name="startDate"
+            rules={{ required: 'Campaign start date is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Start Date</FormLabel>
@@ -102,6 +105,7 @@ export function DetailsTab({ form }: { form: ReturnType<typeof useFormContext<Ma
           <FormField
             control={form.control}
             name="endDate"
+            rules={{ required: 'Campaign end date is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>End Date</FormLabel>

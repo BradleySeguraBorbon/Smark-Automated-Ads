@@ -9,8 +9,10 @@ import { ConnectionsTab } from '@/components/marketingCampaigns/form/Connections
 import { DetailsTab } from '@/components/marketingCampaigns/form/DetailsTab';
 import { ITag } from '@/types/Tag';
 import { IUser } from '@/types/User';
-import { IClient, ClientRef } from '@/types/Client';
+import { ClientRef } from '@/types/Client';
 import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
+import { useAuthStore } from '@/lib/store';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface CampaignFormTabsProps {
   mode: 'new' | 'edit';
@@ -30,6 +32,7 @@ export function CampaignFormTabs({
   const [audience, setAudience] = useState<ClientRef[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'connections' | 'audience'>('details');
+  const token = useAuthStore((state) => state.token);
 
   const formData = form.watch();
 
@@ -45,7 +48,7 @@ export function CampaignFormTabs({
 
             const res = await fetch(`/api/clients?${tagQueryParams}&limit=10&page=1`, {
               headers: {
-                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                'Authorization': `Bearer ${token}`,
               },
             });
             const data = await res.json();
@@ -85,11 +88,17 @@ export function CampaignFormTabs({
 
         <TabsContent value="audience">
           {isLoading ? (
-            <p>Loading audience preview...</p>
+            <div className="container mx-auto py-10">
+              <LoadingSpinner />
+              <p>Loading audience preview...</p>
+            </div>
           ) : audience ? (
             <AudiencePreviewTable clients={audience} />
           ) : (
-            <p>Preparing audience preview...</p>
+            <div className="container mx-auto py-10">
+              <LoadingSpinner />
+              <p>Preparing audience preview...</p>
+            </div>
           )}
         </TabsContent>
 

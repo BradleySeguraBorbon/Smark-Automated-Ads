@@ -2,7 +2,7 @@
 
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
@@ -15,8 +15,26 @@ import { transformMarketingCampaignForSave } from '@/lib/transformers';
 import { useForm, FormProvider } from 'react-hook-form';
 import CustomAlertDialog from '@/components/CustomAlertDialog'
 import { IClient, ClientRef } from '@/types/Client';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { useAuthStore } from '@/lib/store';
+import { decodeToken } from "@/lib/utils/decodeToken"
 
 export default function NewCampaignPage() {
+    const currentPath = usePathname();
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false)
+
+    const allTags = useTagStore((state) => state.tags);
+    const setTags = useTagStore((state) => state.setTags);
+    const tagsHydrated = useTagStore((state) => state.hasHydrated);
+
+    const allUsers = useUserListStore((state) => state.users);
+    const setUsers = useUserListStore((state) => state.setUsers);
+    const usersHydrated = useUserListStore((state) => state.hasHydrated);
+    
+    const [audience, setAudience] = useState<ClientRef[]>([]);
+    const [successOpen, setSuccessOpen] = useState(false);
+
     const form = useForm<MarketingCampaignFormData>({
         defaultValues: {
             name: '',
@@ -35,82 +53,77 @@ export default function NewCampaignPage() {
         }
     });
 
+    const fetchTags = async () => {
+        try {
+            const response = await fetch('/api/tags', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            const data = await response.json();
+            setTags(data.results);
+            useTagStore.setState({ hasHydrated: true });
+        } catch (error) {
+            console.error('Failed to fetch tags:', error);
+        }
+    };
 
-    console.log('CreateCampaignPage mounted!');
-    const allTags = useTagStore((state) => state.tags);
-    const setTags = useTagStore((state) => state.setTags);
-    const tagsHydrated = useTagStore((state) => state.hasHydrated);
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('/api/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            const data = await response.json();
+            setUsers(data.results);
+            useUserListStore.setState({ hasHydrated: true });
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        }
+    };
 
-    const allUsers = useUserListStore((state) => state.users);
-    const setUsers = useUserListStore((state) => state.setUsers);
-    const usersHydrated = useUserListStore((state) => state.hasHydrated);
-    const [audience, setAudience] = useState<ClientRef[]>([]);
-
-    const [successOpen, setSuccessOpen] = useState(false);
-
-    const currentPath = usePathname();
-    const routes = [
-        { href: "/", label: "Dashboard" },
-        { href: "/marketingCampaigns", label: "Campaigns" },
-        { href: "/adMessages", label: "Ad-Messages" },
-        { href: "/clients", label: "Clients" },
-        { href: "/tags", label: "Tags" }
-    ];
+    const token = useAuthStore((state) => state.token);
 
     useEffect(() => {
-        if (!tagsHydrated) return;
-        const fetchTags = async () => {
-            try {
-                const response = await fetch('/api/tags', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    }
-                });
-                const data = await response.json();
-                setTags(data.results);
-            } catch (error) {
-                console.error('Failed to fetch tags:', error);
-            }
-        };
+        if (!token) {
+            return router.push('/auth/login');
+        }
 
+        fetchTags();
+        fetchUsers();
+        setMounted(true);
+
+    }, [token]);
+
+    /*useEffect(() => {
+        if (!tagsHydrated) return;
+    
         if (!allTags || !Array.isArray(allTags) || allTags.length === 0) {
             fetchTags();
         }
     }, [tagsHydrated, allTags, setTags]);
-
+    
     useEffect(() => {
         if (allTags && allTags.length > 0) {
             useTagStore.setState({ hasHydrated: true });
         }
     }, [allTags]);
-
+    
     useEffect(() => {
         if (!usersHydrated) return;
-        const fetchUsers = async () => {
-            try {
-                const response = await fetch('/api/users', {
-                    headers: {
-                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    }
-                });
-                const data = await response.json();
-                setUsers(data.results);
-            } catch (error) {
-                console.error('Failed to fetch users:', error);
-            }
-        };
-
+    
         if (!allUsers || !Array.isArray(allUsers) || allUsers.length === 0) {
             fetchUsers();
         }
     }, [usersHydrated, allUsers, setUsers]);
-
+    
     useEffect(() => {
         if (allUsers && allUsers.length > 0) {
             useUserListStore.setState({ hasHydrated: true });
         }
-    }, [allUsers]);
+    }, [allUsers]);*/
 
     const handleCreate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
@@ -119,7 +132,7 @@ export default function NewCampaignPage() {
             const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
             const clientRes = await fetch(`/api/clients?${tagQuery}`, {
                 headers: {
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
             const clientData = await clientRes.json();
@@ -129,7 +142,7 @@ export default function NewCampaignPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(payload),
             });
@@ -146,7 +159,7 @@ export default function NewCampaignPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     campaign: createdCampaignId,
@@ -159,16 +172,17 @@ export default function NewCampaignPage() {
             console.error('Error creating campaign:', error);
         }
     };
-    console.log('Hydration flags — tags:', tagsHydrated, 'users:', usersHydrated);
-    if (!tagsHydrated || !usersHydrated) {
-        return <div>Loading...</div>;
+
+    if (!mounted) {
+        return (
+            <div className="container mx-auto py-10">
+                <LoadingSpinner />
+            </div>
+        )
     }
 
     return (
         <div>
-            <header>
-                <Navbar currentPath={currentPath} routes={routes} />
-            </header>
             <main>
                 <div className="container mx-auto py-8 px-50">
                     <div className="flex items-center mb-6">

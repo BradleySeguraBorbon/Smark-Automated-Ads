@@ -13,19 +13,21 @@ import { TagIcon, Trash2 } from 'lucide-react'
 import { IMarketingCampaign } from "@/types/MarketingCampaign";
 import { format } from 'date-fns';
 import { useEffect, useState } from "react";
-import { ClientRef } from "@/types/Client";
 import CustomAlertDialog from "../CustomAlertDialog";
+import { useAuthStore } from "@/lib/store";
 
 interface CampaignCardProps {
     campaign: IMarketingCampaign;
     onDelete: () => void;
+    userRole: string;
 }
 
-export function CampaignCard({ campaign, onDelete }: CampaignCardProps) {
+export function CampaignCard({ campaign, onDelete, userRole }: CampaignCardProps) {
 
     const [audienceCount, setAudienceCount] = useState<number | null>(null);
     const [alertOpen, setAlertOpen] = useState(false);
-    const [successDelete, setSuccessDelete] = useState(false)
+    const [successDelete, setSuccessDelete] = useState(false);
+    const token = useAuthStore((state) => state.token);
 
     useEffect(() => {
         const fetchAudienceCount = async () => {
@@ -34,7 +36,7 @@ export function CampaignCard({ campaign, onDelete }: CampaignCardProps) {
                 const response = await fetch(
                     `/api/campaignAudiences/countByCampaignId?campaignId=${campaign._id}`, {
                     headers: {
-                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                        'Authorization': `Bearer ${token}`,
                     }
                 });
                 const data = await response.json();
@@ -47,7 +49,7 @@ export function CampaignCard({ campaign, onDelete }: CampaignCardProps) {
                 console.error('Failed to fetch audience count:', err);
             }
         };
-
+        
         fetchAudienceCount();
     }, [campaign._id]);
 
@@ -74,9 +76,11 @@ export function CampaignCard({ campaign, onDelete }: CampaignCardProps) {
                         >
                             {campaign.status}
                         </Badge>
-                        <Button variant="ghost" size="icon" onClick={() => setAlertOpen(true)}>
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {userRole !== 'employee' &&
+                            <Button variant="ghost" size="icon" onClick={() => setAlertOpen(true)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        }
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -114,7 +118,7 @@ export function CampaignCard({ campaign, onDelete }: CampaignCardProps) {
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/marketingCampaigns/${campaign._id}`}>View Details</Link>
                         </Button>
-                        {["active", "inactive"].includes(campaign.status) && (
+                        {["active", "inactive"].includes(campaign.status) && userRole !== 'employee' && (
                             <Button size="sm" asChild>
                                 <Link href={`/marketingCampaigns/${campaign._id}/edit`}>Edit Campaign</Link>
                             </Button>

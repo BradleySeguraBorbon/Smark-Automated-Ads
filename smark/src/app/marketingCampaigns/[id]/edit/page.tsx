@@ -2,11 +2,12 @@
 
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname, useParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthStore } from '@/lib/store';
 import { useTagStore, useUserListStore } from '@/lib/store';
 import { useEffect, useState } from 'react';
 import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
@@ -16,10 +17,29 @@ import CustomAlertDialog from '@/components/CustomAlertDialog';
 import { TagRef } from '@/types/Tag';
 import { UserRef } from '@/types/User';
 import { ObjectId } from 'mongodb';
-import { IClient, ClientRef } from '@/types/Client';
+import { IClient } from '@/types/Client';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { decodeToken } from '@/lib/utils/decodeToken';
 
 export default function EditCampaignPage() {
     const { id } = useParams();
+    const router = useRouter();
+    const currentPath = usePathname();
+
+    const token = useAuthStore((state) => state.token);
+    const _hasHydrated = useAuthStore((state) => state._hasHydrated);
+    const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
+
+    const allTags = useTagStore((state) => state.tags);
+    const setTags = useTagStore((state) => state.setTags);
+    const tagsHydrated = useTagStore((state) => state.hasHydrated);
+
+    const allUsers = useUserListStore((state) => state.users);
+    const setUsers = useUserListStore((state) => state.setUsers);
+    const usersHydrated = useUserListStore((state) => state.hasHydrated);
+
+    const [successOpen, setSuccessOpen] = useState(false);
+
     const form = useForm<MarketingCampaignFormData>({
         defaultValues: {
             name: '',
@@ -39,89 +59,95 @@ export default function EditCampaignPage() {
     });
     const { setValue } = form;
 
-    const [successOpen, setSuccessOpen] = useState(false);
+    const fetchTags = async () => {
+        try {
+            const response = await fetch('/api/tags', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setTags(data.results);
+            useTagStore.setState({ hasHydrated: true });
+        } catch (error) {
+            console.error('Failed to fetch tags:', error);
+        }
+    };
 
-    const allTags = useTagStore((state) => state.tags);
-    const setTags = useTagStore((state) => state.setTags);
-    const tagsHydrated = useTagStore((state) => state.hasHydrated);
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('/api/users', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setUsers(data.results);
+            useUserListStore.setState({ hasHydrated: true });
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        }
+    };
 
-    const allUsers = useUserListStore((state) => state.users);
-    const setUsers = useUserListStore((state) => state.setUsers);
-    const usersHydrated = useUserListStore((state) => state.hasHydrated);
-
-    const currentPath = usePathname();
-    const routes = [
-        { href: '/', label: 'Dashboard' },
-        { href: '/marketingCampaigns', label: 'Campaigns' },
-        { href: '/adMessages', label: 'Ad-Messages' },
-        { href: '/clients', label: 'Clients' },
-        { href: '/tags', label: 'Tags' },
-    ];
+    const fetchCampaign = async () => {
+        try {
+            const response = await fetch(`/api/marketingCampaigns/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            if (response.ok) {
+                const campaign = {
+                    ...data.result,
+                    startDate: data.result.startDate ? new Date(data.result.startDate) : new Date(),
+                    endDate: data.result.endDate ? new Date(data.result.endDate) : new Date(),
+                };
+                Object.entries(campaign).forEach(([key, value]) => {
+                    setValue(key as keyof MarketingCampaignFormData, value as string | Date | TagRef[] | UserRef[] | ObjectId | undefined);
+                });
+            } else {
+                console.error('Failed to fetch campaign:', data);
+            }
+        } catch (error) {
+            console.error('Error fetching campaign:', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchCampaign = async () => {
-            try {
-                const response = await fetch(`/api/marketingCampaigns/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    },
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    const campaign = {
-                        ...data.result,
-                        startDate: data.result.startDate ? new Date(data.result.startDate) : new Date(),
-                        endDate: data.result.endDate ? new Date(data.result.endDate) : new Date(),
-                    };
-                    Object.entries(campaign).forEach(([key, value]) => {
-                        setValue(key as keyof MarketingCampaignFormData, value as string | Date | TagRef[] | UserRef[] | ObjectId | undefined);
-                    });
-                } else {
-                    console.error('Failed to fetch campaign:', data);
-                }
-            } catch (error) {
-                console.error('Error fetching campaign:', error);
+        if (!_hasHydrated) return;
+
+        const init = async () => {
+            if (!token) {
+                return router.push('/auth/login');
             }
+            const user = await decodeToken(token);
+            if (!user) {
+                return router.push('/auth/login');
+            }
+            setUserInfo(user);
+            fetchTags();
+            fetchUsers();
+            fetchCampaign();
         };
+
+        init();
+    }, [id, _hasHydrated, token]);
+
+    /*useEffect(() => {
 
         fetchCampaign();
     }, [id, setValue]);
 
     useEffect(() => {
         if (!tagsHydrated) return;
-        const fetchTags = async () => {
-            try {
-                const response = await fetch('/api/tags', {
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    },
-                });
-                const data = await response.json();
-                setTags(data.results);
-            } catch (error) {
-                console.error('Failed to fetch tags:', error);
-            }
-        };
         if (!allTags || allTags.length === 0) fetchTags();
     }, [tagsHydrated, allTags, setTags]);
 
     useEffect(() => {
         if (!usersHydrated) return;
-        const fetchUsers = async () => {
-            try {
-                const response = await fetch('/api/users', {
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
-                    },
-                });
-                const data = await response.json();
-                setUsers(data.results);
-            } catch (error) {
-                console.error('Failed to fetch users:', error);
-            }
-        };
         if (!allUsers || allUsers.length === 0) fetchUsers();
-    }, [usersHydrated, allUsers, setUsers]);
+    }, [usersHydrated, allUsers, setUsers]);*/
 
     const handleUpdate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
@@ -129,7 +155,7 @@ export default function EditCampaignPage() {
             const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
             const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
                 headers: {
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
             const clientData = await clientRes.json();
@@ -139,7 +165,7 @@ export default function EditCampaignPage() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -156,7 +182,7 @@ export default function EditCampaignPage() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TEST_JWT}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     campaign: id,
@@ -172,14 +198,15 @@ export default function EditCampaignPage() {
     };
 
     if (!tagsHydrated || !usersHydrated) {
-        return <div>Loading...</div>;
+        return (
+            <div className="container mx-auto py-10">
+                <LoadingSpinner />
+            </div>
+        )
     }
 
     return (
         <div>
-            <header>
-                <Navbar currentPath={currentPath} routes={routes} />
-            </header>
             <main>
                 <div className="container mx-auto py-8 px-50">
                     <div className="flex items-center mb-6">
