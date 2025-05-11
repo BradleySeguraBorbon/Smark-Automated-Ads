@@ -100,10 +100,6 @@ export default function EditTagPage() {
 
     return (
         <div className="container mx-auto py-10">
-            <header>
-                <Navbar currentPath={pathname} />
-            </header>
-
             <div className="max-w-2xl mx-auto mt-6">
                 <BreadcrumbHeader backHref="/tags" title="Edit Tag" />
                 {apiError && (

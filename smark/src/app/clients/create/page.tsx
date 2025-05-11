@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { IClient } from "@/types/Client"
-import { useClientStore, useAuthStore } from "@/lib/store"
+import { useClientStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
@@ -14,7 +14,7 @@ import CustomAlertDialog from "@/components/CustomAlertDialog"
 export default function CreateClientPage() {
     const router = useRouter()
     const { addClient } = useClientStore()
-    const [mounted, setMounted] = useState(false)
+
     const [newPreference, setNewPreference] = useState("")
     const [successOpen, setSuccessOpen] = useState(false)
     const [errorOpen, setErrorOpen] = useState(false)
@@ -37,15 +37,6 @@ export default function CreateClientPage() {
         },
     })
 
-    const token = useAuthStore((state) => state.token);
-
-    useEffect(() => {
-        if (!token) {
-            return;
-        }
-        setMounted(true)
-    }, [token])
-
     async function onSubmit(data: IClient) {
         data.tags = []
 
@@ -54,7 +45,6 @@ export default function CreateClientPage() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ` + token,
                 },
                 body: JSON.stringify(data),
             })
@@ -62,8 +52,7 @@ export default function CreateClientPage() {
             const result = await response.json()
 
             if (!response.ok) {
-                console.log("Response is not ok: ", result)
-                const errorMessage = result.message || result.error || "An unknow error has happened."
+                const errorMessage = result.message || result.error || "An unknown error has happened."
                 setErrorMessage(errorMessage)
                 setErrorOpen(true)
                 return
@@ -89,19 +78,11 @@ export default function CreateClientPage() {
         }
     }
 
-    if (!mounted) {
-        return (
-            <div className="container mx-auto py-10">
-                <LoadingSpinner/>
-            </div>
-        )
-    }
-
     return (
         <div className="container mx-auto py-2 mb-4">
             <div className="lg:max-w-3xl mx-auto px-4 mt-4">
                 <div className="mb-4">
-                <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
+                    <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
                 </div>
                 <Card>
                     <CardHeader>
@@ -122,7 +103,7 @@ export default function CreateClientPage() {
                 open={successOpen}
                 type="success"
                 title="¡Client created successfully!"
-                description="The new client has been added to the data base."
+                description="The new client has been added to the database."
                 confirmLabel="Go to clients"
                 onConfirm={() => {
                     setSuccessOpen(false)

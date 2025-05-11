@@ -23,6 +23,8 @@ import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/lib/store';
 import { useEffect, useState } from 'react';
 import { decodeToken } from '@/lib/utils/decodeToken';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { toUpperCase } from "uri-js/dist/esnext/util";
 
 interface NavbarProps {
     currentPath: string;
@@ -36,7 +38,10 @@ export function Navbar({ currentPath }: NavbarProps) {
         { href: '/clients', label: 'Clients' },
         { href: '/users', label: 'Users' },
         { href: '/tags', label: 'Tags' },
+        { href: '/templates', label: 'Templates' },
     ];
+
+    const publicClientRoute = { href: '/clients/create', label: 'Register as Client' };
 
     const { theme, setTheme } = useTheme();
     const router = useRouter();
@@ -74,23 +79,42 @@ export function Navbar({ currentPath }: NavbarProps) {
             </Link>
 
             <div className="flex items-center flex-nowrap gap-2 min-w-0 overflow-hidden">
+                {/* Desktop Navigation */}
                 <NavigationMenu className="hidden md:flex">
                     <NavigationMenuList className="gap-2">
-                        <NavigationMenuItem key={fixedRoute.href}>
-                            <Link href={fixedRoute.href} legacyBehavior passHref>
-                                <NavigationMenuLink
-                                    className={cn(
-                                        'px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap',
-                                        currentPath === fixedRoute.href && 'bg-gray-200 dark:bg-gray-700 font-bold'
-                                    )}
-                                >
-                                    {fixedRoute.label}
-                                </NavigationMenuLink>
-                            </Link>
-                        </NavigationMenuItem>
+                        {userInfo ? (
+                            [fixedRoute, ...filteredRoutes].map((route) => (
+                                <NavigationMenuItem key={route.href}>
+                                    <Link href={route.href} legacyBehavior passHref>
+                                        <NavigationMenuLink
+                                            className={cn(
+                                                'px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap',
+                                                currentPath === route.href && 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                            )}
+                                        >
+                                            {route.label}
+                                        </NavigationMenuLink>
+                                    </Link>
+                                </NavigationMenuItem>
+                            ))
+                        ) : (
+                            <NavigationMenuItem key={publicClientRoute.href}>
+                                <Link href={publicClientRoute.href} legacyBehavior passHref>
+                                    <NavigationMenuLink
+                                        className={cn(
+                                            'px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap',
+                                            currentPath === publicClientRoute.href && 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                        )}
+                                    >
+                                        {publicClientRoute.label}
+                                    </NavigationMenuLink>
+                                </Link>
+                            </NavigationMenuItem>
+                        )}
                     </NavigationMenuList>
                 </NavigationMenu>
 
+                {/* Mobile Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="md:hidden">
@@ -98,34 +122,22 @@ export function Navbar({ currentPath }: NavbarProps) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        {[fixedRoute, ...filteredRoutes].map((route) => (
-                            <DropdownMenuItem key={route.href} onClick={() => router.push(route.href)}>
-                                {route.label}
+                        {userInfo ? (
+                            [fixedRoute, ...filteredRoutes].map((route) => (
+                                <DropdownMenuItem key={route.href} onClick={() => router.push(route.href)}>
+                                    {route.label}
+                                </DropdownMenuItem>
+                            ))
+                        ) : (
+                            <DropdownMenuItem onClick={() => router.push(publicClientRoute.href)}>
+                                {publicClientRoute.label}
                             </DropdownMenuItem>
-                        ))}
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
-
-                <NavigationMenu className="hidden md:flex">
-                    <NavigationMenuList className="gap-2">
-                        {filteredRoutes.map((route) => (
-                            <NavigationMenuItem key={route.href}>
-                                <Link href={route.href} legacyBehavior passHref>
-                                    <NavigationMenuLink
-                                        className={cn(
-                                            'px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap',
-                                            currentPath === route.href && 'bg-gray-200 dark:bg-gray-700 font-bold'
-                                        )}
-                                    >
-                                        {route.label}
-                                    </NavigationMenuLink>
-                                </Link>
-                            </NavigationMenuItem>
-                        ))}
-                    </NavigationMenuList>
-                </NavigationMenu>
             </div>
 
+            {/* Theme & User */}
             <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                 <Button
                     variant="ghost"
@@ -141,6 +153,11 @@ export function Navbar({ currentPath }: NavbarProps) {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="truncate max-w-[200px]">
+                                <Avatar>
+                                    <AvatarFallback>
+                                        {toUpperCase(userInfo.username[0] + userInfo.role[0])}
+                                    </AvatarFallback>
+                                </Avatar>
                                 {userInfo.username} ({userInfo.role})
                             </Button>
                         </DropdownMenuTrigger>
