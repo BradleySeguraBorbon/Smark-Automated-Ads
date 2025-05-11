@@ -12,15 +12,18 @@ import { Label } from '@/components/ui/label'
 import { IAdMessage } from '@/types/AdMessage'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PlaceholderInputs } from '@/components/adMessages/forms/PlaceholderInputs'
+import { extractPlaceholderValues } from '@/lib/parsePlaceholders';
+
 
 interface TelegramContentTabProps {
   form: ReturnType<typeof useFormContext<IAdMessage>>;
+  mode: 'new' | 'edit';
   templates: TemplateRef[];
   placeholderValues: Record<string, string>;
   setPlaceholderValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-export function TelegramContentTab({ form, templates, placeholderValues, setPlaceholderValues }: TelegramContentTabProps) {
+export function TelegramContentTab({ form, mode, templates, placeholderValues, setPlaceholderValues }: TelegramContentTabProps) {
   const selectedTemplateRef = form.watch('content.telegram.template');
   const telegramButtons = form.watch('content.telegram.buttons') || [];
 
@@ -29,18 +32,22 @@ export function TelegramContentTab({ form, templates, placeholderValues, setPlac
   const [newButtonUrl, setNewButtonUrl] = useState('');
 
   const generateTelegramMessage = (html: string, values: Record<string, string>) => {
-    return html.replace(/{{(\w+?)}}/g, (_, key) => values[key] || '');
+    return html.replace(/{(\w+?)}/g, (_, key) => values[key] || '');
   };
 
   useEffect(() => {
     const tpl = templates.find((t) => t._id === selectedTemplateRef?._id);
     setSelectedTemplate(tpl || null);
-    if (tpl && Object.keys(placeholderValues).length === 0) {
-      const newValues: Record<string, string> = {};
-      tpl.placeholders.forEach((key) => {
-        newValues[key] = '';
-      });
-      setPlaceholderValues(newValues);
+    if (tpl) {
+      const message = form.getValues('content.telegram.message');
+      if (mode === 'edit' && message) {
+        const values = extractPlaceholderValues(tpl.html, message);
+        setPlaceholderValues(values);
+      } else if (Object.keys(placeholderValues).length === 0) {
+        const emptyValues: Record<string, string> = {};
+        tpl.placeholders.forEach((key) => (emptyValues[key] = ''));
+        setPlaceholderValues(emptyValues);
+      }
     }
   }, [selectedTemplateRef]);
 

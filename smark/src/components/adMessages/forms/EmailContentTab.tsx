@@ -15,15 +15,17 @@ import { ITemplate } from '@/types/Template';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlaceholderInputs } from '@/components/adMessages/forms/PlaceholderInputs';
+import { extractPlaceholderValues } from '@/lib/parsePlaceholders';
 
 interface EmailContentTabProps {
   form: ReturnType<typeof useFormContext<IAdMessage>>;
+  mode: 'new' | 'edit';
   templates: ITemplate[];
   placeholderValues: Record<string, string>;
   setPlaceholderValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-export function EmailContentTab({ form, templates, placeholderValues, setPlaceholderValues }: EmailContentTabProps) {
+export function EmailContentTab({ form, mode, templates, placeholderValues, setPlaceholderValues }: EmailContentTabProps) {
   const selectedTemplateRef = form.watch('content.email.template');
   const emailSubject = form.watch('content.email.subject');
   const attachments = form.watch('attachments') || [];
@@ -39,13 +41,17 @@ export function EmailContentTab({ form, templates, placeholderValues, setPlaceho
   useEffect(() => {
     const tpl = templates.find((t) => t._id === selectedTemplateRef?._id);
     setSelectedTemplate(tpl || null);
-    
-    if (tpl && Object.keys(placeholderValues).length === 0) {
-      const newValues: Record<string, string> = {};
-      tpl.placeholders.forEach((key) => {
-        newValues[key] = '';
-      });
-      setPlaceholderValues(newValues);
+
+    if (tpl) {
+      const body = form.getValues('content.email.body');
+      if (mode === 'edit' && body) {
+        const values = extractPlaceholderValues(tpl.html, body);
+        setPlaceholderValues(values);
+      } else if (Object.keys(placeholderValues).length === 0) {
+        const emptyValues: Record<string, string> = {};
+        tpl.placeholders.forEach((key) => (emptyValues[key] = ''));
+        setPlaceholderValues(emptyValues);
+      }
     }
   }, [selectedTemplateRef]);
 

@@ -8,7 +8,7 @@ function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
 
@@ -22,9 +22,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
-        const { searchParams } = new URL(request.url);
-
-        const id = searchParams.get('id');
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json({ message: 'Invalid or missing id parameter' }, { status: 400 });
@@ -85,6 +83,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
+        const { name, marketingCampaign, type, status, content, attachments, sendDate } = body;
+
         if (!Array.isArray(attachments)) {
             return NextResponse.json({ message: 'Attachments must be an array' }, { status: 400 });
         }
@@ -95,14 +95,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             }
         }
 
-        const { name, marketingCampaign, type, status, content, attachments, sendDate } = body;
-
         if (sendDate && isNaN(Date.parse(sendDate))) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
         }
 
-        if (marketingCampaignId) {
-            if (!isValidObjectId(marketingCampaignId) || !(await MarketingCampaigns.findById(marketingCampaignId))) {
+        if (marketingCampaign) {
+            if (!isValidObjectId(marketingCampaign) || !(await MarketingCampaigns.findById(marketingCampaign))) {
                 return NextResponse.json({ message: 'Invalid or non-existent marketingCampaignId' }, { status: 400 });
             }
         }
@@ -130,7 +128,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'AdMessage not found' }, { status: 404 });
         }
 
-        const updatedAdMessage = await adMessage
+        const updatedAdMessage = await AdMessages.findById(id)
             .populate('marketingCampaign', '_id name description status')
             .populate('content.email.template', '_id name type')
             .populate('content.telegram.template', '_id name type');

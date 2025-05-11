@@ -70,11 +70,11 @@ export function AdMessageCard({ adMessage, onDelete, userRole }: AdMessageCardPr
                 <CardFooter>
                     <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                            <Link href={`/adMessages/${adMessage.id}`}>View Details</Link>
+                            <Link href={`/adMessages/${adMessage._id}`}>View Details</Link>
                         </Button>
                         {adMessage.status !== "sent" && (
                             <Button size="sm" asChild>
-                                <Link href={`/adMessages/${adMessage.id}/edit`}>Edit Message</Link>
+                                <Link href={`/adMessages/${adMessage._id}/edit`}>Edit Message</Link>
                             </Button>
                         )}
                     </div>

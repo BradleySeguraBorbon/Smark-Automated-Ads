@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IAdMessage } from "@/types/AdMessage";
 import { IMarketingCampaign } from "@/types/MarketingCampaign";
 import { ITemplate } from "@/types/Template";
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DetailsTab } from "@/components/adMessages/forms/DetailsTab";
 import { EmailContentTab } from "@/components/adMessages/forms/EmailContentTab";
 import { TelegramContentTab } from "@/components/adMessages/forms/TelegramContentTab";
-
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface AdMessageFormTabsProps {
     mode: 'new' | 'edit';
@@ -32,6 +32,26 @@ export function AdMessageFormTabs({
     })
     const [emailPlaceholderValues, setEmailPlaceholderValues] = useState<Record<string, string>>({});
     const [telegramPlaceholderValues, setTelegramPlaceholderValues] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const subscription = form.watch((values) => {
+            const typeValues = values.type || [];
+            setMessageTypes({
+                email: typeValues.includes('email'),
+                telegram: typeValues.includes('telegram'),
+            });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [form]);
+
+    if(isLoading) {
+        return (
+            <div className="flex items-center justify-center w-full h-full">
+                <LoadingSpinner />
+            </div>
+        )
+    }
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -58,6 +78,7 @@ export function AdMessageFormTabs({
                 <TabsContent value="email" className="space-y-6">
                     <EmailContentTab
                         form={form}
+                        mode={mode}
                         templates={allTemplates}
                         placeholderValues={emailPlaceholderValues}
                         setPlaceholderValues={setEmailPlaceholderValues} />
@@ -66,6 +87,7 @@ export function AdMessageFormTabs({
                 <TabsContent value="telegram" className="space-y-6">
                     <TelegramContentTab
                         form={form}
+                        mode={mode}
                         templates={allTemplates}
                         placeholderValues={telegramPlaceholderValues}
                         setPlaceholderValues={setTelegramPlaceholderValues}
