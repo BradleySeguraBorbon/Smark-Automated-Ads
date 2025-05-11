@@ -5,27 +5,33 @@ import { TemplateRef } from './Template';
 export interface AdMessageContentEmail {
     subject: string;
     body: string;
-    senderEmail: string;
-    recipients: string[];
-    cc?: string[];
     openRate?: number;
     clickRate?: number;
     bounceRate?: number;
+    template: TemplateRef;
 }
 
 export interface AdMessageContentTelegram {
-    chatId: string;
     message: string;
     buttons: string[];
     parseMode?: 'Markdown' | 'HTML';
     views?: number;
     clicks?: number;
+    template: TemplateRef;
 }
 
 export interface AdMessageRef {
   _id: Types.ObjectId;
   name: string;
-  type: "email" | "telegram";
+  type: ('email' | 'telegram')[];
+  content: {
+    email?: {
+      template: TemplateRef;
+    };
+    telegram?: {
+      template: TemplateRef;
+    };
+  };
 }
 
 export interface IAdMessage extends Document {
@@ -37,7 +43,6 @@ export interface IAdMessage extends Document {
     email?: AdMessageContentEmail;
     telegram?: AdMessageContentTelegram;
   };
-  attachments?: string[];
-  template?: TemplateRef;
+  attachments?: { name: string; path: string }[];
   sendDate: Date;
 };
