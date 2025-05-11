@@ -21,11 +21,27 @@ export function transformClientForSave(data: IClient) {
 }
 
 export function transformAdMessageForSave(data: IAdMessage) {
-    return {
+    const base: any = {
         ...data,
         marketingCampaign: data.marketingCampaign._id,
-        template: data.template ? data.template._id : null,
+        content: {},
     };
+
+    if (data.type.includes('email') && data.content.email) {
+        base.content.email = {
+            ...data.content.email,
+            template: data.content.email.template._id,
+        };
+    }
+
+    if (data.type.includes('telegram') && data.content.telegram) {
+        base.content.telegram = {
+            ...data.content.telegram,
+            template: data.content.telegram.template._id,
+        };
+    }
+
+    return base;
 }
 
 export function transformCampaignAudienceForSave(data: ICampaignAudience) {
