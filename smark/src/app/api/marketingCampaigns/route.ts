@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({    
+    return NextResponse.json({
       totalPages,
       page,
       limit,
@@ -168,9 +168,9 @@ export async function POST(request: Request) {
       }
     });
 
-    const campaign = await newCampaign
-    .populate('tags', '_id name')
-    .populate('users', '_id username role');
+    const campaign = await MarketingCampaigns.findById(newCampaign._id)
+      .populate('tags', '_id name')
+      .populate('users', '_id username role');
 
     return NextResponse.json(
       { message: 'Marketing campaign created successfully', result: campaign },

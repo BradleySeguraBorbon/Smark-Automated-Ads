@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
     const total = await Users.countDocuments(filter);
     const users = await Users.find(filter).skip(skip).limit(limit)
-      .populate('marketingCampaigns', ['_id', 'name', 'description', 'status']);
+      .populate('marketingCampaigns', '_id name description status');
 
     const totalPages = Math.ceil(total / limit);
 
@@ -119,7 +119,8 @@ export async function POST(request: Request) {
       marketingCampaigns: body.marketingCampaigns,
     });
 
-    const savedUser = await newUser.populate('marketingCampaigns', ['_id', 'name', 'description', 'status'])
+    const savedUser = await Users.findById(newUser._id)
+      .populate('marketingCampaigns', '_id name description status');
 
     return NextResponse.json(
       { message: 'User created successfully.', result: savedUser },

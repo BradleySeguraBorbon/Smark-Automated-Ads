@@ -34,27 +34,26 @@ export async function GET(request: Request) {
             filter.preferredContactMethod = searchParams.get('preferredContactMethod');
         }
         if (searchParams.has('subscription')) {
-            filter.subscriptions = {$in: [searchParams.get('subscription')]};
+            filter.subscriptions = { $in: [searchParams.get('subscription')] };
         }
         if (searchParams.has('tag')) {
-            filter.tags = {$in: [searchParams.get('tag')]};
+            filter.tags = { $in: [searchParams.get('tag')] };
         }
-
-    const tagIds = searchParams.getAll('tagIds[]');
-    if (tagIds.length > 0) {
-      const validTagIds = tagIds.filter(id => mongoose.Types.ObjectId.isValid(id));
-      if (validTagIds.length > 0) {
-        filter.tags = { $in: validTagIds };
-      }
-    }
+        const tagIds = searchParams.getAll('tagIds[]');
+        if (tagIds.length > 0) {
+            const validTagIds = tagIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+            if (validTagIds.length > 0) {
+                filter.tags = { $in: validTagIds };
+            }
+        }
 
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
 
         if (isNaN(page) || page < 1 || isNaN(limit) || limit < 1) {
             return NextResponse.json(
-                {message: 'Invalid parameters: page and limit should be greater than 0.'},
-                {status: 400}
+                { message: 'Invalid parameters: page and limit should be greater than 0.' },
+                { status: 400 }
             );
         }
 
@@ -64,8 +63,8 @@ export async function GET(request: Request) {
         const clients = await Clients.find(filter)
             .skip(skip)
             .limit(limit)
-            .populate('tags', ['_id', 'name'])
-            .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
+            .populate('tags', '_id name')
+            .populate('adInteractions.adMessage', '_id name type');
 
         const totalPages = Math.ceil(total / limit);
 
@@ -79,8 +78,8 @@ export async function GET(request: Request) {
     } catch (error) {
         console.error(error);
         return NextResponse.json(
-            {error: 'Error fetching clients'},
-            {status: 500}
+            { error: 'Error fetching clients' },
+            { status: 500 }
         );
     }
 }
@@ -115,7 +114,7 @@ async function getTagsIdsBasedOnPreference(client: { name: string, preferences: 
     if (tags.length === 0) {
         throw new Error("No tags found");
     }
-    const tagsString = JSON.stringify(tags.map(tag => ({id: tag._id, keywords: tag.keywords})));
+    const tagsString = JSON.stringify(tags.map(tag => ({ id: tag._id, keywords: tag.keywords })));
     const prompt = fillPrompt(`Te proporciono la información de un cliente y una lista de tags (cada una con su ID, nombre y keywords).
 
 1. Analiza las preferencias del cliente.
@@ -132,16 +131,16 @@ Cliente:
 Tags disponibles (array de objetos):
 \${tags}
 `
-        , {client: JSON.stringify(client), tags: tagsString});
+        , { client: JSON.stringify(client), tags: tagsString });
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${apiUrl}/api/chat/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({prompt})
-        }
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ prompt })
+    }
     )
 
     const data = await response.json();
@@ -185,31 +184,31 @@ export async function POST(request: Request) {
 
         if (missingFields.length > 0) {
             return NextResponse.json(
-                {message: 'Missing required fields', missingFields},
-                {status: 400}
+                { message: 'Missing required fields', missingFields },
+                { status: 400 }
             );
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(body.email)) {
             return NextResponse.json(
-                {message: 'Invalid email format'},
-                {status: 400}
+                { message: 'Invalid email format' },
+                { status: 400 }
             );
         }
 
         if (isNaN(Date.parse(body.birthDate))) {
             return NextResponse.json(
-                {message: 'Invalid birthDate format'},
-                {status: 400}
+                { message: 'Invalid birthDate format' },
+                { status: 400 }
             );
         }
         if (Array.isArray(body.tags) && body.tags.length > 0) {
             const invalidTags = await validateObjectIdsExist(body.tags, Tags, 'tags');
             if (invalidTags) {
                 return NextResponse.json(
-                    {message: 'Invalid tag references', details: invalidTags},
-                    {status: 400}
+                    { message: 'Invalid tag references', details: invalidTags },
+                    { status: 400 }
                 );
             }
         }
@@ -223,30 +222,30 @@ export async function POST(request: Request) {
             );
             if (invalidAdMessages) {
                 return NextResponse.json(
-                    {message: 'Invalid ad message references', details: invalidAdMessages},
-                    {status: 400}
+                    { message: 'Invalid ad message references', details: invalidAdMessages },
+                    { status: 400 }
                 );
             }
         }
 
         if (Array.isArray(body.preferences) && body.preferences.length <= 0) {
             return NextResponse.json(
-                {message: 'No preferences provided'},
-                {status: 400}
+                { message: 'No preferences provided' },
+                { status: 400 }
             );
         }
 
         const existingClient = await Clients.findOne({
             $or: [
-                {email: body.email},
-                {telegramChatId: body.telegramChatId}
+                { email: body.email },
+                { telegramChatId: body.telegramChatId }
             ]
         });
 
         if (existingClient) {
             return NextResponse.json(
-                {message: 'Client with this email or telegram username already exists'},
-                {status: 409}
+                { message: 'Client with this email or telegram username already exists' },
+                { status: 409 }
             );
         }
 
@@ -278,25 +277,28 @@ export async function POST(request: Request) {
             adInteractions: body.adInteractions || []
         });
 
-        const client = await newClient
-            .populate('tags', ['_id', 'name']);
+        const client = await Clients.findById(newClient._id)
+            .populate('tags', '_id name')
+            .populate('adInteractions.adMessage', '_id name type');
 
         return NextResponse.json(
+            { message: 'Client created successfully', result: client},
+            { status: 201 }
             {message: 'Client created successfully', result: client},
             {status: 201}
         );
     } catch
-        (error: any) {
+    (error: any) {
         console.error(error);
         if (error.name === 'ValidationError') {
             return NextResponse.json(
-                {error: error.message},
-                {status: 422}
+                { error: error.message },
+                { status: 422 }
             );
         }
         return NextResponse.json(
-            {error: 'Error creating client'},
-            {status: 500}
+            { error: 'Error creating client' },
+            { status: 500 }
         );
     }
 }

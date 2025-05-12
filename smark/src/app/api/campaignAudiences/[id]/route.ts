@@ -37,8 +37,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const campaignAudience = await CampaignAudiences.findById(id)
-            .populate('campaign', ['_id', 'name', 'description', 'status'])
-            .populate('audience', ['_id', 'email', 'firstName', 'lastName']);
+            .populate('campaign', '_id name description status')
+            .populate('audience', '_id email firstName lastName');
 
         if (!campaignAudience) {
             return NextResponse.json({ message: 'Campaign audience not found' }, { status: 404 });
@@ -111,8 +111,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const campaignAudience = await updatedCampaignAudience
-            .populate('campaign', ['_id', 'name', 'description', 'status'])
-            .populate('audience', ['_id', 'email', 'firstName', 'lastName'])
+            .populate('campaign', '_id name description status')
+            .populate('audience', '_id email firstName lastName');
 
         return NextResponse.json({ message: 'Campaign audience updated successfully', result: campaignAudience });
     } catch (error: any) {

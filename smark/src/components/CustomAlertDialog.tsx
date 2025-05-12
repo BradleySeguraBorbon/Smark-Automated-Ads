@@ -26,16 +26,16 @@ interface CustomAlertDialogProps {
 }
 
 export default function CustomAlertDialog({
-                                              open,
-                                              type,
-                                              title,
-                                              description,
-                                              confirmLabel = 'Accept',
-                                              cancelLabel = 'Cancel',
-                                              onConfirm,
-                                              onCancel,
-                                              onOpenChange,
-                                          }: CustomAlertDialogProps) {
+    open,
+    type,
+    title,
+    description,
+    confirmLabel = 'Accept',
+    cancelLabel = 'Cancel',
+    onConfirm,
+    onCancel,
+    onOpenChange,
+}: CustomAlertDialogProps) {
     const typeClasses = {
         error: 'text-red-500',
         warning: 'text-yellow-500',
