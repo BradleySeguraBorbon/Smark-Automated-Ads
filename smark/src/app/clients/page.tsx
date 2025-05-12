@@ -13,6 +13,7 @@ import {useAuthStore} from '@/lib/store';
 import {decodeToken} from "@/lib/utils/decodeToken";
 import {useRouter} from "next/navigation";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
+import CustomAlertDialog from "@/components/CustomAlertDialog";
 
 export default function ClientsPage() {
     const [searchTerm, setSearchTerm] = useState("")
@@ -20,6 +21,9 @@ export default function ClientsPage() {
     const [fetchedClients, setFetchedClients] = useState<IClient[]>([])
     const [loadingIds, setLoadingIds] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+    const [showErrorDialog, setShowErrorDialog] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
 
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
@@ -36,15 +40,15 @@ export default function ClientsPage() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ` + token
+                    Authorization: `Bearer ${token}`,
                 },
-            })
+            });
             console.log("Token current: ", token)
 
             const result = await response.json()
 
             if (!response.ok) {
-                console.error(result)
+                console.error("Error: ",result)
                 const errorMessage = result.message || result.error || 'Unknown error occurred'
                 setApiError(errorMessage)
                 return
@@ -100,13 +104,18 @@ export default function ClientsPage() {
             if (!response.ok) {
                 const errorMessage = result.message || result.error || 'Error deleting client.'
                 setApiError(errorMessage)
+                setErrorMessage(errorMessage)
+                setShowErrorDialog(true)
             } else {
                 setFetchedClients((prev) => prev.filter((client) => client._id !== clientId))
                 setApiError(null)
+                setShowSuccessDialog(true)
             }
         } catch (error) {
             console.error('Delete error:', error)
             setApiError('Unexpected error occurred while deleting.')
+            setErrorMessage('Unexpected error occurred while deleting.')
+            setShowErrorDialog(true)
         } finally {
             setLoadingIds((prev) => prev.filter((id) => id !== clientId))
         }
@@ -129,7 +138,7 @@ export default function ClientsPage() {
                 </Link>}
             </div>
 
-            <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={"Search Clients..."}/>
+            {/*<SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={"Search Clients..."}/>*/}
 
             {apiError && (
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
@@ -149,6 +158,25 @@ export default function ClientsPage() {
                     )}
                 </>
             )}
+            <CustomAlertDialog
+                open={showSuccessDialog}
+                type="success"
+                title="Client deleted successfully"
+                description="The client was removed from the list."
+                confirmLabel="OK"
+                onConfirm={() => setShowSuccessDialog(false)}
+                onOpenChange={setShowSuccessDialog}
+            />
+
+            <CustomAlertDialog
+                open={showErrorDialog}
+                type="error"
+                title="Deletion failed"
+                description={errorMessage}
+                confirmLabel="Close"
+                onConfirm={() => setShowErrorDialog(false)}
+                onOpenChange={setShowErrorDialog}
+            />
         </div>
     )
 }

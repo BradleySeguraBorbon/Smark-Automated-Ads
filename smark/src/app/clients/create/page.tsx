@@ -4,23 +4,20 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { IClient } from "@/types/Client"
-import { useClientStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
-import LoadingSpinner from "@/components/LoadingSpinner"
 import CustomAlertDialog from "@/components/CustomAlertDialog"
+import {useRef} from "react";
 
 export default function CreateClientPage() {
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const router = useRouter()
-    const { addClient } = useClientStore()
 
     const [newPreference, setNewPreference] = useState("")
     const [successOpen, setSuccessOpen] = useState(false)
     const [errorOpen, setErrorOpen] = useState(false)
-    const [infoOpen, setInfoOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
-    const [infoMessage, setInfoMessage] = useState("")
 
     const form = useForm<IClient>({
         defaultValues: {
@@ -41,7 +38,7 @@ export default function CreateClientPage() {
         data.tags = []
 
         try {
-            const response = await fetch("/api/clients", {
+            const response = await fetch("/api/clients/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -59,18 +56,7 @@ export default function CreateClientPage() {
             }
 
             console.log("Client created:", result)
-            addClient(data)
-
-            if (result.warning) {
-                setInfoMessage(result.warning)
-                setInfoOpen(true)
-            }
-
             setSuccessOpen(true)
-
-            setTimeout(() => {
-                router.push("/clients")
-            }, 4000)
         } catch (error: unknown) {
             console.error("Network or unexpected error:", error)
             setErrorMessage("An unexpected error has occurred on network or server.")
@@ -104,10 +90,11 @@ export default function CreateClientPage() {
                 type="success"
                 title="¡Client created successfully!"
                 description="The new client has been added to the database."
-                confirmLabel="Go to clients"
+                confirmLabel="Accept"
                 onConfirm={() => {
                     setSuccessOpen(false)
-                    router.push("/clients")
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+                    router.back();
                 }}
                 onOpenChange={setSuccessOpen}
             />
@@ -120,16 +107,6 @@ export default function CreateClientPage() {
                 confirmLabel="Ok"
                 onConfirm={() => setErrorOpen(false)}
                 onOpenChange={setErrorOpen}
-            />
-
-            <CustomAlertDialog
-                open={infoOpen}
-                type="info"
-                title="Attention"
-                description={infoMessage}
-                confirmLabel="Ok"
-                onConfirm={() => setInfoOpen(false)}
-                onOpenChange={setInfoOpen}
             />
         </div>
     )

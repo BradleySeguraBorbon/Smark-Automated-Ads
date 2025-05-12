@@ -78,10 +78,10 @@ export default function ClientCard({client, onDelete, isLoading, userRole}: Clie
             <CustomAlertDialog
                 open={alertOpen}
                 type="warning"
-                title="Confirmar eliminación"
-                description={`¿Estás seguro de que querés eliminar a ${client.firstName} ${client.lastName}? Esta acción no se puede deshacer.`}
-                confirmLabel="Eliminar"
-                cancelLabel="Cancelar"
+                title="Confirm deletion."
+                description={`Are you sure you want to delete ${client.firstName} ${client.lastName}? This action cannot be undone.`}
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
                 onConfirm={handleDelete}
                 onCancel={() => setAlertOpen(false)}
                 onOpenChange={setAlertOpen}

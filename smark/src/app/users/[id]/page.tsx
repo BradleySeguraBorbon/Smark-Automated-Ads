@@ -2,11 +2,10 @@
 
 import {useAuthStore} from '@/lib/store';
 import {useEffect, useState} from 'react';
-import {useParams, usePathname, useRouter} from 'next/navigation';
-import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
+import {useParams, useRouter} from 'next/navigation';
+import {Card, CardContent} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import {Navbar} from "@/components/Navbar";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 
 interface MarketingCampaign {
@@ -25,15 +24,16 @@ interface UserInfo {
 
 export default function ProfilePage() {
     const token = useAuthStore((state) => state.token);
+    const _hasHydrated = useAuthStore((state)=> state._hasHydrated);
     const params = useParams();
     const id = params.id;
     const router = useRouter();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [apiError, setApiError] = useState<string | null>(null);
-    const currentPath = usePathname();
 
     useEffect(() => {
+        if(!_hasHydrated) return;
         if (!token) {
             router.push('/auth/login');
             return;
@@ -68,7 +68,7 @@ export default function ProfilePage() {
         }
 
         fetchUser(token as string);
-    }, [token, router]);
+    }, [_hasHydrated,token, router]);
 
     if (loading) {
         return (
@@ -80,14 +80,9 @@ export default function ProfilePage() {
 
     return (
         <>
-            <div className="w-full">
-                <Navbar currentPath={currentPath}/>
-            </div>
             <div className="container mx-auto py-10 max-w-lg">
+                <BreadcrumbHeader backHref="/users" title="User Information"/>
                 <Card>
-                    <CardHeader>
-                        <CardTitle>User Profile</CardTitle>
-                    </CardHeader>
                     <CardContent className="space-y-4">
                         {apiError && (
                             <div className="text-red-500 bg-red-100 p-3 rounded">{apiError}</div>
@@ -131,11 +126,11 @@ export default function ProfilePage() {
                             </div>
                         )}
 
-                        <div className="pt-4">
+                        {/*<div className="pt-4">
                             <Button variant="outline" onClick={() => router.back()}>
                                 Back
                             </Button>
-                        </div>
+                        </div>*/}
                     </CardContent>
                 </Card>
             </div>

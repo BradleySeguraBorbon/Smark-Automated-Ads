@@ -41,7 +41,7 @@ export function Navbar({ currentPath }: NavbarProps) {
         { href: '/templates', label: 'Templates' },
     ];
 
-    const publicClientRoute = { href: '/clients/create', label: 'Register as Client' };
+    const publicClientRoute = { href: '/clients/create', label: 'Participate' };
 
     const { theme, setTheme } = useTheme();
     const router = useRouter();
@@ -79,7 +79,6 @@ export function Navbar({ currentPath }: NavbarProps) {
             </Link>
 
             <div className="flex items-center flex-nowrap gap-2 min-w-0 overflow-hidden">
-                {/* Desktop Navigation */}
                 <NavigationMenu className="hidden md:flex">
                     <NavigationMenuList className="gap-2">
                         {userInfo ? (
@@ -114,7 +113,6 @@ export function Navbar({ currentPath }: NavbarProps) {
                     </NavigationMenuList>
                 </NavigationMenu>
 
-                {/* Mobile Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="md:hidden">

@@ -84,7 +84,7 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                         </CardTitle>
                     </div>
                     <div className="flex gap-2">
-                        {currentUserRole !== 'employee' && (
+                        {/*currentUserRole !== 'employee' && (
                             <Button
                                 variant="outline"
                                 size="icon"
@@ -93,7 +93,7 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                                 <Eye className="h-4 w-4" />
                                 <span className="sr-only">View</span>
                             </Button>
-                        )}
+                        )*/}
 
                         {(currentUserRole === 'developer' ||
                                 (currentUserRole === 'admin' && user.role === 'employee')) &&

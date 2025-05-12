@@ -210,8 +210,9 @@ export default function ClientForm({ form, onSubmit, newPreference, setNewPrefer
                     name="preferences"
                     rules={{
                         validate: (value: string[]) => {
-                            if (!value || value.length >= 1) {
-                                return "At least two preference is required"
+                            if (!value || value.length <= 1) {
+                                console.log(value);
+                                return "At least two preferences are required"
                             }
                             return true
                         },

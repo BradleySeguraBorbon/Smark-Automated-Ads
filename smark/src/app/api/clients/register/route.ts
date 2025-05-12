@@ -1,89 +1,7 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/config/db';
-import mongoose from 'mongoose';
-import { Clients, Tags, AdMessages } from '@/models/models';
-import { getUserFromRequest } from '@/lib/auth';
-
-async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
-    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
-    const foundDocs = await model.find({_id: {$in: validIds}}).select('_id');
-    const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
-    const invalid = ids.filter(id => !foundIds.has(id));
-    return invalid.length === 0 ? null : {field: fieldName, invalidIds: invalid};
-}
-
-export async function GET(request: Request) {
-    try {
-        await connectDB();
-
-        const allowedRoles = ['developer', 'admin', 'employee'];
-
-        const user = getUserFromRequest(request);
-
-        if (!user) return NextResponse.json({error: 'Unauthorized'}, {status: 401});
-
-        if (!allowedRoles.includes(user.role as string)) {
-            return NextResponse.json({error: 'Forbidden: insufficient permissions'}, {status: 403});
-        }
-
-        const {searchParams} = new URL(request.url);
-
-        const filter: Record<string, any> = {};
-
-        if (searchParams.has('preferredContactMethod')) {
-            filter.preferredContactMethod = searchParams.get('preferredContactMethod');
-        }
-        if (searchParams.has('subscription')) {
-            filter.subscriptions = {$in: [searchParams.get('subscription')]};
-        }
-        if (searchParams.has('tag')) {
-            filter.tags = {$in: [searchParams.get('tag')]};
-        }
-
-    const tagIds = searchParams.getAll('tagIds[]');
-    if (tagIds.length > 0) {
-      const validTagIds = tagIds.filter(id => mongoose.Types.ObjectId.isValid(id));
-      if (validTagIds.length > 0) {
-        filter.tags = { $in: validTagIds };
-      }
-    }
-
-        const page = parseInt(searchParams.get('page') || '1');
-        const limit = parseInt(searchParams.get('limit') || '10');
-
-        if (isNaN(page) || page < 1 || isNaN(limit) || limit < 1) {
-            return NextResponse.json(
-                {message: 'Invalid parameters: page and limit should be greater than 0.'},
-                {status: 400}
-            );
-        }
-
-        const skip = (page - 1) * limit;
-
-        const total = await Clients.countDocuments(filter);
-        const clients = await Clients.find(filter)
-            .skip(skip)
-            .limit(limit)
-            .populate('tags', ['_id', 'name'])
-            .populate('adInteractions.adMessage', ['_id', 'name', 'type']);
-
-        const totalPages = Math.ceil(total / limit);
-
-        return NextResponse.json({
-            total,
-            totalPages,
-            page,
-            limit,
-            results: clients,
-        });
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json(
-            {error: 'Error fetching clients'},
-            {status: 500}
-        );
-    }
-}
+import mongoose from "mongoose";
+import {AdMessages, Clients, Tags} from "@/models/models";
+import connectDB from "@/config/db";
+import {NextResponse} from "next/server";
 
 function fillPrompt(template: string, variables: Record<string, string>) {
     return template.replace(/\${(.*?)}/g, (_, key) => {
@@ -147,6 +65,7 @@ Tags disponibles (array de objetos):
     const data = await response.json();
 
     if (!data.ok) {
+        console.log("Data: ", data)
         throw new Error('Error fetching tags from AI');
     }
 
@@ -251,8 +170,10 @@ export async function POST(request: Request) {
         }
 
         let clientTags: string[] | null = null;
+        let aiError: string | null = null;
 
         try {
+            console.log("Empezar el try catch")
             const authHeader = request.headers.get('authorization');
             const token = authHeader?.split(' ')[1] || '';
             clientTags = await getTagsIdsBasedOnPreference({
@@ -262,6 +183,7 @@ export async function POST(request: Request) {
         } catch (err) {
             console.error("AI error:", err);
             return NextResponse.json({error: "Error generating tags"}, {status: 500});
+            //aiError = `Tags could not be generated automatically: ${err.message}`;
         }
 
         const newClient = await Clients.create({
@@ -282,7 +204,7 @@ export async function POST(request: Request) {
             .populate('tags', ['_id', 'name']);
 
         return NextResponse.json(
-            {message: 'Client created successfully', result: client},
+            {message: 'Client created successfully', result: client, warning: aiError},
             {status: 201}
         );
     } catch
