@@ -8,7 +8,7 @@ function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
 
@@ -22,16 +22,16 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
-        const { searchParams } = new URL(request.url);
-
-        const id = searchParams.get('id');
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json({ message: 'Invalid or missing id parameter' }, { status: 400 });
         }
 
         const adMessage = await AdMessages.findById(id)
-            .populate('marketingCampaign', ['name', 'description', 'status', 'endDate']).populate('template', ['name', 'type', 'html']);
+            .populate('marketingCampaign', '_id name description status startDate endDate')
+            .populate('content.email.template', '_id name type')
+            .populate('content.telegram.template', '_id name type');
 
         if (!adMessage) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -69,8 +69,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
         const requiredFields = [
             'name', 'marketingCampaign', 'type',
-            'status', 'content', 'attachments',
-            'template', 'sendDate'
+            'status', 'content', 'sendDate'
         ];
 
         const body = await request.json();
@@ -84,31 +83,59 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
-        if (body.sendDate && isNaN(Date.parse(body.sendDate))) {
+        const { name, marketingCampaign, type, status, content, attachments, sendDate } = body;
+
+        if (!Array.isArray(attachments)) {
+            return NextResponse.json({ message: 'Attachments must be an array' }, { status: 400 });
+        }
+
+        for (const att of attachments) {
+            if (typeof att !== 'object' || !att.name || !att.path) {
+                return NextResponse.json({ message: 'Each attachment must have name and path' }, { status: 400 });
+            }
+        }
+
+        if (sendDate && isNaN(Date.parse(sendDate))) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
         }
 
-        if (body.marketingCampaignId) {
-            if (!isValidObjectId(body.marketingCampaignId) || !(await MarketingCampaigns.findById(body.marketingCampaignId))) {
+        if (marketingCampaign) {
+            if (!isValidObjectId(marketingCampaign) || !(await MarketingCampaigns.findById(marketingCampaign))) {
                 return NextResponse.json({ message: 'Invalid or non-existent marketingCampaignId' }, { status: 400 });
             }
         }
 
-        if (body.templateId) {
-            if (!isValidObjectId(body.templateId) || !(await Templates.findById(body.templateId))) {
-                return NextResponse.json({ message: 'Invalid or non-existent templateId' }, { status: 400 });
+        if (type.includes('email')) {
+            const emailTemplate = content?.email?.template;
+            if (!isValidObjectId(emailTemplate) || !(await Templates.findById(emailTemplate))) {
+                return NextResponse.json({ message: 'Invalid or missing email template' }, { status: 400 });
             }
         }
 
-        const adMessage = await AdMessages.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+        if (type.includes('telegram')) {
+            const telegramTemplate = content?.telegram?.template;
+            if (!isValidObjectId(telegramTemplate) || !(await Templates.findById(telegramTemplate))) {
+                return NextResponse.json({ message: 'Invalid or missing telegram template' }, { status: 400 });
+            }
+        }
+
+        const adMessage = await AdMessages.findByIdAndUpdate(
+            id,
+            body,
+            { new: true, runValidators: true });
 
         if (!adMessage) {
             return NextResponse.json({ message: 'AdMessage not found' }, { status: 404 });
         }
 
+        const updatedAdMessage = await AdMessages.findById(id)
+            .populate('marketingCampaign', '_id name description status startDate endDate')
+            .populate('content.email.template', '_id name type')
+            .populate('content.telegram.template', '_id name type');
+
         return NextResponse.json({
             message: 'AdMessage updated successfully',
-            result: adMessage,
+            result: updatedAdMessage,
         });
     } catch (error: any) {
         console.error(error);

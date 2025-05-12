@@ -1,15 +1,22 @@
-import { Types } from 'mongoose';
-
-interface CampaignTag {
-    tag: Types.ObjectId;
-    priority: number;
-}
+import { Types, Document } from 'mongoose';
+import { TagRef } from './Tag';
+import { ClientRef } from './Client';
+import { UserRef } from './User';
 
 interface Performance {
-    totalEmailsSent: number;
-    totalEmailsOpened: number;
-    telegramMessagesSent: number;
-    telegramMessagesOpened: number;
+    totalEmailsSent: number | 0;
+    totalEmailsOpened: number | 0;
+    telegramMessagesSent: number | 0;
+    telegramMessagesOpened: number | 0;
+}
+
+export interface MarketingCampaignRef {
+    _id: Types.ObjectId;
+    name: string;
+    description: string;
+    status: 'active' | 'inactive' | 'completed';
+    startDate: Date;
+    endDate: Date;
 }
 
 export interface IMarketingCampaign extends Document {
@@ -18,10 +25,21 @@ export interface IMarketingCampaign extends Document {
     status: 'active' | 'inactive' | 'completed';
     startDate: Date;
     endDate: Date;
-    tags: CampaignTag[]; 
-    audiencePreview: Types.ObjectId[]; 
-    users: Types.ObjectId[]; 
+    tags: TagRef[];  
+    users: UserRef[]; 
     performance: Performance; 
     createdAt?: Date;
     updatedAt?: Date; 
+}
+
+export interface MarketingCampaignFormData {
+    _id?: Types.ObjectId;
+    name: string;
+    description: string;
+    status: 'active' | 'inactive' | 'completed';
+    startDate: Date;
+    endDate: Date;
+    tags: TagRef[];
+    users: UserRef[]; 
+    performance: Performance;
 }

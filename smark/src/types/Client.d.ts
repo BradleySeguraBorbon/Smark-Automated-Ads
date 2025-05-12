@@ -1,9 +1,18 @@
 
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
+import { TagRef } from "./Tag";
+import { AdMessageRef } from "./AdMessage";
 
 export interface AdInteractions {
-    adMessage: Types.ObjectId;
+    adMessage: AdMessageRef;
     status: "opened" | "received";
+}
+
+export interface ClientRef {
+    _id: Types.ObjectId;
+    email: string;
+    firstName: string;
+    lastName: string;
 }
 
 export interface IClient extends Document {
@@ -16,8 +25,7 @@ export interface IClient extends Document {
     subscriptions: ("email" | "telegram")[];
     birthDate: Date;
     preferences: string[];
-    tags: Types.ObjectId[];
-    marketingCampaigns: Types.ObjectId[];
+    tags: TagRef[];
     adInteractions: AdInteractions[];
     createdAt?: Date;
     updatedAt?: Date;

@@ -9,8 +9,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api-docs') ||
+      pathname.startsWith('/api/auth') ||
+      pathname.startsWith('/api-docs') ||
+      pathname.startsWith('/api/clients/register') ||
+      pathname.startsWith('/api/chat') ||
+      pathname === ('/auth/login') ||
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next();

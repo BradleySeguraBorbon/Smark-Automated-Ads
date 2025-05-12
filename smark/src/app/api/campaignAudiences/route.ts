@@ -5,15 +5,15 @@ import { CampaignAudiences, Clients } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 
 function isValidObjectId(id: string) {
-  return mongoose.Types.ObjectId.isValid(id);
+    return mongoose.Types.ObjectId.isValid(id);
 }
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
-  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
-  const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
-  const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
-  const invalid = ids.filter(id => !foundIds.has(id));
-  return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
+    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
+    const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+    const invalid = ids.filter(id => !foundIds.has(id));
+    return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
 }
 
 export async function GET(request: Request) {
@@ -45,16 +45,24 @@ export async function GET(request: Request) {
             filter.campaign = searchParams.get('campaignId');
         }
 
-        const total = await CampaignAudiences.countDocuments(filter);
-        const results = await CampaignAudiences.find(filter)
-            .populate('campaign')
-            .populate('audience')
-            .skip(skip)
-            .limit(limit);
+        const campaignAudience = await CampaignAudiences.findOne(filter)
+            .populate('campaign', '_id name description status')
+            .populate('audience', '_id email firstName lastName');
+
+        if (!campaignAudience) {
+            return NextResponse.json({ message: 'No audience found' }, { status: 404 });
+        }
+
+        const fullAudience = campaignAudience.audience;
+        const total = fullAudience.length;
+        const paginatedAudience = fullAudience.slice(skip, skip + limit);
 
         return NextResponse.json({
-            message: 'Campaign audiences fetched successfully',
-            results,
+            message: 'Campaign audience fetched successfully',
+            result: {
+                campaign: campaignAudience.campaign,
+                audience: paginatedAudience,
+            },
             total,
             page,
             limit,
@@ -109,9 +117,13 @@ export async function POST(request: Request) {
 
         const newAudience = await CampaignAudiences.create({ campaign, audience, status });
 
+        const campaignAudience = await CampaignAudiences.findById(newAudience._id)
+            .populate('campaign', '_id name description status')
+            .populate('audience', '_id email firstName lastName');
+
         return NextResponse.json({
             message: 'Campaign audience created successfully',
-            result: newAudience
+            result: campaignAudience
         }, { status: 201 });
 
     } catch (error) {

@@ -30,6 +30,14 @@ export async function GET(request: Request) {
 
     const filter: Record<string, any> = {};
 
+    if (searchParams.has('assignedTo')) {
+      const userId = searchParams.get('assignedTo');
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.users = userId;
+      } else {
+        return NextResponse.json({ error: 'Invalid user ID format' }, { status: 400 });
+      }
+    }
     if (searchParams.has('status')) {
       filter.status = searchParams.get('status');
     }
@@ -55,13 +63,12 @@ export async function GET(request: Request) {
     const campaigns = await MarketingCampaigns.find(filter)
       .skip(skip)
       .limit(limit)
-      .populate('tags.tag', '_id name')
-      .populate('audiencePreview', '_id name email')
-      .populate('users', '_id name email');
+      .populate('tags', '_id name')
+      .populate('users', '_id username role');
 
     const totalPages = Math.ceil(total / limit);
 
-    return NextResponse.json({    
+    return NextResponse.json({
       totalPages,
       page,
       limit,
@@ -129,17 +136,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const tags = body.tags.map((tag: any) => tag.tag);
-    const audienceIds = body.audiencePreview || [];
+    const tags = body.tags;
     const userIds = body.users || [];
 
-    const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
+    const [invalidTags, invalidUsers] = await Promise.all([
       validateObjectIdsExist(tags, Tags, 'tags'),
-      validateObjectIdsExist(audienceIds, Clients, 'audiencePreview'),
       validateObjectIdsExist(userIds, Users, 'users'),
     ]);
 
-    const invalidRefs = [invalidTags, invalidAudience, invalidUsers].filter(Boolean);
+    const invalidRefs = [invalidTags, invalidUsers].filter(Boolean);
     if (invalidRefs.length > 0) {
       return NextResponse.json({
         message: 'Invalid references found in request',
@@ -162,7 +167,6 @@ export async function POST(request: Request) {
       startDate: body.startDate,
       endDate: body.endDate,
       tags: body.tags,
-      audiencePreview: body.audiencePreview || [],
       users: body.users || [],
       performance: {
         totalEmailsSent: 0,
@@ -172,8 +176,12 @@ export async function POST(request: Request) {
       }
     });
 
+    const campaign = await MarketingCampaigns.findById(newCampaign._id)
+      .populate('tags', '_id name')
+      .populate('users', '_id username role');
+
     return NextResponse.json(
-      { message: 'Marketing campaign created successfully', result: newCampaign },
+      { message: 'Marketing campaign created successfully', result: campaign },
       { status: 201 }
     );
   } catch (error) {

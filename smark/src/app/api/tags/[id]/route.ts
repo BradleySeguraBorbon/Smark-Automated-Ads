@@ -44,7 +44,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     try {
         await connectDB();
 
-        const allowedRoles = ['developer', 'admin', 'employee'];
+        const allowedRoles = ['developer', 'admin'];
 
         const user = getUserFromRequest(request);
 
@@ -106,7 +106,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     try {
         await connectDB();
 
-        const allowedRoles = ['developer', 'admin', 'employee'];
+        const allowedRoles = ['developer', 'admin'];
         const user = getUserFromRequest(request);
 
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -122,13 +122,10 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         }
 
         await MarketingCampaigns.updateMany(
-            { "tags.tag": new mongoose.Types.ObjectId(id) },
+            { tags: new mongoose.Types.ObjectId(id) },
             {
                 $pull: {
-                    tags: {
-                        tag: new mongoose.Types.ObjectId(id),
-                        _id: { $exists: true }
-                    }
+                    tags: new mongoose.Types.ObjectId(id)
                 }
             }
         );

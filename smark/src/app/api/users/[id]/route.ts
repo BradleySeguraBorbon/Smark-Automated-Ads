@@ -15,7 +15,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         const allowedRoles = ['developer', 'admin'];
 
         const tokenUser = getUserFromRequest(request);
-
         if (!tokenUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(tokenUser.role as string)) {
@@ -31,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
-        const user = await Users.findById(id).populate('marketingCampaigns', 'name startDate endDate');
+        const user = await Users.findById(id).populate('marketingCampaigns', ['_id', 'name', 'description', 'status']);
 
         if (!user) {
             return NextResponse.json(
@@ -102,7 +101,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             id,
             body,
             { new: true, runValidators: true }
-        ).populate('marketingCampaigns', 'name description startDate endDate');
+        ).populate('marketingCampaigns', ['_id', 'name', 'description', 'status']);
 
         if (!updatedUser) {
             return NextResponse.json(
@@ -146,8 +145,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         if (!allowedRoles.includes(tokenUser.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
-        
-        const { id } = params;
+
+        const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
             return NextResponse.json(

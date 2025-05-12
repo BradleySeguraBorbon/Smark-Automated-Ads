@@ -40,8 +40,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const campaign = await MarketingCampaigns.findById(id)
-      .populate('tags.tag', 'name')
-      .populate('audiencePreview', 'name email')
+      .populate('tags', 'name')
       .populate('users', 'username');
 
     if (!campaign) {
@@ -123,17 +122,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       }
     }
 
-    const tags = body.tags?.map((tag: any) => tag.tag) || [];
-    const audienceIds = body.audiencePreview || [];
+    const tags = body.tags || [];
     const userIds = body.users || [];
 
-    const [invalidTags, invalidAudience, invalidUsers] = await Promise.all([
+    const [invalidTags, invalidUsers] = await Promise.all([
       tags.length ? validateObjectIdsExist(tags, Tags, 'tags') : null,
-      audienceIds.length ? validateObjectIdsExist(audienceIds, Clients, 'audiencePreview') : null,
       userIds.length ? validateObjectIdsExist(userIds, Users, 'users') : null,
     ]);
 
-    const invalidRefs = [invalidTags, invalidAudience, invalidUsers].filter(Boolean);
+    const invalidRefs = [invalidTags, invalidUsers].filter(Boolean);
     if (invalidRefs.length > 0) {
       return NextResponse.json({
         message: 'Invalid references found in update',
@@ -147,8 +144,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       body,
       { new: true, runValidators: true }
     )
-      .populate('tags.tag', 'name')
-      .populate('audiencePreview', 'name email')
+      .populate('tags', 'name')
       .populate('users', 'name email');
 
     if (!updatedCampaign) {
