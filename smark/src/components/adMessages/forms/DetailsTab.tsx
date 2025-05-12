@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,6 +25,24 @@ interface DetailsTabProps {
 }
 
 export function DetailsTab({ form, campaigns, messageTypes, setMessageTypes }: DetailsTabProps) {
+    const [minDate, setMinDate] = useState<Date | undefined>(undefined);
+    const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
+
+    useEffect(() => {
+        const selected : MarketingCampaignRef = form.getValues('marketingCampaign');
+        if (selected && selected.startDate && selected.endDate) {
+            const start = new Date(selected.startDate);
+            const end = new Date(selected.endDate);
+            setMinDate(start);
+            setMaxDate(end);
+
+            const currentSendDate = form.getValues('sendDate');
+            if (currentSendDate && (currentSendDate < start || currentSendDate > end)) {
+                form.setValue('sendDate', undefined);
+            }
+        }
+    }, []);
+
     return (
         <Card>
             <CardContent className="pt-2 space-y-6">
@@ -55,6 +74,16 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypes }: D
                                     const selected = campaigns.find((c) => c._id === selectedId);
                                     if (selected) {
                                         form.setValue('marketingCampaign', selected as MarketingCampaignRef);
+
+                                        const start = new Date(selected.startDate);
+                                        const end = new Date(selected.endDate);
+                                        setMinDate(start);
+                                        setMaxDate(end);
+
+                                        const currentSendDate = form.getValues('sendDate');
+                                        if (currentSendDate && (currentSendDate < start || currentSendDate > end)) {
+                                            form.setValue('sendDate', undefined);
+                                        }
                                     }
                                 }}
                             >
@@ -106,6 +135,11 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypes }: D
                                         selected={field.value}
                                         onSelect={field.onChange}
                                         initialFocus
+                                        disabled={(date) => {
+                                            if (minDate && date < minDate) return true;
+                                            if (maxDate && date > maxDate) return true;
+                                            return false;
+                                        }}
                                     />
                                 </PopoverContent>
                             </Popover>
