@@ -1,55 +1,58 @@
-'use client';
-
 import {
     NavigationMenu,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
-} from '@/components/ui/navigation-menu';
+} from "@/components/ui/navigation-menu";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Moon, Sun, MoreHorizontal } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { useAuthStore } from '@/lib/store';
-import { useEffect, useState } from 'react';
-import { decodeToken } from '@/lib/utils/decodeToken';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { toUpperCase } from "uri-js/dist/esnext/util";
+} from "@/components/ui/dropdown-menu";
+import {
+    useEffect,
+    useRef,
+    useState,
+    useLayoutEffect,
+} from "react";
+import {useRouter} from "next/navigation";
+import Link from "next/link";
+import {Button} from "@/components/ui/button";
+import {cn} from "@/lib/utils";
+import {Moon, Sun, MoreHorizontal, LogOut} from "lucide-react";
+import {useTheme} from "next-themes";
+import {useAuthStore} from "@/lib/store";
+import {decodeToken} from "@/lib/utils/decodeToken";
+import {Avatar, AvatarFallback} from "@/components/ui/avatar";
+import {toUpperCase} from "uri-js/dist/esnext/util";
+import CustomAlertDialog from '@/components/CustomAlertDialog';
 
 interface NavbarProps {
     currentPath: string;
 }
 
-export function Navbar({ currentPath }: NavbarProps) {
-    const fixedRoute = { href: '/', label: 'Dashboard' };
+export function Navbar({currentPath}: NavbarProps) {
+    const fixedRoute = {href: "/", label: "Dashboard"};
     const allRoutes = [
-        { href: '/marketingCampaigns', label: 'Campaigns' },
-        { href: '/adMessages', label: 'Ad-Messages' },
-        { href: '/clients', label: 'Clients' },
-        { href: '/users', label: 'Users' },
-        { href: '/tags', label: 'Tags' },
-        { href: '/templates', label: 'Templates' },
+        {href: "/marketingCampaigns", label: "Campaigns"},
+        {href: "/adMessages", label: "Ad-Messages"},
+        {href: "/clients", label: "Clients"},
+        {href: "/users", label: "Users"},
+        {href: "/tags", label: "Tags"},
+        {href: "/templates", label: "Templates"},
     ];
 
-    const publicClientRoute = { href: '/clients/create', label: 'Participate' };
+    const publicClientRoute = {href: "/clients/create", label: "Participate"};
 
-    const { theme, setTheme } = useTheme();
+    const {theme, setTheme} = useTheme();
     const router = useRouter();
-
     const token = useAuthStore((state) => state.token);
     const clearToken = useAuthStore((state) => state.clearAuth);
     const hasHydrated = useAuthStore((state) => state._hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+    const measurementRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!hasHydrated) return;
@@ -61,16 +64,8 @@ export function Navbar({ currentPath }: NavbarProps) {
     }, [token, hasHydrated]);
 
     const filteredRoutes = allRoutes.filter(
-        (route) => route.href !== '/users' || (userInfo && userInfo.role !== 'employee')
+        (route) => route.href !== "/users" || (userInfo && userInfo.role !== "employee")
     );
-
-    const handleLogout = () => {
-        clearToken();
-        setUserInfo(null);
-        setTimeout(() => {
-            router.push('/');
-        }, 10);
-    };
 
     return (
         <div className="flex items-center justify-between w-full px-4 py-4 border-b overflow-x-auto">
@@ -78,8 +73,8 @@ export function Navbar({ currentPath }: NavbarProps) {
                 AutoSmark
             </Link>
 
-            <div className="flex items-center flex-nowrap gap-2 min-w-0 overflow-hidden">
-                <NavigationMenu className="hidden md:flex">
+            <div className="flex flex-wrap items-center gap-2 max-h-[5.5rem] overflow-hidden">
+                <NavigationMenu className="hidden lg:flex">
                     <NavigationMenuList className="gap-2">
                         {userInfo ? (
                             [fixedRoute, ...filteredRoutes].map((route) => (
@@ -115,8 +110,8 @@ export function Navbar({ currentPath }: NavbarProps) {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="md:hidden">
-                            <MoreHorizontal className="h-5 w-5" />
+                        <Button variant="ghost" size="icon" className="lg:hidden">
+                            <MoreHorizontal className="h-5 w-5"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -135,45 +130,65 @@ export function Navbar({ currentPath }: NavbarProps) {
                 </DropdownMenu>
             </div>
 
-            {/* Theme & User */}
             <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <Sun
+                        className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"/>
+                    <Moon
+                        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
                     <span className="sr-only">Toggle theme</span>
                 </Button>
 
                 {userInfo ? (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="truncate max-w-[200px]">
-                                <Avatar>
-                                    <AvatarFallback>
-                                        {toUpperCase(userInfo.username[0] + userInfo.role[0])}
-                                    </AvatarFallback>
-                                </Avatar>
-                                {userInfo.username} ({userInfo.role})
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Session</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => router.push(`/users/${userInfo.id}`)}>
-                                View Profile
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-xl shadow-md">
+                        <div className="flex items-center gap-2">
+                            <Avatar>
+                                <AvatarFallback>
+                                    {toUpperCase(userInfo.username[0] + userInfo.role[0])}
+                                </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium text-sm text-foreground truncate max-w-[160px]">
+                {userInfo.username} ({userInfo.role})
+              </span>
+                        </div>
+                        <Button
+                            onClick={() => setLogoutDialogOpen(true)}
+                            variant="outline"
+                            size="icon"
+                            className="text-red-500 hover:text-red-600"
+                        >
+                            <LogOut className="h-5 w-5"/>
+                            <span className="sr-only">Log out</span>
+                        </Button>
+                    </div>
                 ) : (
-                    <Button variant="outline" onClick={() => router.push('/auth/login')}>
+                    <Button variant="outline" onClick={() => router.push("/auth/login")}>
                         Sign In
                     </Button>
                 )}
             </div>
+            <CustomAlertDialog
+                open={logoutDialogOpen}
+                onOpenChange={setLogoutDialogOpen}
+                type="warning"
+                title="Cerrar sesión"
+                description="¿Estás seguro de que deseas cerrar tu sesión actual?"
+                confirmLabel="Cerrar sesión"
+                cancelLabel="Cancelar"
+                onConfirm={() => {
+                    setLogoutDialogOpen(false);
+                    clearToken();
+                    setUserInfo(null);
+                    setTimeout(() => {
+                        router.push('/');
+                    }, 10);
+                }}
+                onCancel={() => setLogoutDialogOpen(false)}
+            />
         </div>
     );
 }
