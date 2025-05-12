@@ -11,17 +11,16 @@ function isValidObjectId(id: string) {
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
-/*
+
         const allowedRoles = ['developer', 'admin'];
 
         const tokenUser = getUserFromRequest(request);
-
         if (!tokenUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!allowedRoles.includes(tokenUser.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
-*/
+
         const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {
@@ -146,7 +145,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         if (!allowedRoles.includes(tokenUser.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
-        
+
         const { id } = await params;
 
         if (!id || !isValidObjectId(id)) {

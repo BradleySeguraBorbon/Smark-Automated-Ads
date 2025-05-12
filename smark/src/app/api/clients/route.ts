@@ -284,8 +284,6 @@ export async function POST(request: Request) {
         return NextResponse.json(
             { message: 'Client created successfully', result: client},
             { status: 201 }
-            {message: 'Client created successfully', result: client},
-            {status: 201}
         );
     } catch
     (error: any) {

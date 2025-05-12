@@ -13,6 +13,14 @@ function fillPrompt(template: string, variables: Record<string, string>) {
     });
 }
 
+async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
+    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const foundDocs = await model.find({_id: {$in: validIds}}).select('_id');
+    const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+    const invalid = ids.filter(id => !foundIds.has(id));
+    return invalid.length === 0 ? null : {field: fieldName, invalidIds: invalid};
+}
+
 function convertResponseIntoArray(response: string) {
     const cleaned = response
         .replace(/```[\s\S]*?\n/, '')
@@ -170,7 +178,6 @@ export async function POST(request: Request) {
         }
 
         let clientTags: string[] | null = null;
-        let aiError: string | null = null;
 
         try {
             console.log("Empezar el try catch")
@@ -183,7 +190,6 @@ export async function POST(request: Request) {
         } catch (err) {
             console.error("AI error:", err);
             return NextResponse.json({error: "Error generating tags"}, {status: 500});
-            //aiError = `Tags could not be generated automatically: ${err.message}`;
         }
 
         const newClient = await Clients.create({
@@ -204,7 +210,7 @@ export async function POST(request: Request) {
             .populate('tags', ['_id', 'name']);
 
         return NextResponse.json(
-            {message: 'Client created successfully', result: client, warning: aiError},
+            {message: 'Client created successfully', result: client},
             {status: 201}
         );
     } catch
