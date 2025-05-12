@@ -46,6 +46,7 @@ export default function MarketingCampaignDetailPage({ params }: { params: { id: 
             setCampaign(null);
         } finally {
             setLoading(false);
+            adMessageStore.setState({ _hasHydrated: true });
         }
     }
 

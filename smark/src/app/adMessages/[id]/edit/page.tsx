@@ -20,6 +20,7 @@ export default function EditAdMessagePage() {
   const { id } = useParams();
   const token = useAuthStore((state) => state.token);
   const _hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [userInfo, setUserInfo] = useState<{ id: string; username: string; role: string } | null>(null);
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
@@ -106,9 +107,14 @@ export default function EditAdMessagePage() {
       if (!user) return router.push('/auth/login');
 
       setUserInfo(user);
-      await fetchCampaigns(user.id);
-      await fetchTemplates();
-      await fetchAdMessage();
+
+      await Promise.all([
+        fetchCampaigns(user.id),
+        fetchTemplates(),
+        fetchAdMessage()
+      ]);
+
+      setIsLoading(false);
     };
 
     init();
@@ -137,7 +143,7 @@ export default function EditAdMessagePage() {
     }
   };
 
-  if (!_hasHydrated || !userInfo) {
+  if (!_hasHydrated || !userInfo || isLoading) {
     return (
       <div className="container mx-auto py-10">
         <LoadingSpinner />

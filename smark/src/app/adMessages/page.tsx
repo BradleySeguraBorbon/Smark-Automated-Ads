@@ -14,61 +14,63 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { AdMessageCard } from '@/components/adMessages/AdMessageCard'
 
 export default function AdMessagesPage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const token = useAuthStore((state) => state.token)
-  const _hasHydrated = useAuthStore((state) => state._hasHydrated)
-  const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null)
+  const token = useAuthStore((state) => state.token);
+  const _hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
-  const adMessages = useAdMessageStore((state) => state.adMessages)
-  const setAdMessages = useAdMessageStore((state) => state.setAdMessages)
-  const clearAdMessages = useAdMessageStore((state) => state.clearAdMessages)
-  const messagesHydrated = useAdMessageStore((state) => state.hasHydrated)
+  const adMessages = useAdMessageStore((state) => state.adMessages);
+  const setAdMessages = useAdMessageStore((state) => state.setAdMessages);
+  const clearAdMessages = useAdMessageStore((state) => state.clearAdMessages);
+  const messagesHydrated = useAdMessageStore((state) => state.hasHydrated);
 
   const fetchAdMessages = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch(`/api/adMessages?page=${currentPage}&limit=10`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      const data = await response.json()
-      setAdMessages(data.results as IAdMessage[])
-      setTotalPages(data.totalPages)
-      useAdMessageStore.setState({ hasHydrated: true })
+      const data = await response.json();
+      setAdMessages(data.results as IAdMessage[]);
+      setTotalPages(data.totalPages);
     } catch (error) {
-      console.error('Failed to fetch ad messages:', error)
-      clearAdMessages()
+      console.error('Failed to fetch ad messages:', error);
+      clearAdMessages();
     } finally {
-      setLoading(false)
+      setLoading(false);
+      useAdMessageStore.setState({ hasHydrated: true })
     }
   }
 
   useEffect(() => {
-    if (!_hasHydrated) return
+    if (!_hasHydrated) return;
 
     const init = async () => {
       if (!token) {
-        router.push('/auth/login')
-        return
+        router.push('/auth/login');
+        return;
       }
 
       const user = await decodeToken(token)
       if (!user) {
-        router.push('/auth/login')
-        return
+        router.push('/auth/login');
+        return;
       }
 
-      setUserInfo(user)
-      await fetchAdMessages()
+      setUserInfo(user);
+      await fetchAdMessages();
+      setHasFetched(true);
     }
 
-    init()
+    init();
   }, [_hasHydrated, token, currentPage])
 
   const handleDelete = async (adMessageId: string) => {
@@ -81,18 +83,18 @@ export default function AdMessagesPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to delete ad message')
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete ad message');
       }
 
-      const updatedMessages = adMessages.filter((m: IAdMessage) => m._id !== adMessageId)
-      setAdMessages(updatedMessages)
+      const updatedMessages = adMessages.filter((m: IAdMessage) => m._id !== adMessageId);
+      setAdMessages(updatedMessages);
     } catch (error) {
-      console.error('Error deleting ad message:', error)
+      console.error('Error deleting ad message:', error);
     }
   }
 
-  if (!messagesHydrated && loading) {
+  if (!messagesHydrated || loading || !hasFetched || !_hasHydrated || !userInfo) {
     return <LoadingSpinner />
   }
 
