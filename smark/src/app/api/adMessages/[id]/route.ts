@@ -29,7 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const adMessage = await AdMessages.findById(id)
-            .populate('marketingCampaign', '_id name description status')
+            .populate('marketingCampaign', '_id name description status startDate endDate')
             .populate('content.email.template', '_id name type')
             .populate('content.telegram.template', '_id name type');
 
@@ -129,7 +129,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         const updatedAdMessage = await AdMessages.findById(id)
-            .populate('marketingCampaign', '_id name description status')
+            .populate('marketingCampaign', '_id name description status startDate endDate')
             .populate('content.email.template', '_id name type')
             .populate('content.telegram.template', '_id name type');
 

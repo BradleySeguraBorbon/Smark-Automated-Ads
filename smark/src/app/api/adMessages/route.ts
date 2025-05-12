@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
         const total = await AdMessages.countDocuments(filter);
         const adMessages = await AdMessages.find(filter).skip(skip).limit(limit)
-            .populate('marketingCampaign', ['name', 'description', 'status'])
+            .populate('marketingCampaign', '_id name description status startDate endDate')
             .populate('content.email.template', '_id name type')
             .populate('content.telegram.template', '_id name type');
 
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
         });
 
         const savedAdMessage = await AdMessages.findById(adMessage._id)
-            .populate('marketingCampaign', '_id name description status')
+            .populate('marketingCampaign', '_id name description status startDate endDate')
             .populate('content.email.template', '_id name type')
             .populate('content.telegram.template', '_id name type');
 
