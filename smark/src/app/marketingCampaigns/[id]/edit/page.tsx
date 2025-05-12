@@ -25,6 +25,7 @@ export default function EditCampaignPage() {
     const { id } = useParams();
     const router = useRouter();
     const currentPath = usePathname();
+    const [isLoading, setIsLoading] = useState(true);
 
     const token = useAuthStore((state) => state.token);
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
@@ -126,9 +127,14 @@ export default function EditCampaignPage() {
                 return router.push('/auth/login');
             }
             setUserInfo(user);
-            fetchTags();
-            fetchUsers();
-            fetchCampaign();
+
+            await Promise.all([
+                fetchTags(),
+                fetchUsers(),
+                fetchCampaign()
+            ]);
+
+            setIsLoading(false);
         };
 
         init();
@@ -197,7 +203,7 @@ export default function EditCampaignPage() {
         }
     };
 
-    if (!tagsHydrated || !usersHydrated) {
+    if (!tagsHydrated || !usersHydrated || isLoading) {
         return (
             <div className="container mx-auto py-10">
                 <LoadingSpinner />

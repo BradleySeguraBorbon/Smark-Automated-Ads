@@ -15,6 +15,8 @@ export interface MarketingCampaignRef {
     name: string;
     description: string;
     status: 'active' | 'inactive' | 'completed';
+    startDate: Date;
+    endDate: Date;
 }
 
 export interface IMarketingCampaign extends Document {

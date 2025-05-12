@@ -30,6 +30,14 @@ export async function GET(request: Request) {
 
     const filter: Record<string, any> = {};
 
+    if (searchParams.has('assignedTo')) {
+      const userId = searchParams.get('assignedTo');
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.users = userId;
+      } else {
+        return NextResponse.json({ error: 'Invalid user ID format' }, { status: 400 });
+      }
+    }
     if (searchParams.has('status')) {
       filter.status = searchParams.get('status');
     }

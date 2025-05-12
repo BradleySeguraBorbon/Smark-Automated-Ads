@@ -49,8 +49,9 @@ export async function GET(request: Request) {
 
         const total = await AdMessages.countDocuments(filter);
         const adMessages = await AdMessages.find(filter).skip(skip).limit(limit)
-            .populate('marketingCampaign', ['name', 'description', 'status'])
-            .populate('template', ['_id', 'name', 'type']);
+            .populate('marketingCampaign', '_id name description status startDate endDate')
+            .populate('content.email.template', '_id name type')
+            .populate('content.telegram.template', '_id name type');
 
         if (adMessages.length === 0) {
             return NextResponse.json({ message: 'No AdMessages found' }, { status: 404 });
@@ -90,13 +91,12 @@ export async function POST(request: Request) {
 
         const requiredFields = [
             'name', 'marketingCampaign', 'type',
-            'status', 'content', 'attachments',
-            'template', 'sendDate'
+            'status', 'content', 'sendDate'
         ];
 
         const missingFields = requiredFields.filter(field => body[field] === undefined || body[field] === null);
 
-        const { name, marketingCampaign, type, status, content, attachments, template, sendDate } = body;
+        const { name, marketingCampaign, type, status, content, attachments, sendDate } = body;
 
         if (missingFields.length > 0) {
             return NextResponse.json(
@@ -104,6 +104,17 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
+
+        if (!Array.isArray(attachments)) {
+            return NextResponse.json({ message: 'Attachments must be an array' }, { status: 400 });
+        }
+
+        for (const att of attachments) {
+            if (typeof att !== 'object' || !att.name || !att.path) {
+                return NextResponse.json({ message: 'Each attachment must have name and path' }, { status: 400 });
+            }
+        }
+
 
         if (isNaN(Date.parse(body.sendDate))) {
             return NextResponse.json({ message: 'Invalid sendDate format' }, { status: 400 });
@@ -113,8 +124,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'Invalid or non-existent marketingCampaign' }, { status: 400 });
         }
 
-        if (!isValidObjectId(template) || !(await Templates.findById(template))) {
-            return NextResponse.json({ message: 'Invalid or non-existent template' }, { status: 400 });
+        if (type.includes('email')) {
+            const emailTemplate = content?.email?.template;
+            if (!isValidObjectId(emailTemplate) || !(await Templates.findById(emailTemplate))) {
+                return NextResponse.json({ message: 'Invalid or missing email template' }, { status: 400 });
+            }
+        }
+
+        if (type.includes('telegram')) {
+            const telegramTemplate = content?.telegram?.template;
+            if (!isValidObjectId(telegramTemplate) || !(await Templates.findById(telegramTemplate))) {
+                return NextResponse.json({ message: 'Invalid or missing telegram template' }, { status: 400 });
+            }
         }
 
         const adMessage = await AdMessages.create({
@@ -124,16 +145,17 @@ export async function POST(request: Request) {
             status,
             content,
             attachments,
-            template,
             sendDate,
         });
 
         const savedAdMessage = await AdMessages.findById(adMessage._id)
-            .populate('marketingCampaign', 'name description status')
-            .populate('template', '_id name type');
+            .populate('marketingCampaign', '_id name description status startDate endDate')
+            .populate('content.email.template', '_id name type')
+            .populate('content.telegram.template', '_id name type');
 
-        return NextResponse.json({ 
-            message: 'AdMessage created successfully', savedAdMessage },
+        return NextResponse.json({
+            message: 'AdMessage created successfully', savedAdMessage
+        },
             { status: 201 }
         );
 

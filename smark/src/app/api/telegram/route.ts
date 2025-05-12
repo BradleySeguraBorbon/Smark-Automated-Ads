@@ -9,7 +9,7 @@ export async function sendToTelegram(chatId: string, message: string) {
     const params = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: message }),
+        body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "Markdown" }),
     };
 
     const response = await fetch(telegramAPIUrl, params);

@@ -20,6 +20,7 @@ export default function MarketingCampaignsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [hasFetched, setHasFetched] = useState(false);
 
     const token = useAuthStore((state) => state.token);
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
@@ -29,10 +30,7 @@ export default function MarketingCampaignsPage() {
     const campaigns = useMarketingCampaignStore((state) => state.campaigns);
     const setCampaigns = useMarketingCampaignStore((state) => state.setCampaigns);
     const clearCampaigns = useMarketingCampaignStore((state) => state.clearCampaigns);
-    const hasHydrated = useMarketingCampaignStore((state) => state.hasHydrated);
-
-    console.log('Campaigns:', campaigns);
-    console.log('Has hydrated:', hasHydrated);
+    const campaignsHydrated = useMarketingCampaignStore((state) => state.hasHydrated);
 
     const fetchCampaigns = async () => {
         setLoading(true);
@@ -45,12 +43,12 @@ export default function MarketingCampaignsPage() {
             const data = await response.json();
             setCampaigns(data.results as IMarketingCampaign[]);
             setTotalPages(data.totalPages);
-            useMarketingCampaignStore.setState({ hasHydrated: true });
         } catch (error) {
             console.error('Failed to fetch campaigns:', error);
             clearCampaigns();
         } finally {
             setLoading(false);
+            useMarketingCampaignStore.setState({ hasHydrated: true });
         }
     }
 
@@ -71,6 +69,7 @@ export default function MarketingCampaignsPage() {
 
             setUserInfo(user);
             await fetchCampaigns();
+            setHasFetched(true);
         };
 
         init();
@@ -97,7 +96,7 @@ export default function MarketingCampaignsPage() {
         }
     };
 
-    if (!hasHydrated && loading) {
+    if (loading || !userInfo || !campaignsHydrated || !hasFetched || !_hasHydrated) {
         return <LoadingSpinner />
     }
 
