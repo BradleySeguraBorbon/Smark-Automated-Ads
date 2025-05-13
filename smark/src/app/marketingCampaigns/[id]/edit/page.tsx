@@ -140,21 +140,6 @@ export default function EditCampaignPage() {
         init();
     }, [id, _hasHydrated, token]);
 
-    /*useEffect(() => {
-
-        fetchCampaign();
-    }, [id, setValue]);
-
-    useEffect(() => {
-        if (!tagsHydrated) return;
-        if (!allTags || allTags.length === 0) fetchTags();
-    }, [tagsHydrated, allTags, setTags]);
-
-    useEffect(() => {
-        if (!usersHydrated) return;
-        if (!allUsers || allUsers.length === 0) fetchUsers();
-    }, [usersHydrated, allUsers, setUsers]);*/
-
     const handleUpdate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
         try {

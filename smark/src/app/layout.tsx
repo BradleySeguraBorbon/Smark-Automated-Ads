@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import {NavbarWrapper} from "@/components/NavbarWrapper";
-import {cn} from "@/lib/utils";
+import { NavbarWrapper } from "@/components/NavbarWrapper";
+import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,13 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-    <body
+      <body
         className={cn(
-            `${geistSans.variable} ${geistMono.variable}`,
-            "antialiased overflow-x-hidden max-w-screen w-full"
+          `${geistSans.variable} ${geistMono.variable}`,
+          "antialiased overflow-x-hidden max-w-screen w-full"
         )}
-    >
-    <Providers>
+      >
+        <Providers>
           <NavbarWrapper />
           {children}
         </Providers>

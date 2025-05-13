@@ -25,7 +25,7 @@ interface PerformanceCardProps {
     }
   
     return (
-      <div className="border rounded-lg p-4 flex flex-col">
+      <div className="border rounded-lg p-4 flex flex-col bg-gray-200 dark:bg-[#171717] shadow-sm">
         <div className="flex items-center gap-2 mb-2">
           <div className="p-2 bg-primary/10 rounded-full text-primary">{icon}</div>
           <h3 className="font-medium">{title}</h3>

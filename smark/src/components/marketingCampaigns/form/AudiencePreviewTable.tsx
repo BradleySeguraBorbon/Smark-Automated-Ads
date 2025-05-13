@@ -22,7 +22,7 @@ export function AudiencePreviewTable({
 ) {
   console.log("AudiencePreviewTable received:", clients);
   return (
-    <Card>
+    <Card >
       <CardContent className="pt-2">
         <div className="space-y-6">
           <div>

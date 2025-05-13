@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
+import { Tag } from 'lucide-react';
 
 export function CampaignSummary({
   onSubmit,
@@ -24,7 +25,7 @@ export function CampaignSummary({
   const { handleSubmit } = useFormContext<MarketingCampaignFormData>();
 
   return (
-    <Card>
+    <Card >
       <CardContent className="pt-1">
         <h3 className="font-semibold mb-4">Campaign Summary</h3>
         <div className="space-y-4">
@@ -54,7 +55,8 @@ export function CampaignSummary({
             <div className="flex flex-wrap gap-2 mt-1">
               {tags && tags.length > 0 ? (
                 tags.map((tag) => (
-                  <Badge key={tag._id} variant="outline">
+                  <Badge key={tag._id} variant="outline" className="bg-emerald-600 hover:bg-emerald-700 transition-colors duration-200 ease-in-out">
+                    <Tag className="h-3 w-3" />
                     {tag.name}
                   </Badge>
                 ))
@@ -64,7 +66,7 @@ export function CampaignSummary({
             </div>
           </div>
           <div className="mt-8">
-            <Button className="w-full" onClick={handleSubmit(onSubmit)}>
+            <Button className="w-full bg-purple-600 hover:bg-purple-800 text-white" onClick={handleSubmit(onSubmit)}>
               {mode === 'edit' ? 'Save Changes' : 'Create Campaign'}
             </Button>
           </div>

@@ -101,7 +101,7 @@ export default function AdMessagesPage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 px-4">
+        <div className="container mx-auto py-8 px-50">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h1 className="text-3xl font-bold">Ad Messages</h1>
@@ -112,7 +112,7 @@ export default function AdMessagesPage() {
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
-              <Button asChild>
+              <Button className="bg-purple-500 hover:bg-purple-800" asChild>
                 {userInfo && userInfo?.role !== 'employee' && (
                   <Link href="/adMessages/new">
                     <PlusCircle className="h-4 w-4 mr-2" />

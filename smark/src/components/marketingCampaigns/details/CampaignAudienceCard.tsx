@@ -17,7 +17,7 @@ interface AudienceCardProps {
 
 export default function CampaignAudienceCard({ audience, currentPage, totalPages, onPageChange }: AudienceCardProps) {
     return (
-        <Card>
+        <Card className='no-hover-effect'>
             <CardHeader>
                 <CardTitle>Target Audience</CardTitle>
                 <CardDescription>Clients targeted by this campaign</CardDescription>

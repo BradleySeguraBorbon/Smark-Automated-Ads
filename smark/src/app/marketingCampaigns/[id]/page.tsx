@@ -104,7 +104,7 @@ export default function MarketingCampaignDetailPage({ params }: { params: { id: 
     return (
         <>
             <main>
-                <div className="container mx-auto py-8 px-4">
+                <div className="container mx-auto py-8 px-50">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center">
                             <Button variant="ghost" size="sm" asChild className="mr-2">
@@ -116,7 +116,7 @@ export default function MarketingCampaignDetailPage({ params }: { params: { id: 
                             <h1 className="text-2xl font-bold">{campaign.name}</h1>
                         </div>
                         {userInfo?.role !== 'employee' &&
-                            <Button asChild variant="outline" size="sm">
+                            <Button asChild className="bg-blue-600 hover:bg-blue-800 text-white" size="sm">
                                 <Link href={`/marketingCampaigns/${campaign._id}/edit`}>
                                     <Pencil className="h-4 w-4 mr-2" />
                                     Edit Campaign

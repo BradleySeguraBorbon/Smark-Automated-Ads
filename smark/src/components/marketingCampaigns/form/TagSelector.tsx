@@ -3,6 +3,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { TagRef } from "@/types/Tag";
+import { Tag } from "lucide-react";
 
 export function TagSelector({
   tags = [],
@@ -30,8 +31,9 @@ export function TagSelector({
             key={String(tag._id)}
             onClick={() => toggleTag(tag)}
             variant={selectedTags.find((t) => t._id === tag._id) ? "default" : "outline"}
-            className="cursor-pointer"
+            className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 transition-colors duration-200 ease-in-out"
           >
+            <Tag className="h-3 w-3" />
             {tag.name}
           </Badge>
         ))}

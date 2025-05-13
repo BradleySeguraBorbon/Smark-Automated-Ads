@@ -12,7 +12,7 @@ interface CampaignHeaderProps {
 
 export default function CampaignHeader({ campaign }: CampaignHeaderProps) {
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 no-hover-effect">
       <CardContent className="pt-1">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div>

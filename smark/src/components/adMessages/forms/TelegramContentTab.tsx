@@ -72,7 +72,7 @@ export function TelegramContentTab({ form, mode, templates, placeholderValues, s
   }
 
   return (
-    <Card>
+    <Card >
       <CardContent className="pt-2 space-y-6">
         <FormField
           control={form.control}
@@ -177,7 +177,7 @@ export function TelegramContentTab({ form, mode, templates, placeholderValues, s
 
         {selectedTemplate && (
           <div className="mt-6 p-4 border rounded-md">
-            <h3 className="font-medium mb-2 text-white">Telegram Preview</h3>
+            <h3 className="font-medium mb-2 text-black dark:text-white">Telegram Preview</h3>
             <div className="bg-gray-100 p-3 rounded-lg max-w-md text-sm whitespace-pre-wrap text-muted-foreground">
               {form.watch('content.telegram.message')}
               {telegramButtons.length > 0 && (

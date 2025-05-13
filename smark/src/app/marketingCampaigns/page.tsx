@@ -114,7 +114,7 @@ export default function MarketingCampaignsPage() {
                                 <Filter className="h-4 w-4 mr-2" />
                                 Filter
                             </Button>
-                            <Button asChild>
+                            <Button className="bg-purple-600 hover:bg-purple-800 text-white" asChild>
                                 {userInfo && userInfo?.role !== 'employee' &&
                                     <Link href="/marketingCampaigns/new">
                                         <PlusCircle className="h-4 w-4 mr-2" />

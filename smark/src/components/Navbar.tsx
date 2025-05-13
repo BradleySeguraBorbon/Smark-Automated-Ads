@@ -68,7 +68,7 @@ export function Navbar({currentPath}: NavbarProps) {
     );
 
     return (
-        <div className="flex items-center justify-between w-full px-4 py-4 border-b overflow-x-auto">
+        <div className="flex items-center justify-between w-full px-4 py-4 border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
             <Link href="/" className="text-lg font-bold whitespace-nowrap flex-shrink-0 mr-4">
                 AutoSmark
             </Link>
@@ -82,8 +82,8 @@ export function Navbar({currentPath}: NavbarProps) {
                                     <Link href={route.href} legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                'px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap',
-                                                currentPath === route.href && 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                                'px-3 py-2 text-sm font-medium rounded-md hover:bg-blue-600 dark:hover:bg-gray-800 whitespace-nowrap',
+                                                currentPath === route.href && '!bg-blue-800 !dark:bg-gray-700 !font-bold !text-white'
                                             )}
                                         >
                                             {route.label}
@@ -148,7 +148,7 @@ export function Navbar({currentPath}: NavbarProps) {
                         <div className="flex items-center gap-2">
                             <Avatar>
                                 <AvatarFallback>
-                                    {toUpperCase(userInfo.username[0] + userInfo.role[0])}
+                                    {toUpperCase(userInfo.username[0] + userInfo.username[1])}
                                 </AvatarFallback>
                             </Avatar>
                             <span className="font-medium text-sm text-foreground truncate max-w-[160px]">

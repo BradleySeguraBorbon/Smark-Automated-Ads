@@ -50,7 +50,7 @@ export default function CampaignPerformanceCard({ performance } : { performance:
                     />
                 </div>
 
-                <div className="mt-6 p-4 border rounded-md bg-muted/30">
+                <div className="mt-6 p-4 border rounded-md bg-gray-200 dark:bg-[#171717]">
                     <div className="flex items-center gap-2 mb-2">
                         <PieChart className="h-5 w-5 text-muted-foreground" />
                         <h4 className="font-medium">Performance Insights</h4>

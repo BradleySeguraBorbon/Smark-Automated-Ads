@@ -8,11 +8,7 @@ import { TagRef } from '@/types/Tag'
 
 export default function CampaignDetailsCard({ campaign }: { campaign: IMarketingCampaign }) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Campaign Information</CardTitle>
-                <CardDescription>Detailed information about this campaign</CardDescription>
-            </CardHeader>
+        <Card >
             <CardContent className="space-y-6">
                 <div>
                     <h3 className="text-lg font-medium mb-2">Description</h3>
@@ -20,10 +16,10 @@ export default function CampaignDetailsCard({ campaign }: { campaign: IMarketing
                 </div>
 
                 <div>
-                    <h3 className="text-lg font-medium mb-2">Tags</h3>
+                    <h3 className="text-lg font-medium mb-3">Tags</h3>
                     <div className="flex flex-wrap gap-2">
                         {campaign.tags.map((tag: TagRef) => (
-                            <Badge key={tag._id} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={tag._id} variant="secondary" className="flex items-center gap-1 bg-cyan-600 text-black hover:bg-cyan-700 hover:text-white transition-colors duration-200 ease-in-out">
                                 <Tag className="h-3 w-3" />
                                 {tag.name}
                             </Badge>
@@ -32,7 +28,7 @@ export default function CampaignDetailsCard({ campaign }: { campaign: IMarketing
                 </div>
 
                 <div>
-                    <h3 className="text-lg font-medium mb-2">Team Members</h3>
+                    <h3 className="text-lg font-medium mb-3">Team Members</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {campaign.users.map((user: UserRef) => (
                             <div key={String(user._id)} className="flex items-center gap-3 p-3 border rounded-md">

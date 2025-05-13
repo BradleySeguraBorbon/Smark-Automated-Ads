@@ -43,7 +43,7 @@ export function AdMessageCard({ adMessage, onDelete, userRole }: AdMessageCardPr
                         <Badge variant={getStatusVariant(adMessage.status)} className="capitalize">
                             {adMessage.status}
                         </Badge>
-                        <Button variant="ghost" size="icon" onClick={() => setAlertOpen(true)}>
+                        <Button variant="secondary" className="bg-red-500 hover:bg-red-800" size="icon" onClick={() => setAlertOpen(true)}>
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     </div>
@@ -69,11 +69,11 @@ export function AdMessageCard({ adMessage, onDelete, userRole }: AdMessageCardPr
                 </CardContent>
                 <CardFooter>
                     <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild>
+                        <Button variant="default" className="bg-slate-600 hover:bg-slate-800 text-white" size="sm" asChild>
                             <Link href={`/adMessages/${adMessage._id}`}>View Details</Link>
                         </Button>
                         {adMessage.status !== "sent" && (
-                            <Button size="sm" asChild>
+                            <Button size="sm" className="bg-blue-600 hover:bg-blue-800 text-white" asChild>
                                 <Link href={`/adMessages/${adMessage._id}/edit`}>Edit Message</Link>
                             </Button>
                         )}

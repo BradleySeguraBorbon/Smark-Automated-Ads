@@ -132,7 +132,7 @@ export default function NewAdMessagePage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 px-4">
+        <div className="container mx-auto py-8 px-50">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" asChild className="mr-2">
               <Link href="/adMessages">

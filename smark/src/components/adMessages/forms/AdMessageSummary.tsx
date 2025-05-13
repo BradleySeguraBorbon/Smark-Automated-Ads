@@ -84,7 +84,7 @@ export function AdMessageSummary({ onSubmit, mode }: AdMessageSummaryProps) {
         </div>
 
         <div className="mt-8">
-          <Button className="w-full" onClick={handleSubmit(onSubmit)}>
+          <Button className="w-full bg-purple-600 hover:bg-purple-800 text-white" onClick={handleSubmit(onSubmit)}>
             {mode === 'edit' ? 'Save Changes' : 'Create Message'}
           </Button>
         </div>
