@@ -84,7 +84,7 @@ export default function UsersPage() {
     );
 
     return (
-        <div className="max-w-3xl mx-auto mt-8">
+        <div className="max-w-6xl mx-auto mt-8">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
                 <BreadcrumbHeader backHref="/" title="User Management"/>
                 {(userInfo?.role === 'developer' || userInfo?.role === 'admin') && (
