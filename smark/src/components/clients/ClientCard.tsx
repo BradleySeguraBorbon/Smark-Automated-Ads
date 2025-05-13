@@ -25,7 +25,7 @@ export default function ClientCard({client, onDelete, isLoading, userRole}: Clie
 
     return (
         <>
-            <Card className="relative hover:shadow-md transition-shadow">
+            <Card className="relative hover:shadow-md transition-shadow dark:bg-">
                 <CardHeader className="flex flex-row justify-between items-start">
                     <div>
                         <CardTitle>
@@ -34,19 +34,20 @@ export default function ClientCard({client, onDelete, isLoading, userRole}: Clie
                     </div>
                     <div className="flex gap-2">
                         {userRole !== 'employee' && <Link href={`/clients/${client._id}/edit`}>
-                            <Button variant="secondary" size="icon">
+                            <Button className="bg-blue-500 hover:bg-blue-800" variant="secondary" size="icon">
                                 <Pencil className="h-4 w-4"/>
                                 <span className="sr-only">Edit</span>
                             </Button>
                         </Link>}
-                        {userRole === 'employee' && <Link href={`/clients/${client._id}`}>
-                            <Button variant="secondary" size="icon">
+                        {userRole !== 'employee' && <Link href={`/clients/${client._id}`}>
+                            <Button variant="default" className="bg-slate-600" size="icon">
                                 <Eye className="h-4 w-4"/>
                                 <span className="sr-only">View</span>
                             </Button>
                         </Link>}
                         {userRole !== 'employee' && <Button
-                            variant="destructive"
+                            className={"bg-red-500 hover:bg-red-800"}
+                            variant="secondary"
                             size="icon"
                             onClick={() => setAlertOpen(true)}
                             disabled={isLoading}

@@ -99,7 +99,8 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                                 (currentUserRole === 'admin' && user.role === 'employee')) &&
                             user._id !== currentUserId && (
                                 <Button
-                                    variant="destructive"
+                                    variant="secondary"
+                                    className={"bg-red-500 hover:bg-red-800"}
                                     size="icon"
                                     onClick={() => setConfirmDialogOpen(true)}
                                 >

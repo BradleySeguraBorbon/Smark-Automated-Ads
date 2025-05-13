@@ -94,13 +94,24 @@ export default function UserForm({ form, onSubmit, userRole, isSubmitting }: Use
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                     >
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger className="w-full bg-white">
                                             <SelectValue placeholder="Select role" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="employee">Employee</SelectItem>
-                                            <SelectItem value="admin">Admin</SelectItem>
-                                            <SelectItem value="developer">Developer</SelectItem>
+                                            <SelectItem
+                                                value="employee"
+                                                className="hover:bg-emerald-100 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-white [&>[data-slot=check]]:text-black"
+                                            >
+                                                Employee
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="admin"
+                                                className="hover:bg-emerald-100 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-white [&>[data-slot=check]]:text-black"
+                                            >Admin</SelectItem>
+                                            <SelectItem
+                                                value="developer"
+                                                className="hover:bg-emerald-100 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-white [&>[data-slot=check]]:text-black"
+                                            >Developer</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </FormControl>

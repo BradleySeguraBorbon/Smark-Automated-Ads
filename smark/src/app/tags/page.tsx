@@ -13,6 +13,7 @@ import SearchInput from '@/components/SearchInput'
 import TagsList from '@/components/tags/TagsList'
 import {ITag} from '@/types/Tag'
 import {useRouter} from "next/navigation";
+import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 
 export default function TagsPage() {
     const [tags, setTags] = useState<ITag[]>([])
@@ -91,9 +92,9 @@ export default function TagsPage() {
         <>
             <div className="max-w-6xl mx-auto mt-8">
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
-                    <h1 className="text-3xl font-bold">Tag Management</h1>
+                    <BreadcrumbHeader backHref="/" title={"Tags Management"}/>
                     <Link href="/tags/new">
-                        <Button className="w-full sm:w-auto">
+                        <Button variant="secondary" className="w-full sm:w-auto bg-purple-500 hover:bg-purple-800">
                             <PlusCircle className="mr-2 h-4 w-4"/>
                             Add New Tag
                         </Button>

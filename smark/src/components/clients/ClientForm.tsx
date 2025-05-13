@@ -229,11 +229,10 @@ export default function ClientForm({ form, onSubmit, newPreference, setNewPrefer
                     )}
                 />
 
-
                 <SubscriptionsSelector control={form.control} />
 
                 <div className="flex justify-end">
-                    <Button type="submit">Create Client</Button>
+                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Create Client</Button>
                 </div>
             </form>
         </Form>

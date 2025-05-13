@@ -53,12 +53,13 @@ export default function TagCard({ tag, refresh, onSuccessDelete, currentUserRole
                     <CardTitle>{tag.name}</CardTitle>
                     <div className="flex gap-2">
                         {currentUserRole !== 'employee' && <Link href={`/tags/${tag._id}/edit`}>
-                            <Button variant="secondary" size="icon">
+                            <Button variant="secondary" className="bg-blue-500 hover:bg-blue-800" size="icon">
                                 <Pencil className="h-4 w-4"/>
                             </Button>
                         </Link>}
                         {currentUserRole !== 'employee' && <Button
-                            variant="destructive"
+                            className="bg-red-500 hover:bg-red-600"
+                            variant="secondary"
                             size="icon"
                             onClick={() => setAlertOpen(true)}
                         >

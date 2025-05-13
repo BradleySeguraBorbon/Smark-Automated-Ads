@@ -18,7 +18,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg">
-                  <Link href="/campaigns/new">
+                  <Link href="/marketingCampaigns/new">
                     Create New Campaign
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
