@@ -36,7 +36,7 @@ export default function ClientsPage() {
     const fetchClients = async (page: number = 1) => {
         try {
             setLoading(true)
-            const response = await fetch(`/api/clients?page=${page}&limit=10`, {
+            const response = await fetch(`/api/clients?page=${page}&limit=9`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export default function ClientsPage() {
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
                 <BreadcrumbHeader backHref={'/'} title={"Client Management"}/>
                 {userInfo && userInfo?.role !== 'employee' && <Link href="/clients/create">
-                    <Button className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto bg-purple-500 hover:bg-purple-800 dark:text-white">
                         <PlusCircle className="mr-2 h-4 w-4"/>
                         Add New Client
                     </Button>

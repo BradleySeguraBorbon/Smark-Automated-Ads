@@ -92,7 +92,7 @@ export default function TagForm({ form, onSubmit }: TagFormProps) {
                                             key={idx}
                                             type="button"
                                             onClick={() => removeKeyword(idx)}
-                                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-sm font-medium text-gray-800 hover:bg-red-100 hover:text-red-700 transition-all border border-gray-300 shadow-sm"
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500 text-sm font-medium text-white hover:bg-red-200 hover:text-red-700 transition-all shadow-sm"
                                             title="Click to remove keyword"
                                         >
                                             <span>{kw}</span>
@@ -107,7 +107,7 @@ export default function TagForm({ form, onSubmit }: TagFormProps) {
                 />
 
                 <div className="flex justify-end">
-                    <Button type="submit">Create Tag</Button>
+                    <Button variant="secondary" type="submit" className="bg-purple-500 hover:bg-purple-800">Create Tag</Button>
                 </div>
             </form>
         </Form>

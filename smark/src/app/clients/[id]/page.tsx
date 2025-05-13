@@ -103,7 +103,7 @@ export default function ClientViewPage() {
                 <CardContent className="flex flex-wrap gap-2">
                     {client.preferences.length > 0 ? (
                         client.preferences.map((pref, idx) => (
-                            <span key={idx} className="px-3 py-1 bg-blue-900 rounded-full text-sm">{pref}</span>
+                            <span key={idx} className="px-3 py-1 bg-amber-700 rounded-full text-sm">{pref}</span>
                         ))
                     ) : (
                         <p className="text-muted-foreground">No preferences set.</p>
@@ -118,7 +118,7 @@ export default function ClientViewPage() {
                 <CardContent className="flex flex-wrap gap-2">
                     {client.tags.length > 0 ? (
                         (client.tags as ITag[]).map((tag: ITag) => (
-                            <span key={String(tag._id)} className="px-3 py-1 bg-emerald-950 rounded-full text-sm">{tag.name}</span>
+                            <span key={String(tag._id)} className="px-3 py-1 bg-emerald-700 rounded-full text-sm">{tag.name}</span>
                         ))
                     ) : (
                         <p className="text-muted-foreground">No tags assigned.</p>

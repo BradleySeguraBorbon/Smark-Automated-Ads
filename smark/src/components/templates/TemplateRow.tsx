@@ -40,9 +40,9 @@ export default function TemplateRow({ template, userRole, onDelete }: Props) {
                     {canEdit && (
                         <>
                             <Link href={`/templates/${template._id}/edit`}>
-                                <Button variant="outline" size="icon"><Pencil className="h-4 w-4" /></Button>
+                                <Button variant="secondary" className="bg-blue-500 hover:bg-blue-800" size="icon"><Pencil className="h-4 w-4" /></Button>
                             </Link>
-                            <Button onClick={() => onDelete(template._id! as string)} variant="destructive" size="icon">
+                            <Button onClick={() => onDelete(template._id! as string)} variant="secondary" className={"bg-red-500 hover:bg-red-800"} size="icon">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </>

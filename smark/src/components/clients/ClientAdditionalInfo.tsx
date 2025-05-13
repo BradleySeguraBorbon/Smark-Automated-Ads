@@ -29,7 +29,7 @@ export default function ClientAdditionalInfo({
                     {preferences && preferences.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                             {preferences.map((pref, index) => (
-                                <Badge key={index} variant="secondary">
+                                <Badge key={index} variant="secondary" className="bg-amber-600">
                                     {pref}
                                 </Badge>
                             ))}

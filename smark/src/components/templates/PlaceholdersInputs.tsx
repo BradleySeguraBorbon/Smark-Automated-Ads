@@ -59,7 +59,7 @@ export default function PlaceholdersInput({ field }: Props) {
                             key={idx}
                             type="button"
                             onClick={() => removePlaceholder(idx)}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-sm font-medium text-gray-800 hover:bg-red-100 hover:text-red-700 transition-all border border-gray-300 shadow-sm"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500 text-sm font-medium text-gray-800 hover:bg-red-300 hover:text-red-700 transition-all shadow-sm"
                             title="Click to remove placeholder"
                         >
                             <span>{ph}</span>

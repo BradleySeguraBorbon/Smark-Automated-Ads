@@ -1,21 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter, usePathname } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { ITag } from '@/types/Tag'
 import { useAuthStore } from '@/lib/store'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import BreadcrumbHeader from '@/components/BreadcrumbHeader'
-import { Navbar } from '@/components/Navbar'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
 import TagForm from '@/components/tags/TagForm'
 
 export default function EditTagPage() {
     const { id } = useParams()
     const router = useRouter()
-    const pathname = usePathname()
     const token = useAuthStore((state) => state.token)
 
     const [loading, setLoading] = useState(true)
@@ -109,9 +107,6 @@ export default function EditTagPage() {
                 )}
 
                 <Card className="mt-4">
-                    <CardHeader>
-                        <CardTitle>Edit Tag</CardTitle>
-                    </CardHeader>
                     <CardContent>
                         <TagForm form={form} onSubmit={onSubmit} />
                     </CardContent>

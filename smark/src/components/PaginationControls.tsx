@@ -46,7 +46,7 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
     const pages = getPageNumbers(currentPage, totalPages);
 
     return (
-        <Pagination className="mt-6">
+        <Pagination className="mt-6 mb-4">
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious

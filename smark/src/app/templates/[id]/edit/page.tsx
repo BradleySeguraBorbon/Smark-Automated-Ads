@@ -127,18 +127,18 @@ export default function EditTemplatePage() {
     }
 
     return (
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 px-7">
             <BreadcrumbHeader backHref="/templates" title="Edit Template" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                 <div>
                     <TemplateForm form={form} onSubmit={onSubmit} buttonText={"Save Template"} />
                 </div>
-                <div className="border rounded-md bg-white p-4 shadow-sm">
+                <div className="border rounded-md p-4 shadow-sm">
                     <p className="text-sm text-muted-foreground mb-2">Live Content Preview</p>
                     <div
                         style={{
-                            backgroundColor: '#fff',
+                            backgroundColor: '#00786f',
                             color: '#000',
                             padding: '20px',
                             fontFamily: 'Arial, sans-serif',

@@ -77,7 +77,7 @@ export default function TemplateForm({form, onSubmit, buttonText}: TemplateFormP
                         <FormItem>
                             <FormLabel>HTML or Markdown</FormLabel>
                             <FormControl>
-                                <Textarea rows={10} {...field} />
+                                <Textarea rows={10} className="max-h-[400px] overflow-y-auto" {...field} />
                             </FormControl>
                             <FormMessage/>
                         </FormItem>
@@ -91,7 +91,7 @@ export default function TemplateForm({form, onSubmit, buttonText}: TemplateFormP
                 />
 
                 <div className="flex justify-end">
-                    <Button type="submit">{buttonText}</Button>
+                    <Button variant="secondary" className="bg-purple-500 hover:bg-purple-800" type="submit">{buttonText}</Button>
                 </div>
             </form>
         </Form>

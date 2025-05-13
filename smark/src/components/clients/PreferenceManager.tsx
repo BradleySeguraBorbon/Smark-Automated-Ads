@@ -36,7 +36,7 @@ export default function PreferenceManager({
                     <Label>Client Preferences</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
                         {field.value.map((preference: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                            <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-900">
                                 {preference}
                                 <button
                                     type="button"
