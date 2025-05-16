@@ -13,9 +13,9 @@ const clientSchema = new Schema<IClient>({
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
   telegramChatId: { type: String, unique: true },
-  preferredContactMethod: { type: String, enum: ["email", "telegram"], required: true },
-  subscriptions: [{ type: String, enum: ["email", "telegram"], required: true }],
-  birthDate: { type: Date, required: true },
+  preferredContactMethod: { type: String, required: true },
+  subscriptions: [{ type: String, required: true }],
+  birthDate: { type: String, required: true },
   preferences: [{ type: String, required: true }],
   tags: [{ type: Types.ObjectId, ref: "Tags" }],
   adInteractions: [adInteractionsSchema],
@@ -25,7 +25,7 @@ const clientSchema = new Schema<IClient>({
 });
 
 
-clientSchema.pre("validate", function (next) {
+/*clientSchema.pre("validate", function (next) {
   const client = this as IClient;
 
   const hasEmail = !!client.email;
@@ -44,7 +44,7 @@ clientSchema.pre("validate", function (next) {
   }
 
   next();
-});
+});*/
 
 const Clients = mongoose.models.Clients as Model<IClient> || mongoose.model<IClient>('Clients', clientSchema);
 export default Clients;

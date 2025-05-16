@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {encryptClient, decryptClient} from "@/lib/clientEncryption";
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -67,13 +68,13 @@ export async function GET(request: Request) {
             .populate('adInteractions.adMessage', '_id name type');
 
         const totalPages = Math.ceil(total / limit);
-
+        const decrypted = clients.map(decryptClient);
         return NextResponse.json({
             total,
             totalPages,
             page,
             limit,
-            results: clients,
+            results: decrypted,
         });
     } catch (error) {
         console.error(error);
@@ -175,7 +176,8 @@ export async function POST(request: Request) {
             'phone',
             'preferredContactMethod',
             'subscriptions',
-            'birthDate'
+            'birthDate',
+            'telegramChatId'
         ];
 
         const missingFields = requiredFields.filter(
@@ -235,6 +237,34 @@ export async function POST(request: Request) {
             );
         }
 
+        const validMethods = ['email', 'telegram'];
+
+        if (!validMethods.includes(body.preferredContactMethod)) {
+            return NextResponse.json({ message: 'Invalid preferredContactMethod' }, { status: 400 });
+        }
+
+        if (!Array.isArray(body.subscriptions) || body.subscriptions.some(s => !validMethods.includes(s))) {
+            return NextResponse.json({ message: 'Invalid subscriptions values' }, { status: 400 });
+        }
+
+        if (!body.email && !body.telegramChatId) {
+            return NextResponse.json({
+                message: "Client must have at least one contact method: email or telegramChatId."
+            }, { status: 400 });
+        }
+
+        if (body.preferredContactMethod === "email" && !body.email) {
+            return NextResponse.json({
+                message: "Preferred contact method is email, but email is missing."
+            }, { status: 400 });
+        }
+
+        if (body.preferredContactMethod === "telegram" && !body.telegramChatId) {
+            return NextResponse.json({
+                message: "Preferred contact method is telegram, but telegramChatId is missing."
+            }, { status: 400 });
+        }
+
         const existingClient = await Clients.findOne({
             $or: [
                 { email: body.email },
@@ -263,18 +293,19 @@ export async function POST(request: Request) {
             return NextResponse.json({error: "Error generating tags"}, {status: 500});
         }
 
+        const encrypted = encryptClient(body);
         const newClient = await Clients.create({
-            firstName: body.firstName,
-            lastName: body.lastName,
-            email: body.email,
-            phone: body.phone,
-            telegramChatId: body.telegramChatId,
-            preferredContactMethod: body.preferredContactMethod,
-            subscriptions: body.subscriptions,
-            birthDate: body.birthDate,
-            preferences: body.preferences || [],
+            firstName: encrypted.firstName,
+            lastName: encrypted.lastName,
+            email: encrypted.email,
+            phone: encrypted.phone,
+            telegramChatId: encrypted.telegramChatId,
+            preferredContactMethod: encrypted.preferredContactMethod,
+            subscriptions: encrypted.subscriptions,
+            birthDate: encrypted.birthDate,
+            preferences: encrypted.preferences || [],
             tags: clientTags || [],
-            adInteractions: body.adInteractions || []
+            adInteractions: encrypted.adInteractions || []
         });
 
         const client = await Clients.findById(newClient._id)

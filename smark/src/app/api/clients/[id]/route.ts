@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, AdMessages, Tags } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {decryptClient,encryptClient} from "@/lib/clientEncryption";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -50,9 +51,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
+        const decrypted = decryptClient(client);
         return NextResponse.json({
             message: 'Client found',
-            result: client,
+            result: decrypted,
         });
     } catch (error) {
         console.error(error);
@@ -88,6 +90,28 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
         const body = await request.json();
 
+        const requiredFields = [
+            'firstName',
+            'lastName',
+            'email',
+            'phone',
+            'preferredContactMethod',
+            'subscriptions',
+            'birthDate',
+            'telegramChatId'
+        ];
+
+        const missingFields = requiredFields.filter(
+            field => body[field] === undefined || body[field] === null
+        );
+
+        if (missingFields.length > 0) {
+            return NextResponse.json(
+                { message: 'Missing required fields', missingFields },
+                { status: 400 }
+            );
+        }
+
         if (body.birthDate && isNaN(Date.parse(body.birthDate))) {
             return NextResponse.json(
                 { message: 'Invalid birthDate format' },
@@ -107,11 +131,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
         if (body.adInteractions && body.adInteractions.length > 0) {
             const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
-            const invalidAdMessages = await validateObjectIdsExist(
-                adMessageIds,
-                AdMessages,
-                'adInteractions'
-            );
+            const invalidAdMessages = await validateObjectIdsExist(adMessageIds, AdMessages, 'adInteractions');
             if (invalidAdMessages) {
                 return NextResponse.json(
                     { message: 'Invalid ad message references', details: invalidAdMessages },
@@ -120,37 +140,60 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             }
         }
 
+        const validMethods = ['email', 'telegram'];
+
+        if (!validMethods.includes(body.preferredContactMethod)) {
+            return NextResponse.json({ message: 'Invalid preferredContactMethod' }, { status: 400 });
+        }
+
+        if (!Array.isArray(body.subscriptions) || body.subscriptions.some(s => !validMethods.includes(s))) {
+            return NextResponse.json({ message: 'Invalid subscriptions values' }, { status: 400 });
+        }
+
+        if (!body.email && !body.telegramChatId) {
+            return NextResponse.json({
+                message: "Client must have at least one contact method: email or telegramChatId."
+            }, { status: 400 });
+        }
+
+        if (body.preferredContactMethod === "email" && !body.email) {
+            return NextResponse.json({
+                message: "Preferred contact method is email, but email is missing."
+            }, { status: 400 });
+        }
+
+        if (body.preferredContactMethod === "telegram" && !body.telegramChatId) {
+            return NextResponse.json({
+                message: "Preferred contact method is telegram, but telegramChatId is missing."
+            }, { status: 400 });
+        }
+
+        const encryptedData = encryptClient(body);
+
         const updatedClient = await Clients.findByIdAndUpdate(
             id,
-            body,
+            encryptedData,
             { new: true, runValidators: true }
         )
             .populate('tags', '_id name')
             .populate('adInteractions.adMessage', '_id name type');
 
         if (!updatedClient) {
-            return NextResponse.json(
-                { message: 'Client not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ message: 'Client not found' }, { status: 404 });
         }
+
+        const decryptedClient = decryptClient(updatedClient);
 
         return NextResponse.json({
             message: 'Client updated successfully',
-            result: updatedClient,
+            result: decryptedClient,
         });
     } catch (error: any) {
         console.error(error);
         if (error.name === 'ValidationError') {
-            return NextResponse.json(
-                { error: error.message },
-                { status: 422 }
-            );
+            return NextResponse.json({ error: error.message }, { status: 422 });
         }
-        return NextResponse.json(
-            { error: 'Error updating client' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Error updating client' }, { status: 500 });
     }
 }
 

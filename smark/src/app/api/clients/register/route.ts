@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {AdMessages, Clients, Tags} from "@/models/models";
 import connectDB from "@/config/db";
 import {NextResponse} from "next/server";
+import { encryptClient } from '@/lib/clientEncryption';
 
 function fillPrompt(template: string, variables: Record<string, string>) {
     return template.replace(/\${(.*?)}/g, (_, key) => {
@@ -172,7 +173,7 @@ export async function POST(request: Request) {
 
         if (existingClient) {
             return NextResponse.json(
-                {message: 'Client with this email or telegram username already exists'},
+                {message: 'Client with this email or telegram chat id already exists'},
                 {status: 409}
             );
         }
@@ -192,18 +193,19 @@ export async function POST(request: Request) {
             return NextResponse.json({error: "Error generating tags"}, {status: 500});
         }
 
+        const encrypted = encryptClient(body);
         const newClient = await Clients.create({
-            firstName: body.firstName,
-            lastName: body.lastName,
-            email: body.email,
-            phone: body.phone,
-            telegramChatId: body.telegramChatId,
-            preferredContactMethod: body.preferredContactMethod,
-            subscriptions: body.subscriptions,
-            birthDate: body.birthDate,
-            preferences: body.preferences || [],
+            firstName: encrypted.firstName,
+            lastName: encrypted.lastName,
+            email: encrypted.email,
+            phone: encrypted.phone,
+            telegramChatId: encrypted.telegramChatId,
+            preferredContactMethod: encrypted.preferredContactMethod,
+            subscriptions: encrypted.subscriptions,
+            birthDate: encrypted.birthDate,
+            preferences: encrypted.preferences || [],
             tags: clientTags || [],
-            adInteractions: body.adInteractions || []
+            adInteractions: encrypted.adInteractions || []
         });
 
         const client = await newClient

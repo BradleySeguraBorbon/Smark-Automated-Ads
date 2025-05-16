@@ -22,8 +22,8 @@ export interface IClient extends Document {
     phone: string;
     telegramChatId: string;
     preferredContactMethod: string;
-    subscriptions: ("email" | "telegram")[];
-    birthDate: Date;
+    subscriptions: string[];
+    birthDate: string;
     preferences: string[];
     tags: TagRef[];
     adInteractions: AdInteractions[];

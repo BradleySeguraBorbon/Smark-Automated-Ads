@@ -112,6 +112,8 @@ export default function ClientForm({ form, onSubmit, newPreference, setNewPrefer
                                 message: "Telegram Chat ID cannot exceed 50 characters",
                             },
                             required: "Telegram Chat ID is required",
+                            validate: value =>
+                                value.trim() !== "" || "Telegram Chat ID cannot be empty or just spaces",
                         }}
                         render={({ field }: ControllerRenderProps<IClient, 'telegramChatId'>) => (
                             <FormItem>
