@@ -12,7 +12,7 @@ const clientSchema = new Schema<IClient>({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  telegramChatId: { type: String, unique: true },
+  telegramChatId: { type: String, unique: true, sparse: true },
   preferredContactMethod: { type: String, enum: ["email", "telegram"], required: true },
   subscriptions: [{ type: String, enum: ["email", "telegram"], required: true }],
   birthDate: { type: Date, required: true },
