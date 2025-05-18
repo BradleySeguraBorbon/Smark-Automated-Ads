@@ -23,14 +23,20 @@ export default function EmailLoginPage() {
         setLoading(true);
         setError("");
         try {
-            console.log("Antes de enivar code")
             const res = await fetch("/api/auth/send-code", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, purpose: "login" })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to send code");
+            if (!res.ok) {
+                if (data.error === 'TokenExpired') {
+                    setError('The code has expired. Please request a new one.');
+                } else {
+                    setError(data.error || 'Invalid code.');
+                }
+                return;
+            }
             console.log("Temp Token: ", data.tempToken)
             setTempToken(data.tempToken);
             setStep("code");
@@ -47,7 +53,6 @@ export default function EmailLoginPage() {
         try {
             console.log("Antes de decode",tempToken)
             const userInfo = await decodeToken(tempToken);
-            console.log("Despues: ",userInfo);
             if (!userInfo || userInfo.code !== code) {
                 throw new Error("Invalid code");
             }

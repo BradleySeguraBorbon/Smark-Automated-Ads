@@ -51,7 +51,14 @@ export default function ResetPasswordPage() {
                 body: JSON.stringify({ tempToken, code, newPassword })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+            if (!res.ok) {
+                if (data.error === 'TokenExpired') {
+                    setError('The code has expired. Please request a new one.');
+                } else {
+                    setError(data.error || 'Invalid code.');
+                }
+                return;
+            }
             router.back();
         } catch (err: any) {
             setError(err.message);
