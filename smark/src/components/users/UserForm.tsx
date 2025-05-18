@@ -9,18 +9,18 @@ import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 
 interface UserFormProps {
-    form: UseFormReturn<{ username: string; password: string; role?: string }>;
-    onSubmit: (data: { username: string; password: string; role?: string }) => void;
+    form: UseFormReturn<{ username: string; password: string; email:string; role?: string }>;
+    onSubmitAction: (data: { username: string; password: string; role?: string }) => void;
     userRole: string;
     isSubmitting: boolean;
 }
 
-export default function UserForm({ form, onSubmit, userRole, isSubmitting }: UserFormProps) {
+export default function UserForm({ form, onSubmitAction, userRole, isSubmitting }: UserFormProps) {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
                 <FormField
                     control={form.control}
                     name="username"
@@ -76,6 +76,23 @@ export default function UserForm({ form, onSubmit, userRole, isSubmitting }: Use
                     )}
                 />
 
+                <FormField
+                    control={form.control}
+                    name="email"
+                    rules={{
+                        required: "Email is required",
+                        maxLength: { value: 80, message: "Email cannot exceed 80 characters" },
+                    }}
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter email" {...field} />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
 
                 {userRole === 'developer' && (
                     <FormField

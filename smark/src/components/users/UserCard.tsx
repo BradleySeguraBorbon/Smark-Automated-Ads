@@ -114,6 +114,9 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                 <CardContent>
                     <div className="space-y-2">
                         <p className="text-sm">
+                            <span className="font-medium">Email:</span> {user.email}
+                        </p>
+                        <p className="text-sm">
                             <span className="font-medium">Role:</span> {user.role}
                         </p>
                         {user.marketingCampaigns.length > 0 && (

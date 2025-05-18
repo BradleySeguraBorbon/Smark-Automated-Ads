@@ -21,6 +21,9 @@ export async function POST(request: Request) {
             username: payload.username,
             role: payload.role,
             id: payload.uid,
+            email: payload.email,
+            code: payload.code,
+            purpose: payload.purpose,
         });
     } catch (error) {
         console.error('Failed to decode token:', error);

@@ -84,6 +84,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             );
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(body.email)) {
+            return NextResponse.json(
+                { message: 'Invalid email format' },
+                { status: 400 }
+            );
+        }
+
         if (body.username) {
             const existingUser = await Users.findOne({
                 username: body.username,
@@ -92,6 +100,16 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             if (existingUser) {
                 return NextResponse.json(
                     { message: 'A user with this username already exists' },
+                    { status: 409 }
+                );
+            }
+        }
+
+        if (body.email) {
+            const existingEmailUser = await Users.findOne({ email: body.email });
+            if (existingEmailUser) {
+                return NextResponse.json(
+                    { message: 'A user with this email already exists' },
                     { status: 409 }
                 );
             }

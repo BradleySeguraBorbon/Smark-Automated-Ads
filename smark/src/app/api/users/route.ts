@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const requiredFields = ['username', 'password', 'role'/*, 'marketingCampaigns'*/];
+    const requiredFields = ['username', 'password', 'role', 'email'];
     const missingFields = requiredFields.filter(
       field => body[field] === undefined || body[field] === null
     );
@@ -90,6 +90,15 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email)) {
+      return NextResponse.json(
+          { message: 'Invalid email format' },
+          { status: 400 }
+      );
+    }
+
 /*
     if (!['admin', 'employee'].includes(body.role)) {
       return NextResponse.json(
@@ -106,6 +115,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const existingEmailUser = await Users.findOne({ email: body.email });
+    if (existingEmailUser) {
+      return NextResponse.json(
+          { message: 'A user with this email already exists' },
+          { status: 409 }
+      );
+    }
+
     const hashed = await bcrypt.hash(body.password, 10);
 
     if (user.role === 'admin') {
@@ -115,6 +132,7 @@ export async function POST(request: Request) {
     const newUser = await Users.create({
       username: body.username,
       password: hashed,
+      email: body.email,
       role: body.role,
       marketingCampaigns: body.marketingCampaigns,
     });

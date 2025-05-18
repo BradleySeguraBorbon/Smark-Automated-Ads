@@ -1,7 +1,10 @@
+import Cookies from 'js-cookie';
+import { useAuthStore } from '@/lib/store';
+
 export async function decodeToken(token: string | null | undefined) {
     console.log('Token recibido:', token);
     if (!token || token.trim() === '') {
-        return null;
+        return handleInvalidToken();
     }
 
     try {
@@ -15,7 +18,7 @@ export async function decodeToken(token: string | null | undefined) {
 
         if (!res.ok) {
             console.error('Error verificando el token en el servidor');
-            return null;
+            return handleInvalidToken();
         }
 
         const data = await res.json();
@@ -23,6 +26,15 @@ export async function decodeToken(token: string | null | undefined) {
         return data;
     } catch (error) {
         console.log('Failed to decode token via API:', error);
-        return null;
+        return handleInvalidToken();
     }
+}
+
+function handleInvalidToken() {
+    Cookies.remove('token');
+
+    const { clearAuth } = useAuthStore.getState();
+    clearAuth();
+
+    return null;
 }

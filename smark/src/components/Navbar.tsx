@@ -12,9 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
     useEffect,
-    useRef,
     useState,
-    useLayoutEffect,
 } from "react";
 import {useRouter} from "next/navigation";
 import Link from "next/link";
@@ -27,6 +25,7 @@ import {decodeToken} from "@/lib/utils/decodeToken";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {toUpperCase} from "uri-js/dist/esnext/util";
 import CustomAlertDialog from '@/components/CustomAlertDialog';
+import Cookies from 'js-cookie';
 
 interface NavbarProps {
     currentPath: string;
@@ -52,7 +51,6 @@ export function Navbar({currentPath}: NavbarProps) {
     const hasHydrated = useAuthStore((state) => state._hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-    const measurementRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!hasHydrated) return;
@@ -182,6 +180,7 @@ export function Navbar({currentPath}: NavbarProps) {
                 onConfirm={() => {
                     setLogoutDialogOpen(false);
                     clearToken();
+                    Cookies.remove('token');
                     setUserInfo(null);
                     setTimeout(() => {
                         router.push('/');
