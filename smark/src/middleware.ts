@@ -3,6 +3,7 @@ import {jwtVerify} from 'jose';
 
 const PUBLIC_FILE = /\.(.*)$/;
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+const allowedOrigin = process.env.CORS_ALLOWED_ORIGIN || '*';
 
 export async function middleware(request: NextRequest) {
     const {pathname} = request.nextUrl;
@@ -18,6 +19,20 @@ export async function middleware(request: NextRequest) {
     const headerToken = authHeader?.split(' ')[1];
     const token = cookieToken || headerToken || null;
 
+    const response = NextResponse.next();
+
+    response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+
+    if (request.method === 'OPTIONS') {
+        return new NextResponse(null, {
+            status: 204,
+            headers: response.headers,
+        });
+    }
+
     if (
         pathname.startsWith('/api/auth') ||
         pathname.startsWith('/api-docs') ||
@@ -25,14 +40,21 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/api/chat') ||
         PUBLIC_FILE.test(pathname)
     ) {
-        return NextResponse.next();
+        return response;
     }
 
     if (token && isAuthPage) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    const protectedPaths = ['/templates', '/users', '/tags', '/adMessages', '/marketingCampaigns', '/campaignAudiences'];
+    const protectedPaths = [
+        '/templates',
+        '/users',
+        '/tags',
+        '/adMessages',
+        '/marketingCampaigns',
+        '/campaignAudiences',
+    ];
     const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
 
     if (!token && isProtected) {
@@ -51,17 +73,21 @@ export async function middleware(request: NextRequest) {
                 request: {
                     headers: requestHeaders,
                 },
+                headers: response.headers,
             });
         } catch (err) {
             if (pathname.startsWith('/api')) {
-                return NextResponse.json({error: 'Invalid token'}, {status: 401});
+                return NextResponse.json({error: 'Invalid token'}, {
+                    status: 401,
+                    headers: response.headers,
+                });
             } else {
                 return NextResponse.redirect(new URL('/auth/login', request.url));
             }
         }
     }
 
-    return NextResponse.next();
+    return response;
 }
 
 export const config = {
