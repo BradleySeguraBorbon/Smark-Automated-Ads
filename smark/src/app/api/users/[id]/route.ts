@@ -3,9 +3,18 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Users, MarketingCampaigns } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
+}
+
+async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
+    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const foundDocs = await model.find({ _id: { $in: validIds } }).select('_id');
+    const foundIds = new Set(foundDocs.map((doc: any) => doc._id.toString()));
+    const invalid = ids.filter(id => !foundIds.has(id));
+    return invalid.length === 0 ? null : { field: fieldName, invalidIds: invalid };
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -53,68 +62,45 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    await connectDB();
+
+    const user = getUserFromRequest(request);
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!['developer', 'admin'].includes(user.role)) {
+        return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    if (!id || !isValidObjectId(id)) {
+        return NextResponse.json({ message: 'Invalid or missing ID' }, { status: 400 });
+    }
+
+    const result = await sanitizeRequest(request, {
+        requiredFields: ['username', 'email', 'role'],
+        emails: ['email'],
+        enums: [{ field: 'role', allowed: ['admin', 'employee', 'developer'] }]
+    });
+    if (!result.ok) return result.response;
+    const body = result.data;
+
+    const existingUser = await Users.findOne({ username: body.username, _id: { $ne: id } });
+    if (existingUser) {
+        return NextResponse.json({ message: 'A user with this username already exists' }, { status: 409 });
+    }
+
+    const existingEmailUser = await Users.findOne({ email: body.email, _id: { $ne: id } });
+    if (existingEmailUser) {
+        return NextResponse.json({ message: 'A user with this email already exists' }, { status: 409 });
+    }
+
+    if (Array.isArray(body.marketingCampaigns)) {
+        const invalidRefs = await validateObjectIdsExist(body.marketingCampaigns, MarketingCampaigns, 'marketingCampaigns');
+        if (invalidRefs) {
+            return NextResponse.json({ message: 'Invalid campaign references', details: invalidRefs }, { status: 400 });
+        }
+    }
+
     try {
-        await connectDB();
-
-        const allowedRoles = ['developer', 'admin'];
-
-        const tokenUser = getUserFromRequest(request);
-
-        if (!tokenUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        if (!allowedRoles.includes(tokenUser.role as string)) {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
-        }
-
-        const { id } = await params;
-
-        if (!id || !isValidObjectId(id)) {
-            return NextResponse.json(
-                { message: 'Invalid or missing ID parameter' },
-                { status: 400 }
-            );
-        }
-
-        const body = await request.json();
-
-        if (body.role && !['admin', 'employee'].includes(body.role)) {
-            return NextResponse.json(
-                { message: 'Invalid role. Must be "admin" or "employee".' },
-                { status: 400 }
-            );
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(body.email)) {
-            return NextResponse.json(
-                { message: 'Invalid email format' },
-                { status: 400 }
-            );
-        }
-
-        if (body.username) {
-            const existingUser = await Users.findOne({
-                username: body.username,
-                _id: { $ne: id }
-            });
-            if (existingUser) {
-                return NextResponse.json(
-                    { message: 'A user with this username already exists' },
-                    { status: 409 }
-                );
-            }
-        }
-
-        if (body.email) {
-            const existingEmailUser = await Users.findOne({ email: body.email });
-            if (existingEmailUser) {
-                return NextResponse.json(
-                    { message: 'A user with this email already exists' },
-                    { status: 409 }
-                );
-            }
-        }
-
         const updatedUser = await Users.findByIdAndUpdate(
             id,
             body,
@@ -122,35 +108,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         ).populate('marketingCampaigns', ['_id', 'name', 'description', 'status']);
 
         if (!updatedUser) {
-            return NextResponse.json(
-                { message: 'User not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
 
-        return NextResponse.json({
-            message: 'User updated successfully',
-            result: updatedUser,
-        });
+        return NextResponse.json({ message: 'User updated successfully', result: updatedUser });
     } catch (error: any) {
         console.error(error);
-        if (error.name === 'ValidationError') {
-            return NextResponse.json(
-                { error: error.message },
-                { status: 422 }
-            );
-        }
         return NextResponse.json(
-            { error: 'Error updating user' },
-            { status: 500 }
+            { error: error.message || 'Error updating user' },
+            { status: error.name === 'ValidationError' ? 422 : 500 }
         );
     }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-
-    //const session = await mongoose.startSession();
-    //session.startTransaction();
     try {
         await connectDB();
 

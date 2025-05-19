@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import sendMail from '@/lib/utils/mailer';
 import dbConnect from '@/config/db';
 import User from '@/models/User';
+import {deepSanitize, validateEmail, validateEnum} from "@/lib/utils/inputSecurity";
 
 const generateHtml = (code: string, purpose: 'login' | 'reset') => {
     const purposeText = purpose === 'reset' ? 'reset the password for' : 'log in to';
@@ -49,7 +50,14 @@ const generateHtml = (code: string, purpose: 'login' | 'reset') => {
 
 export async function POST(request: Request) {
     await dbConnect();
-    const { email, purpose } = await request.json();
+    const { email, purpose } = deepSanitize(await request.json());
+
+    if (!validateEmail(email)) {
+        return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+    if (!validateEnum(purpose, ['login', 'reset'])) {
+        return NextResponse.json({ error: 'Invalid purpose' }, { status: 400 });
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -57,12 +65,7 @@ export async function POST(request: Request) {
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const subject =
-        purpose === 'reset'
-            ? 'Password reset verification code'
-            : 'Your login code';
-
+    const subject = purpose === 'reset' ? 'Password reset verification code' : 'Your login code';
     const html = generateHtml(code, purpose);
 
     await sendMail(email, subject, html);

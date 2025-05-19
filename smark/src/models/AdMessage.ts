@@ -34,7 +34,8 @@ const adMessagesSchema = new mongoose.Schema<IAdMessage>(
     sendDate: { type: Date, required: true }
   },
   {
-    timestamps: true
+    timestamps: true,
+    strict:true
   }
 );
 

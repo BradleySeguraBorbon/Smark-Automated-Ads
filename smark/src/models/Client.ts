@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from 'mongoose';
 import { Model } from 'mongoose';
-import { IClient } from '../types/Client';
+import { IClient } from '@/types/Client';
 
 const adInteractionsSchema = new Schema({
   adMessage: { type: Types.ObjectId, ref: "AdMessages", required: true },
@@ -21,7 +21,8 @@ const clientSchema = new Schema<IClient>({
   adInteractions: [adInteractionsSchema],
 }, {
   timestamps: true,
-  validateBeforeSave: true
+  validateBeforeSave: true,
+  strict:true
 });
 
 

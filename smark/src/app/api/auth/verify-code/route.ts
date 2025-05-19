@@ -3,10 +3,18 @@ import jwt from 'jsonwebtoken';
 import dbConnect from '@/config/db';
 import User from '@/models/User';
 import bcrypt from 'bcrypt';
+import {deepSanitize} from "@/lib/utils/inputSecurity";
 
 export async function POST(request: Request) {
     await dbConnect();
-    const { tempToken, code, newPassword } = await request.json();
+    const { tempToken, code, newPassword } = deepSanitize(await request.json());
+
+    if (
+        typeof tempToken !== 'string' || typeof code !== 'string' ||
+        (newPassword && typeof newPassword !== 'string')
+    ) {
+        return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
+    }
 
     try {
         const decoded = jwt.verify(tempToken, process.env.JWT_SECRET!) as any;
@@ -28,13 +36,16 @@ export async function POST(request: Request) {
         }
 
         if (decoded.purpose === 'reset') {
+            if (!newPassword || newPassword.length < 6) {
+                return NextResponse.json({ error: 'Password too weak or missing' }, { status: 400 });
+            }
             user.password = await bcrypt.hash(newPassword, 10);
             await user.save();
             return NextResponse.json({ message: 'Password updated successfully' });
         }
 
         return NextResponse.json({ error: 'Invalid purpose' }, { status: 400 });
-    } catch (err) {
+    } catch {
         return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 }

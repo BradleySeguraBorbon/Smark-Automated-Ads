@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { ITemplate } from '../types/Template';
+import { ITemplate } from '@/types/Template';
 
 const templateSchema = new Schema<ITemplate>(
   {
@@ -9,7 +9,8 @@ const templateSchema = new Schema<ITemplate>(
     placeholders: { type: [String], required: true }
   },
   {
-    timestamps: true
+    timestamps: true,
+      strict:true
   }
 );
 

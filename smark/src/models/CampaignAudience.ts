@@ -7,7 +7,8 @@ const campaignAudienceSchema = new Schema<ICampaignAudience>(
     audience: { type: [Schema.Types.ObjectId], ref: 'Clients', required: true },
     status: { type: String, enum: ['approved', 'pending', 'rejected'], required: true },
   },
-  { timestamps: true }
+  { timestamps: true,
+    strict:true}
 );
 
 const CampaignAudiences = mongoose.models.CampaignAudiences as Model<ICampaignAudience> || mongoose.model<ICampaignAudience>('CampaignAudiences', campaignAudienceSchema);

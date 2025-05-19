@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { ITag } from '../types/Tag';
+import { ITag } from '@/types/Tag';
 
 const tagSchema = new Schema<ITag>(
   {
@@ -7,7 +7,8 @@ const tagSchema = new Schema<ITag>(
     keywords: [{ type: String, required: true }]
   },
   {
-    timestamps: true
+    timestamps: true,
+      strict:true
   }
 );
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import { Tags } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
 
 export async function GET(request: Request) {
     try {
@@ -57,51 +58,35 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    await connectDB();
+
+    const allowedRoles = ['developer', 'admin'];
+    const user = getUserFromRequest(request);
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!allowedRoles.includes(user.role)) {
+        return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
+    const result = await sanitizeRequest(request, {
+        requiredFields: ['name', 'keywords']
+    });
+    if (!result.ok) return result.response;
+    const body = result.data;
+
+    if (!body.name || !Array.isArray(body.keywords) || body.keywords.length === 0) {
+        return NextResponse.json({ message: 'Name and keywords are required' }, { status: 400 });
+    }
+
+    const exists = await Tags.findOne({ name: body.name });
+    if (exists) {
+        return NextResponse.json({ message: 'Tag with this name already exists' }, { status: 409 });
+    }
+
     try {
-        await connectDB();
-
-        const allowedRoles = ['developer', 'admin'];
-
-        const user = getUserFromRequest(request);
-
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        if (!allowedRoles.includes(user.role as string)) {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
-        }
-
-        const body = await request.json();
-
-        const requiredFields = [
-            'name',
-            'keywords'
-        ];
-
-        const missingFields = requiredFields.filter(
-            field => body[field] === undefined || body[field] === null
-        );
-
-        if (missingFields.length > 0) {
-            return NextResponse.json(
-                { message: 'Missing required fields', missingFields },
-                { status: 400 }
-            );
-        }
-
-        if (!body.name || !Array.isArray(body.keywords) || body.keywords.length === 0) {
-            return NextResponse.json({ message: 'Name and keywords are required' }, { status: 400 });
-        }
-
-        const exists = await Tags.findOne({ name: body.name });
-        if (exists) {
-            return NextResponse.json({ message: 'Tag with this name already exists' }, { status: 409 });
-        }
-
         const newTag = await Tags.create(body);
         return NextResponse.json({ message: 'Tag created successfully', result: newTag }, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
-        return NextResponse.json({ error: 'Error creating tag' },
-            { status: 500 });
+        return NextResponse.json({ error: error.message || 'Error creating tag' }, { status: 500 });
     }
 }
