@@ -4,7 +4,8 @@ import {useState} from 'react';
 import * as XLSX from 'xlsx';
 import { commaSeparatedToArray } from '@/lib/utils/stringHelper';
 import CustomAlertDialog from '@/components/CustomAlertDialog';
-import {useAuthStore} from '@/lib/store';
+import { useAuthStore } from '@/lib/store';
+import { useNotificationStore } from '@/lib/store';
 
 export default function ClientImportForm() {
     const [loading, setLoading] = useState(false);
@@ -14,6 +15,7 @@ export default function ClientImportForm() {
     const [successMessage, setSuccessMessage] = useState('');
 
     const token = useAuthStore.getState().token;
+    const notifyGlobal = useNotificationStore.getState().showAlert;
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -51,25 +53,52 @@ export default function ClientImportForm() {
 
             if (!response.ok) throw new Error(result.message || 'Failed to import clients');
 
-            setSuccessMessage(result.message);
+            setSuccessMessage(result.message + " La asignación de tags se realizará en segundo plano.");
             setSuccessOpen(true);
-        } catch (err: any) {
-            setErrorMessage(err.message || 'There was a problem with the import');
-            setErrorOpen(true);
-        } finally {
             setLoading(false);
+
+            try {
+                const assignResponse = await fetch('/api/clients/assignTags', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ token }),
+                });
+
+                let assignResult: any;
+                try {
+                    assignResult = await assignResponse.json();
+                } catch {
+                    assignResult = {};
+                }
+
+                if (!assignResponse.ok) {
+                    console.error('Tag assignment failed:', assignResult.message);
+                    notifyGlobal('error', 'Tags could not be assigned automatically');
+                } else {
+                    notifyGlobal('success', `Tags assigned to ${assignResult.updatedClientIds.length} clients.`);
+                }
+            } catch (tagError) {
+                console.error('Error in background tag assignment:', tagError);
+                notifyGlobal('error', 'Unexpected error during Tags Assignation');
+            }
+        } catch (err: any) {
+            setErrorMessage(err.message || 'There was a problem with the clients import');
+            setErrorOpen(true);
         }
     };
 
     return (
         <div className="space-y-4">
-            <label className="block text-sm font-medium">Upload Excel File</label>
+            <label className="block text-sm font-medium pb-5">Upload Excel File</label>
             <input
                 type="file"
                 accept=".xlsx, .xls"
                 onChange={handleFileUpload}
                 disabled={loading}
-                className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-white hover:file:bg-primary/80"
+                className="block w-full text-sm file:bg-emerald-600 hover:file:bg-emerald-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-white"
             />
             {loading && <p className="text-sm text-muted-foreground">Processing file...</p>}
 

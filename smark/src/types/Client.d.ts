@@ -27,6 +27,7 @@ export interface IClient extends Document {
     preferences: string[];
     tags: TagRef[];
     adInteractions: AdInteractions[];
+    tagsPending: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
