@@ -15,6 +15,7 @@ import { decodeToken } from "@/lib/utils/decodeToken"
 import { ClientRef } from "@/types/Client"
 
 
+
 export default function MarketingCampaignDetailPage({ params }: { params: { id: string } }) {
     const { id } = useParams();
     const currentPath = usePathname();

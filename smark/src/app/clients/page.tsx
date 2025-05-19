@@ -6,7 +6,7 @@ import {PlusCircle} from "lucide-react"
 import Link from "next/link"
 import {IClient} from "@/types/Client"
 import ClientsList from "@/components/clients/ClientList"
-import SearchInput from "@/components/SearchInput"
+import { FileInput } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner"
 import PaginationControls from "@/components/PaginationControls"
 import {useAuthStore} from '@/lib/store';
@@ -14,16 +14,18 @@ import {decodeToken} from "@/lib/utils/decodeToken";
 import {useRouter} from "next/navigation";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 import CustomAlertDialog from "@/components/CustomAlertDialog";
+import ClientImportModal from "@/components/clients/ClientImportModal";
 
 export default function ClientsPage() {
     const [searchTerm, setSearchTerm] = useState("")
-    const [apiError, setApiError] = useState<string | null>(null)
-    const [fetchedClients, setFetchedClients] = useState<IClient[]>([])
-    const [loadingIds, setLoadingIds] = useState<string[]>([])
-    const [loading, setLoading] = useState(true)
-    const [showSuccessDialog, setShowSuccessDialog] = useState(false)
-    const [showErrorDialog, setShowErrorDialog] = useState(false)
-    const [errorMessage, setErrorMessage] = useState("")
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [fetchedClients, setFetchedClients] = useState<IClient[]>([]);
+    const [loadingIds, setLoadingIds] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [showErrorDialog, setShowErrorDialog] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [showImportModal, setShowImportModal] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
@@ -130,12 +132,23 @@ export default function ClientsPage() {
         <div className="max-w-6xl mx-auto mt-8">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
                 <BreadcrumbHeader backHref={'/'} title={"Client Management"}/>
-                {userInfo && userInfo?.role !== 'employee' && <Link href="/clients/create">
-                    <Button className="w-full sm:w-auto bg-purple-500 hover:bg-purple-800 dark:text-white">
-                        <PlusCircle className="mr-2 h-4 w-4"/>
-                        Add New Client
-                    </Button>
-                </Link>}
+                {userInfo && userInfo?.role !== 'employee' && (
+                    <div className="flex gap-3 justify-end">
+                        <Button
+                            onClick={() => setShowImportModal(true)}
+                            className="bg-blue-600 hover:bg-blue-800 dark:text-white"
+                        >
+                            <FileInput className="mr-2 h-4 w-4" />
+                            Import Clients
+                        </Button>
+                        <Link href="/clients/create">
+                            <Button className="bg-purple-500 hover:bg-purple-800 dark:text-white">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add New Client
+                            </Button>
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/*<SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={"Search Clients..."}/>*/}
@@ -177,6 +190,7 @@ export default function ClientsPage() {
                 onConfirm={() => setShowErrorDialog(false)}
                 onOpenChange={setShowErrorDialog}
             />
+            <ClientImportModal open={showImportModal} onClose={() => setShowImportModal(false)} />
         </div>
     )
 }
