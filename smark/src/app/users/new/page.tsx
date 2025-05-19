@@ -145,13 +145,13 @@ export default function CreateUserPage() {
                 title={alertType === "success" ? "Success" : "Error"}
                 description={alertMessage}
                 confirmLabel="OK"
-                onConfirm={() => {
+                onConfirmAction={() => {
                     if(alertType!=='error'){
                         setAlertOpen(false);
                         router.back();
                     }
                 }}
-                onOpenChange={setAlertOpen}
+                onOpenChangeAction={setAlertOpen}
             />
         </>
     );

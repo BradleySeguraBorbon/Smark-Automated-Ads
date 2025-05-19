@@ -243,7 +243,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'Invalid preferredContactMethod' }, { status: 400 });
         }
 
-        if (!Array.isArray(body.subscriptions) || body.subscriptions.some(s => !validMethods.includes(s))) {
+        if (!Array.isArray(body.subscriptions) || body.subscriptions.some((s:string) => !validMethods.includes(s))) {
             return NextResponse.json({ message: 'Invalid subscriptions values' }, { status: 400 });
         }
 

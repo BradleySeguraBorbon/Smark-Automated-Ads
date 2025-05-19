@@ -13,12 +13,12 @@ interface UserCardProps {
     user: IUser;
     currentUserRole: string;
     currentUserId?: string;
-    onDelete: (id: string) => void;
+    onDeleteAction: (id: string) => void;
 }
 
-export default function UserCard({user, currentUserRole, currentUserId, onDelete}: UserCardProps) {
+export default function UserCard({user, currentUserRole, currentUserId, onDeleteAction}: UserCardProps) {
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-    const router = useRouter();
+
     const [feedbackDialog, setFeedbackDialog] = useState<{
         open: boolean;
         type: 'success' | 'error';
@@ -53,7 +53,7 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                     description: result.message || result.error || 'Failed to delete user.',
                 });
             } else {
-                onDelete(user._id as string);
+                onDeleteAction(user._id as string);
                 setFeedbackDialog({
                     open: true,
                     type: 'success',
@@ -139,9 +139,9 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                 description={`Are you sure you want to delete ${user.username}? This action cannot be undone.`}
                 confirmLabel="Delete"
                 cancelLabel="Cancel"
-                onConfirm={handleDelete}
-                onCancel={() => setConfirmDialogOpen(false)}
-                onOpenChange={setConfirmDialogOpen}
+                onConfirmAction={handleDelete}
+                onCancelAction={() => setConfirmDialogOpen(false)}
+                onOpenChangeAction={setConfirmDialogOpen}
             />
 
             <CustomAlertDialog
@@ -150,8 +150,8 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                 title={feedbackDialog.title}
                 description={feedbackDialog.description}
                 confirmLabel="OK"
-                onConfirm={() => setFeedbackDialog({...feedbackDialog, open: false})}
-                onOpenChange={(open) => setFeedbackDialog((prev) => ({...prev, open}))}
+                onConfirmAction={() => setFeedbackDialog({...feedbackDialog, open: false})}
+                onOpenChangeAction={(open) => setFeedbackDialog((prev) => ({...prev, open}))}
             />
         </>
     );

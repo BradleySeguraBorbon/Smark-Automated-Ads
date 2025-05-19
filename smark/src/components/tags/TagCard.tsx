@@ -11,12 +11,12 @@ import { useAuthStore } from '@/lib/store'
 
 interface TagCardProps {
     tag: ITag
-    refresh: () => void
+    refreshAction: () => void
     onSuccessDelete?: (msg: string) => void
     currentUserRole:string
 }
 
-export default function TagCard({ tag, refresh, onSuccessDelete, currentUserRole }: TagCardProps) {
+export default function TagCard({ tag, refreshAction, onSuccessDelete, currentUserRole }: TagCardProps) {
     const [alertOpen, setAlertOpen] = useState(false)
     const token = useAuthStore(state => state.token)
 
@@ -37,7 +37,7 @@ export default function TagCard({ tag, refresh, onSuccessDelete, currentUserRole
                 return
             }
 
-            refresh()
+            refreshAction()
             onSuccessDelete?.(`Tag "${tag.name}" was deleted successfully.`)
         } catch (err) {
             console.error('Error deleting tag:', err)
@@ -81,9 +81,9 @@ export default function TagCard({ tag, refresh, onSuccessDelete, currentUserRole
                 description={`Are you sure you want to delete "${tag.name}"? This action cannot be undone.`}
                 confirmLabel="Delete"
                 cancelLabel="Cancel"
-                onConfirm={handleDelete}
-                onCancel={() => setAlertOpen(false)}
-                onOpenChange={setAlertOpen}
+                onConfirmAction={handleDelete}
+                onCancelAction={() => setAlertOpen(false)}
+                onOpenChangeAction={setAlertOpen}
             />
         </>
     )

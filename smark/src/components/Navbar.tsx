@@ -171,13 +171,13 @@ export function Navbar({currentPath}: NavbarProps) {
             </div>
             <CustomAlertDialog
                 open={logoutDialogOpen}
-                onOpenChange={setLogoutDialogOpen}
+                onOpenChangeAction={setLogoutDialogOpen}
                 type="warning"
                 title="Cerrar sesión"
                 description="¿Estás seguro de que deseas cerrar tu sesión actual?"
                 confirmLabel="Cerrar sesión"
                 cancelLabel="Cancelar"
-                onConfirm={() => {
+                onConfirmAction={() => {
                     setLogoutDialogOpen(false);
                     clearToken();
                     Cookies.remove('token');
@@ -186,7 +186,7 @@ export function Navbar({currentPath}: NavbarProps) {
                         router.push('/');
                     }, 10);
                 }}
-                onCancel={() => setLogoutDialogOpen(false)}
+                onCancelAction={() => setLogoutDialogOpen(false)}
             />
         </div>
     );

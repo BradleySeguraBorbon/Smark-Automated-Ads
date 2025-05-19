@@ -25,7 +25,7 @@ export default function UsersList({ users, currentUserRole, currentUserId, onDel
                     user={user}
                     currentUserRole={currentUserRole as string}
                     currentUserId={currentUserId}
-                    onDelete={onDelete}
+                    onDeleteAction={onDelete}
                 />
 
             ))}

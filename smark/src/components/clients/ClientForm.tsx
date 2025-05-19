@@ -15,15 +15,15 @@ import SubscriptionsSelector from "@/components/clients/SubscriptionsSelector"
 
 interface ClientFormProps {
     form: UseFormReturn<IClient>
-    onSubmit: (data: IClient) => void
-    newPreference: string
+    onSubmitAction: (data: IClient) => void
+    newPreferenceAction: string
     setNewPreference: (value: string) => void
 }
 
-export default function ClientForm({ form, onSubmit, newPreference, setNewPreference }: ClientFormProps) {
+export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreference }: ClientFormProps) {
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                         control={form.control}
@@ -223,8 +223,8 @@ export default function ClientForm({ form, onSubmit, newPreference, setNewPrefer
                         <PreferenceManager
                             fieldName="preferences"
                             control={form.control}
-                            newPreference={newPreference}
-                            setNewPreference={setNewPreference}
+                            newPreference={newPreferenceAction}
+                            setNewPreferenceAction={setNewPreference}
                             field={field}
                             error={fieldState.error?.message}
                         />

@@ -29,7 +29,7 @@ export function decryptClient(client: IClient): IClient {
     if (dec.preferredContactMethod) dec.preferredContactMethod = tryDecrypt(dec.preferredContactMethod);
     if (dec.birthDate && typeof dec.birthDate === 'string') {
         const d = tryDecrypt(dec.birthDate);
-        dec.birthDate = new Date(d);
+        dec.birthDate = (d);
     }
     if (dec.subscriptions) dec.subscriptions = dec.subscriptions.map(tryDecrypt);
 

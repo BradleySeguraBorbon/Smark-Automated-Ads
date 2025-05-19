@@ -199,14 +199,14 @@ export default function NewCampaignPage() {
                             <div className="lg:col-span-2 w-full">
                                 <CampaignFormTabs
                                     mode="new"
-                                    onSubmit={handleCreate}
+                                    onSubmitAction={handleCreate}
                                     allTags={allTags}
                                     allUsers={allUsers}
                                     form={form}
                                 />
                             </div>
                             <div className="lg:col-span-1">
-                                <CampaignSummary onSubmit={handleCreate} mode="new" />
+                                <CampaignSummary onSubmitAction={handleCreate} mode="new" />
                             </div>
                         </div>
                     </FormProvider>
@@ -217,11 +217,11 @@ export default function NewCampaignPage() {
                     title="Campaign Created"
                     description="The marketing campaign was successfully created."
                     confirmLabel="Go to Campaigns"
-                    onConfirm={() => {
+                    onConfirmAction={() => {
                         setSuccessOpen(false);
                         window.location.href = "/marketingCampaigns";
                     }}
-                    onOpenChange={setSuccessOpen}
+                    onOpenChangeAction={setSuccessOpen}
                 />
             </main>
         </div>

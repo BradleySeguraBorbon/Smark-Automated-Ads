@@ -11,14 +11,14 @@ import PlaceholdersInput from "@/components/templates/PlaceholdersInputs";
 
 interface TemplateFormProps {
     form: UseFormReturn<ITemplate>
-    onSubmit: (data: ITemplate) => void
+    onSubmitAction: (data: ITemplate) => void
     buttonText: boolean
 }
 
-export default function TemplateForm({form, onSubmit, buttonText}: TemplateFormProps) {
+export default function TemplateForm({form, onSubmitAction, buttonText}: TemplateFormProps) {
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
                 <FormField
                     control={form.control}
                     name="name"

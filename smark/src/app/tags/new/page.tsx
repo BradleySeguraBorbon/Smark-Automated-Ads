@@ -88,7 +88,7 @@ export default function CreateTagPage() {
                         <CardTitle>Tag Information</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <TagForm form={form} onSubmit={onSubmit}/>
+                        <TagForm form={form} onSubmitAction={onSubmit}/>
                     </CardContent>
                 </Card>
             </div>
@@ -99,11 +99,11 @@ export default function CreateTagPage() {
                 title="Tag Created Successfully!"
                 description="The new tag has been saved into the system."
                 confirmLabel="Go to tags"
-                onConfirm={() => {
+                onConfirmAction={() => {
                     setSuccessOpen(false)
                     router.push('/tags')
                 }}
-                onOpenChange={setSuccessOpen}
+                onOpenChangeAction={setSuccessOpen}
             />
 
             <CustomAlertDialog
@@ -112,8 +112,8 @@ export default function CreateTagPage() {
                 title="Error Creating Tag"
                 description={errorMessage}
                 confirmLabel="Ok"
-                onConfirm={() => setErrorOpen(false)}
-                onOpenChange={setErrorOpen}
+                onConfirmAction={() => setErrorOpen(false)}
+                onOpenChangeAction={setErrorOpen}
             />
 
             <CustomAlertDialog
@@ -122,8 +122,8 @@ export default function CreateTagPage() {
                 title="Attention"
                 description={infoMessage}
                 confirmLabel="Ok"
-                onConfirm={() => setInfoOpen(false)}
-                onOpenChange={setInfoOpen}
+                onConfirmAction={() => setInfoOpen(false)}
+                onOpenChangeAction={setInfoOpen}
             />
         </div>
     )
