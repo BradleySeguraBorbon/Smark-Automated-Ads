@@ -109,6 +109,20 @@ export async function POST(req: NextRequest) {
 
         const inserted = await Clients.insertMany(validClients, { ordered: false });
 
+        for (const client of inserted) {
+            if (
+                client.subscriptions?.includes("telegram") &&
+                client.telegram?.tokenKey &&
+                client.email
+            ) {
+                try {
+                    await sendTelegramInvite(client.email, client.telegram.tokenKey);
+                } catch (err) {
+                    console.error(`Failed to send Telegram invite to ${client.email}:`, err);
+                }
+            }
+        }
+
         return NextResponse.json({
             message: `${inserted.length} clients were imported successfully.`,
             clients: inserted,
