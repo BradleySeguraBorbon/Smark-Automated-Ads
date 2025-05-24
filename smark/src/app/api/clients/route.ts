@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import crypto from 'crypto';
 import {encryptClient, decryptClient} from "@/lib/clientEncryption";
 import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
 
@@ -210,6 +211,56 @@ export async function POST(request: Request) {
         }
     }
 
+        const existingClient = await Clients.findOne({
+            $or: [
+                { email: body.email },
+                { "telegram.chatId": body.telegram?.chatId }
+            ]
+        });
+
+        if (existingClient) {
+            return NextResponse.json(
+                { message: 'Client with this email or telegram username already exists' },
+                { status: 409 }
+            );
+        }
+
+        let clientTags: string[] | null = null;
+
+        try {
+            const authHeader = request.headers.get('authorization');
+            const token = authHeader?.split(' ')[1] || '';
+            clientTags = await getTagsIdsBasedOnPreference({
+                name: body.firstName,
+                preferences: body.preferences,
+            }, token);
+        } catch (err) {
+            console.error("AI error:", err);
+            return NextResponse.json({error: "Error generating tags"}, {status: 500});
+        }
+
+        let telegram;
+        if (body.subscriptions?.includes("telegram")) {
+            telegram = {
+                chatId: null,
+                tokenKey: crypto.randomBytes(16).toString("hex"),
+                isConfirmed: false
+            };
+        }
+
+        const newClient = await Clients.create({
+            firstName: body.firstName,
+            lastName: body.lastName,
+            email: body.email,
+            phone: body.phone,
+            preferredContactMethod: body.preferredContactMethod,
+            subscriptions: body.subscriptions,
+            birthDate: new Date(body.birthDate),
+            preferences: body.preferences || [],
+            tags: clientTags || [],
+            adInteractions: body.adInteractions || [],
+            ...(telegram && { telegram })
+        });
     const encrypted = encryptClient(body);
 
     try {

@@ -20,6 +20,11 @@ const clientSchema = new Schema<IClient>({
   tags: [{ type: Types.ObjectId, ref: "Tags" }],
   adInteractions: [adInteractionsSchema],
   tagsPending: { type: Boolean, default: false },
+  telegram: {
+    tokenKey: { type: String },
+    chatId: { type: String },
+    isConfirmed: { type: Boolean, default: false },
+  }
 }, {
   timestamps: true,
   validateBeforeSave: true,
@@ -31,7 +36,7 @@ const clientSchema = new Schema<IClient>({
   const client = this as IClient;
 
   const hasEmail = !!client.email;
-  const hasTelegram = !!client.telegramChatId;
+  const hasTelegram = !!client.telegram;
 
   if (!hasEmail && !hasTelegram) {
     return next(new Error("Client must have at least one contact method: email or telegramChatId."));

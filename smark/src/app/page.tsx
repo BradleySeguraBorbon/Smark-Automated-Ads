@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import {JSX, useEffect, useState} from 'react';
 import { FeatureCard } from '@/components/FeatureCard';
 import Link from "next/link";
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Mail, MessageSquare, Users } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { decodeToken } from '@/lib/utils/decodeToken';
-import { useRouter } from 'next/navigation';
 
 export default function Home() {
 
@@ -100,7 +99,7 @@ export default function Home() {
           </div>
         </section>
         <section className="bg-muted py-16 dark:bg-[#121212]">
-          <div className="container mx-auto px-0">
+          <div className="container mx-auto px-10">
             <h3 className="text-2xl font-bold text-center mb-12">Our Features</h3>
             <div className="grid md:grid-cols-3 gap-8">
               <FeatureCard
