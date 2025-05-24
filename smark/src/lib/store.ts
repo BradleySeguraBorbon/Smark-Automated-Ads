@@ -315,3 +315,21 @@ export const useAuthStore = create<AuthStore>()(
     }
   )
 );
+
+type AlertType = 'success' | 'error';
+
+interface NotificationStore {
+    open: boolean;
+    type: AlertType;
+    message: string;
+    showAlert: (type: AlertType, message: string) => void;
+    clearAlert: () => void;
+}
+
+export const useNotificationStore = create<NotificationStore>((set) => ({
+    open: false,
+    type: 'success',
+    message: '',
+    showAlert: (type, message) => set({ open: true, type, message }),
+    clearAlert: () => set({ open: false, type: 'success', message: '' }),
+}));

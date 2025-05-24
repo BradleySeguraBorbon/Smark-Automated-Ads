@@ -19,6 +19,7 @@ const clientSchema = new Schema<IClient>({
   preferences: [{ type: String, required: true }],
   tags: [{ type: Types.ObjectId, ref: "Tags" }],
   adInteractions: [adInteractionsSchema],
+  tagsPending: { type: Boolean, default: false },
 }, {
   timestamps: true,
   validateBeforeSave: true,
