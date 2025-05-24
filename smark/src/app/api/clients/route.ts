@@ -280,7 +280,7 @@ export async function POST(request: Request) {
             phone: body.phone,
             preferredContactMethod: body.preferredContactMethod,
             subscriptions: body.subscriptions,
-            birthDate: body.birthDate,
+            birthDate: new Date(body.birthDate),
             preferences: body.preferences || [],
             tags: clientTags || [],
             adInteractions: body.adInteractions || [],

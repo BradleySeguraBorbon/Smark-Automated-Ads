@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
                 phone,
                 preferredContactMethod,
                 subscriptions,
-                birthDate,
+                birthDate: new Date(birthDate),
                 preferences,
                 adInteractions,
                 tags: [],

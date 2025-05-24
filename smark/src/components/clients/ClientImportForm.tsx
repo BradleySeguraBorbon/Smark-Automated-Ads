@@ -29,14 +29,32 @@ export default function ClientImportForm() {
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
             const cleanedClients = jsonData.map((client: any) => {
+                const rawBirthDate = client.birthDate;
+                let parsedBirthDate: string | undefined = undefined;
+
+                if (typeof rawBirthDate === 'number') {
+                    const excelDate = XLSX.SSF.parse_date_code(rawBirthDate);
+                    if (excelDate) {
+                        const jsDate = new Date(
+                            excelDate.y,
+                            excelDate.m - 1,
+                            excelDate.d
+                        );
+                        parsedBirthDate = jsDate.toISOString();
+                    }
+                } else if (typeof rawBirthDate === 'string') {
+                    const date = new Date(rawBirthDate);
+                    if (!isNaN(date.getTime())) {
+                        parsedBirthDate = date.toISOString();
+                    }
+                }
+
                 const cleaned = {
                     ...client,
                     subscriptions: commaSeparatedToArray(client.subscriptions),
                     preferences: commaSeparatedToArray(client.preferences),
+                    birthDate: parsedBirthDate
                 };
-                if (cleaned.telegramChatId == null || cleaned.telegramChatId === "") {
-                    delete cleaned.telegramChatId;
-                }
                 return cleaned;
             });
 

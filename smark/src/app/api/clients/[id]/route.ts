@@ -88,6 +88,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
         const body = await request.json();
 
+        if (body.birthDate) {
+            body.birthDate = new Date(body.birthDate);
+        }
+
         if (body.birthDate && isNaN(Date.parse(body.birthDate))) {
             return NextResponse.json(
                 { message: 'Invalid birthDate format' },
