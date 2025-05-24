@@ -8,18 +8,18 @@ import { Tag } from "lucide-react";
 export function TagSelector({
   tags = [],
   selectedTags = [],
-  onChange,
+  onChangeAction,
 }: {
   tags?: TagRef[];
   selectedTags?: TagRef[];
-  onChange: (updated: TagRef[]) => void;
+  onChangeAction: (updated: TagRef[]) => void;
 }) {
   const toggleTag = (tag: TagRef) => {
     const exists = selectedTags.find((t) => t._id === tag._id);
     if (exists) {
-      onChange(selectedTags.filter((t) => t._id !== tag._id));
+      onChangeAction(selectedTags.filter((t) => t._id !== tag._id));
     } else {
-      onChange([...selectedTags, tag]);
+      onChangeAction([...selectedTags, tag]);
     }
   };
 

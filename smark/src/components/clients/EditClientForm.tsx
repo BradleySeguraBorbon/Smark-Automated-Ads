@@ -11,17 +11,17 @@ import { ITag } from "@/types/Tag"
 
 interface EditClientFormProps {
     form: UseFormReturn<IClient>
-    onSubmit: (data: IClient) => void
+    onSubmitAction: (data: IClient) => void
     tags: ITag[]
     router: any
 }
 
-export default function EditClientForm({ form, onSubmit, tags, router }: EditClientFormProps) {
+export default function EditClientForm({ form, onSubmitAction, tags, router }: EditClientFormProps) {
     return (
         <Card>
             <CardContent>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
                         <ClientInfoFields form={form} />
                         <TagsField form={form} tagOptions={tags} />
                         <div className="flex justify-end space-x-4">

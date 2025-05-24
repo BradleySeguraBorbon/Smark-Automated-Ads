@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { jwtVerify, JWTVerifyResult } from 'jose';
 
 export async function POST(request: Request) {
     const { token } = await request.json();
@@ -15,15 +15,23 @@ export async function POST(request: Request) {
 
     try {
         const secret = new TextEncoder().encode(jwtSecret);
-        const { payload } = await jwtVerify(token, secret);
+        const { payload }: JWTVerifyResult = await jwtVerify(token, secret);
 
         return NextResponse.json({
             username: payload.username,
             role: payload.role,
             id: payload.uid,
+            email: payload.email,
+            code: payload.code,
+            purpose: payload.purpose,
         });
-    } catch (error) {
-        console.error('Failed to decode token:', error);
+    } catch (error: any) {
+        if (error?.code === 'ERR_JWT_EXPIRED') {
+            console.warn('Token expired:', error); // log opcional
+            return NextResponse.json({ error: 'TokenExpired' }, { status: 401 });
+        }
+
+        console.error('Token decode failed:', error);
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 }

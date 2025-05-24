@@ -71,7 +71,7 @@ export function AdMessageFormTabs({
                         form={form}
                         campaigns={allMarketingCampaigns}
                         messageTypes={messageTypes}
-                        setMessageTypes={setMessageTypes}
+                        setMessageTypesAction={setMessageTypes}
                     />
                 </TabsContent>
 
@@ -81,7 +81,7 @@ export function AdMessageFormTabs({
                         mode={mode}
                         templates={allTemplates}
                         placeholderValues={emailPlaceholderValues}
-                        setPlaceholderValues={setEmailPlaceholderValues} />
+                        setPlaceholderValuesAction={setEmailPlaceholderValues} />
                 </TabsContent>
 
                 <TabsContent value="telegram" className="space-y-6">
@@ -90,7 +90,7 @@ export function AdMessageFormTabs({
                         mode={mode}
                         templates={allTemplates}
                         placeholderValues={telegramPlaceholderValues}
-                        setPlaceholderValues={setTelegramPlaceholderValues}
+                        setPlaceholderValuesAction={setTelegramPlaceholderValues}
                     />
                 </TabsContent>
             </Tabs>

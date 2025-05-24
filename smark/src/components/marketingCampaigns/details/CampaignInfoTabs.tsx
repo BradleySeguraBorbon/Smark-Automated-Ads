@@ -13,7 +13,7 @@ interface CampaignInfoTabsProps {
     audience: ClientRef[];
     audienceAudienceTotalPages: number;
     audienceCurrentPage: number;
-    onAudiencePageChange: (page: number) => void;
+    onAudiencePageChangeAction: (page: number) => void;
 }
 
 export default function CampaignInfoTabs({
@@ -21,7 +21,7 @@ export default function CampaignInfoTabs({
     audience,
     audienceAudienceTotalPages,
     audienceCurrentPage,
-    onAudiencePageChange
+    onAudiencePageChangeAction
 }: CampaignInfoTabsProps) {
     const [activeTab, setActiveTab] = useState<'details' | 'audience' | 'performance'>('details');
 
@@ -42,7 +42,7 @@ export default function CampaignInfoTabs({
                     audience={audience}
                     currentPage={audienceCurrentPage}
                     totalPages={audienceAudienceTotalPages}
-                    onPageChange={onAudiencePageChange}
+                    onPageChangeAction={onAudiencePageChangeAction}
                 />
             </TabsContent>
 

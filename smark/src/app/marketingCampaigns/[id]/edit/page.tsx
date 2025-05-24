@@ -214,14 +214,14 @@ export default function EditCampaignPage() {
                             <div className="lg:col-span-2">
                                 <CampaignFormTabs
                                     mode="edit"
-                                    onSubmit={handleUpdate}
+                                    onSubmitAction={handleUpdate}
                                     allTags={allTags}
                                     allUsers={allUsers}
                                     form={form}
                                 />
                             </div>
                             <div className="lg:col-span-1">
-                                <CampaignSummary onSubmit={handleUpdate} mode="edit" />
+                                <CampaignSummary onSubmitAction={handleUpdate} mode="edit" />
                             </div>
                         </div>
                     </FormProvider>
@@ -231,11 +231,11 @@ export default function EditCampaignPage() {
                         title="Campaign Updated"
                         description="The marketing campaign was successfully updated."
                         confirmLabel="Back to Campaigns"
-                        onConfirm={() => {
+                        onConfirmAction={() => {
                             setSuccessOpen(false);
                             window.location.href = "/marketingCampaigns";
                         }}
-                        onOpenChange={setSuccessOpen}
+                        onOpenChangeAction={setSuccessOpen}
                     />
                 </div>
             </main>

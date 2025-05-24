@@ -77,8 +77,8 @@ export default function CreateClientPage() {
                     <CardContent>
                         <ClientForm
                             form={form}
-                            onSubmit={onSubmit}
-                            newPreference={newPreference}
+                            onSubmitAction={onSubmit}
+                            newPreferenceAction={newPreference}
                             setNewPreference={setNewPreference}
                         />
                     </CardContent>
@@ -91,12 +91,12 @@ export default function CreateClientPage() {
                 title="¡Client created successfully!"
                 description="The new client has been added to the database."
                 confirmLabel="Accept"
-                onConfirm={() => {
+                onConfirmAction={() => {
                     setSuccessOpen(false)
                     if (timeoutRef.current) clearTimeout(timeoutRef.current)
                     router.back();
                 }}
-                onOpenChange={setSuccessOpen}
+                onOpenChangeAction={setSuccessOpen}
             />
 
             <CustomAlertDialog
@@ -105,8 +105,8 @@ export default function CreateClientPage() {
                 title="Error creating client"
                 description={errorMessage}
                 confirmLabel="Ok"
-                onConfirm={() => setErrorOpen(false)}
-                onOpenChange={setErrorOpen}
+                onConfirmAction={() => setErrorOpen(false)}
+                onOpenChangeAction={setErrorOpen}
             />
         </div>
     )

@@ -178,7 +178,7 @@ export default function EditAdMessagePage() {
               </div>
               <div className="lg:col-span-1">
                 <AdMessageSummary
-                  onSubmit={handleUpdate}
+                  onSubmitAction={handleUpdate}
                   mode="edit"
                   campaignName={
                     campaigns.find((c) => c.id === form.watch('marketingCampaign'))?.name || ''
@@ -194,11 +194,11 @@ export default function EditAdMessagePage() {
             title="Ad Message Updated"
             description="The ad message was successfully updated."
             confirmLabel="Back to Ad Messages"
-            onConfirm={() => {
+            onConfirmAction={() => {
               setSuccessOpen(false);
               router.push('/adMessages');
             }}
-            onOpenChange={setSuccessOpen}
+            onOpenChangeAction={setSuccessOpen}
           />
         </div>
       </main>

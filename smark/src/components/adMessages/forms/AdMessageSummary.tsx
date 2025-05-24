@@ -9,11 +9,11 @@ import { Mail, MessageSquare } from 'lucide-react';
 import { IAdMessage } from '@/types/AdMessage';
 
 interface AdMessageSummaryProps {
-  onSubmit: (data: IAdMessage) => void;
+  onSubmitAction: (data: IAdMessage) => void;
   mode: 'new' | 'edit';
 }
 
-export function AdMessageSummary({ onSubmit, mode }: AdMessageSummaryProps) {
+export function AdMessageSummary({ onSubmitAction, mode }: AdMessageSummaryProps) {
   const { watch, handleSubmit } = useFormContext<IAdMessage>();
   const name = watch('name');
   const campaign = watch('marketingCampaign');
@@ -84,7 +84,7 @@ export function AdMessageSummary({ onSubmit, mode }: AdMessageSummaryProps) {
         </div>
 
         <div className="mt-8">
-          <Button className="w-full bg-purple-600 hover:bg-purple-800 text-white" onClick={handleSubmit(onSubmit)}>
+          <Button className="w-full bg-purple-600 hover:bg-purple-800 text-white" onClick={handleSubmit(onSubmitAction)}>
             {mode === 'edit' ? 'Save Changes' : 'Create Message'}
           </Button>
         </div>

@@ -156,7 +156,7 @@ export default function NewAdMessagePage() {
               </div>
               <div className="lg:col-span-1">
                 <AdMessageSummary
-                  onSubmit={handleCreate}
+                  onSubmitAction={handleCreate}
                   mode="new"
                   campaignName={
                     campaigns.find((c) => c.id === form.watch('marketingCampaign'))?.name || ''
@@ -172,11 +172,11 @@ export default function NewAdMessagePage() {
             title="Ad Message Created"
             description="The ad message was successfully created."
             confirmLabel="Back to Ad Messages"
-            onConfirm={() => {
+            onConfirmAction={() => {
               setSuccessOpen(false);
               router.push('/adMessages');
             }}
-            onOpenChange={setSuccessOpen}
+            onOpenChangeAction={setSuccessOpen}
           />
         </div>
       </main>

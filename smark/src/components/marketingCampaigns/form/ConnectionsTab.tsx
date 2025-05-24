@@ -28,7 +28,7 @@ export function ConnectionsTab({
           <TagSelector
             tags={allTags as TagRef[]}
             selectedTags={selectedTags}
-            onChange={(updated) => form.setValue('tags', updated)}
+            onChangeAction={(updated) => form.setValue('tags', updated)}
           />
         </div>
         <div className='space-y-3'>
@@ -36,7 +36,7 @@ export function ConnectionsTab({
           <TeamMemberSelector
             users={allUsers as UserRef[]}
             selectedUsers={selectedUsers}
-            onChange={(updated) => form.setValue('users', updated)}
+            onChangeAction={(updated) => form.setValue('users', updated)}
           />
         </div>
       </CardContent>

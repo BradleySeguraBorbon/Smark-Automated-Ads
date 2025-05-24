@@ -10,16 +10,16 @@ import {useState} from "react";
 
 interface ClientCardProps {
     client: IClient
-    onDelete: (id: string) => void
+    onDeleteAction: (id: string) => void
     isLoading: boolean
     userRole: string
 }
 
-export default function ClientCard({client, onDelete, isLoading, userRole}: ClientCardProps) {
+export default function ClientCard({client, onDeleteAction, isLoading, userRole}: ClientCardProps) {
     const [alertOpen, setAlertOpen] = useState(false)
 
     const handleDelete = () => {
-        onDelete(client._id as string)
+        onDeleteAction(client._id as string)
         setAlertOpen(false)
     }
 
@@ -83,9 +83,9 @@ export default function ClientCard({client, onDelete, isLoading, userRole}: Clie
                 description={`Are you sure you want to delete ${client.firstName} ${client.lastName}? This action cannot be undone.`}
                 confirmLabel="Delete"
                 cancelLabel="Cancel"
-                onConfirm={handleDelete}
-                onCancel={() => setAlertOpen(false)}
-                onOpenChange={setAlertOpen}
+                onConfirmAction={handleDelete}
+                onCancelAction={() => setAlertOpen(false)}
+                onOpenChangeAction={setAlertOpen}
             />
         </>
     )

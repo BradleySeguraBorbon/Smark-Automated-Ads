@@ -16,7 +16,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface CampaignFormTabsProps {
   mode: 'new' | 'edit';
-  onSubmit: (data: MarketingCampaignFormData) => void;
+  onSubmitAction: (data: MarketingCampaignFormData) => void;
   allTags: ITag[];
   allUsers: IUser[];
   form: ReturnType<typeof useForm<MarketingCampaignFormData>>;
@@ -24,7 +24,7 @@ interface CampaignFormTabsProps {
 
 export function CampaignFormTabs({
   mode,
-  onSubmit,
+  onSubmitAction,
   allTags,
   allUsers,
   form,
@@ -70,7 +70,7 @@ export function CampaignFormTabs({
   }, [activeTab, formData.tags, formData._id, mode]);
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={form.handleSubmit(onSubmitAction)}>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-6 rounded-lg border">
           <TabsTrigger value="details">Campaign Details</TabsTrigger>

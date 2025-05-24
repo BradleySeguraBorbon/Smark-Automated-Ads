@@ -97,7 +97,7 @@ export default function UsersPage() {
                 )}
             </div>
 
-            <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={"Search Users..."}/>
+            <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder={"Search Users..."}/>
 
             {apiError && (
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>

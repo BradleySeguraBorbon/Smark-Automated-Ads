@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import connectDB from '@/config/db';
 import { CampaignAudiences } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import Clients from "@/models/Client";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -52,65 +54,47 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    await connectDB();
+
+    const allowedRoles = ['developer', 'admin'];
+    const user = getUserFromRequest(request);
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!allowedRoles.includes(user.role as string)) {
+        return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    if (!id || !isValidObjectId(id)) {
+        return NextResponse.json({ message: 'Invalid or missing ID' }, { status: 400 });
+    }
+
+    const result = await sanitizeRequest(request, {
+        requiredFields: ['campaign', 'audience', 'status'],
+        enumArrays: [{ field: 'audience', allowed: [] }],
+        enums: [{ field: 'status', allowed: ['approved', 'pending', 'rejected'] }]
+    });
+
+    if (!result.ok) return result.response;
+    const body = result.data;
+    const { campaign, audience } = body;
+
+    if (!isValidObjectId(campaign)) {
+        return NextResponse.json({ message: 'Invalid campaign ID' }, { status: 400 });
+    }
+
+    const audienceValidation = await validateObjectIdsExist(audience, Clients, 'audience');
+    if (audienceValidation) {
+        return NextResponse.json({ message: `Invalid ${audienceValidation.field} IDs`, invalidIds: audienceValidation.invalidIds }, { status: 400 });
+    }
+
     try {
-        await connectDB();
-
-        const allowedRoles = ['developer', 'admin'];
-
-        const user = getUserFromRequest(request);
-
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        if (!allowedRoles.includes(user.role as string)) {
-            return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
-        }
-
-        const { id } = await params;
-
-        if (!id || !isValidObjectId(id)) {
-            return NextResponse.json({ message: 'Invalid or missing ID' }, { status: 400 });
-        }
-
-        const body = await request.json();
-        const { campaign, audience, status } = body;
-
-        const requiredFields = ['campaign', 'audience', 'status'];
-        const missingFields = requiredFields.filter(
-            field => body[field] === undefined || body[field] === null
-        );
-
-        if (missingFields.length > 0) {
-            return NextResponse.json(
-                { message: 'Missing required fields', missingFields },
-                { status: 400 }
-            );
-        }
-
-        if (!isValidObjectId(campaign)) {
-            return NextResponse.json({ message: 'Invalid campaign ID' }, { status: 400 });
-        }
-
-        const audienceValidation = await validateObjectIdsExist(audience, CampaignAudiences, 'audience');
-        if (audienceValidation) {
-            return NextResponse.json({ message: `Invalid ${audienceValidation.field} IDs`, invalidIds: audienceValidation.invalidIds }, { status: 400 });
-        }
-
-        const validStatuses = ['approved', 'pending', 'rejected'];
-        if (!validStatuses.includes(status)) {
-            return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
-        }
-
-        const updatedCampaignAudience = await CampaignAudiences.findByIdAndUpdate(
-            id,
-            { campaign, audience, status },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedCampaignAudience) {
+        const updated = await CampaignAudiences.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+        if (!updated) {
             return NextResponse.json({ message: 'Campaign audience not found' }, { status: 404 });
         }
 
-        const campaignAudience = await updatedCampaignAudience
+        const campaignAudience = await CampaignAudiences.findById(id)
             .populate('campaign', '_id name description status')
             .populate('audience', '_id email firstName lastName');
 

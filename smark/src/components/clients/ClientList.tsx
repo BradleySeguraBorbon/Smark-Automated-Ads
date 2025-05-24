@@ -6,11 +6,11 @@ import ClientCard from "@/components/clients/ClientCard"
 interface ClientsListProps {
     clients: IClient[]
     loadingIds: string[]
-    onDelete: (id: string) => void
+    onDeleteAction: (id: string) => void
     userRole: string
 }
 
-export default function ClientsList({ clients, loadingIds, onDelete, userRole }: ClientsListProps) {
+export default function ClientsList({ clients, loadingIds, onDeleteAction, userRole }: ClientsListProps) {
     if (clients.length === 0) {
         return (
             <div className="text-center py-10">
@@ -25,7 +25,7 @@ export default function ClientsList({ clients, loadingIds, onDelete, userRole }:
                 <ClientCard
                     key={String(client._id)}
                     client={client}
-                    onDelete={onDelete}
+                    onDeleteAction={onDeleteAction}
                     isLoading={loadingIds.includes(client._id as string)}
                     userRole={userRole}
                 />

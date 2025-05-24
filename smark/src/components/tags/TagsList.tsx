@@ -16,7 +16,7 @@ export default function TagsList({ tags, refresh, onSuccessDelete, currentUserRo
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
             {tags.map(tag => (
-                <TagCard key={tag._id as string} tag={tag} refresh={refresh} onSuccessDelete={onSuccessDelete} currentUserRole={currentUserRole} />
+                <TagCard key={tag._id as string} tag={tag} refreshAction={refresh} onSuccessDelete={onSuccessDelete} currentUserRole={currentUserRole} />
             ))}
         </div>
     )

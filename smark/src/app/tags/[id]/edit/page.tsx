@@ -108,7 +108,7 @@ export default function EditTagPage() {
 
                 <Card className="mt-4">
                     <CardContent>
-                        <TagForm form={form} onSubmit={onSubmit} />
+                        <TagForm form={form} onSubmitAction={onSubmit} />
                     </CardContent>
                 </Card>
             </div>
@@ -119,11 +119,11 @@ export default function EditTagPage() {
                 title="Tag Updated!"
                 description="The tag was updated successfully."
                 confirmLabel="Return to list"
-                onConfirm={() => {
+                onConfirmAction={() => {
                     setSuccessOpen(false)
                     router.push('/tags')
                 }}
-                onOpenChange={setSuccessOpen}
+                onOpenChangeAction={setSuccessOpen}
             />
 
             <CustomAlertDialog
@@ -132,8 +132,8 @@ export default function EditTagPage() {
                 title="Update Error"
                 description={errorMessage || apiError || 'An error occurred'}
                 confirmLabel="Ok"
-                onConfirm={() => setErrorOpen(false)}
-                onOpenChange={setErrorOpen}
+                onConfirmAction={() => setErrorOpen(false)}
+                onOpenChangeAction={setErrorOpen}
             />
         </div>
     )

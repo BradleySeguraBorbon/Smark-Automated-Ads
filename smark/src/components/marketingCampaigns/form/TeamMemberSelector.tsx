@@ -13,20 +13,20 @@ import { UserRef } from "@/types/User";
 export function TeamMemberSelector({
   users = [],
   selectedUsers = [],
-  onChange,
+  onChangeAction,
 }: {
   users?: UserRef[];
   selectedUsers?: UserRef[];
-  onChange: (updated: UserRef[]) => void;
+  onChangeAction: (updated: UserRef[]) => void;
 }) {
   const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const toggleUser = (user: UserRef) => {
     const exists = selectedUsers.find((u) => u._id === user._id);
     if (exists) {
-      onChange(selectedUsers.filter((u) => u._id !== user._id));
+      onChangeAction(selectedUsers.filter((u) => u._id !== user._id));
     } else {
-      onChange([...selectedUsers, user]);
+      onChangeAction([...selectedUsers, user]);
     }
   };
 

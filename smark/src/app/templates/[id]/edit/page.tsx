@@ -132,7 +132,7 @@ export default function EditTemplatePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                 <div>
-                    <TemplateForm form={form} onSubmit={onSubmit} buttonText={"Save Template"} />
+                    <TemplateForm form={form} onSubmitAction={onSubmit} buttonText={"Save Template"} />
                 </div>
                 <div className="border rounded-md p-4 shadow-sm">
                     <p className="text-sm text-muted-foreground mb-2">Live Content Preview</p>
@@ -161,8 +161,8 @@ export default function EditTemplatePage() {
                 title="Template Updated"
                 description="Changes saved successfully."
                 confirmLabel="Go to Templates"
-                onConfirm={() => router.push('/templates')}
-                onOpenChange={setSuccessOpen}
+                onConfirmAction={() => router.push('/templates')}
+                onOpenChangeAction={setSuccessOpen}
             />
 
             <CustomAlertDialog
@@ -171,8 +171,8 @@ export default function EditTemplatePage() {
                 title="Update Error"
                 description={errorMessage}
                 confirmLabel="OK"
-                onConfirm={() => setErrorOpen(false)}
-                onOpenChange={setErrorOpen}
+                onConfirmAction={() => setErrorOpen(false)}
+                onOpenChangeAction={setErrorOpen}
             />
         </div>
     )

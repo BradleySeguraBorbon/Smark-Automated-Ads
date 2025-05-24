@@ -101,7 +101,7 @@ export default function TagsPage() {
                     </Link>
                 </div>
 
-                <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search tags..."/>
+                <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder="Search tags..."/>
 
                 {apiError && (
                     <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
@@ -135,8 +135,8 @@ export default function TagsPage() {
                 title="Tag deleted"
                 description={successMessage}
                 confirmLabel="OK"
-                onConfirm={() => setSuccessOpen(false)}
-                onOpenChange={setSuccessOpen}
+                onConfirmAction={() => setSuccessOpen(false)}
+                onOpenChangeAction={setSuccessOpen}
             />
         </>
     )

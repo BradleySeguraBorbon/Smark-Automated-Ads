@@ -20,10 +20,10 @@ interface TelegramContentTabProps {
   mode: 'new' | 'edit';
   templates: TemplateRef[];
   placeholderValues: Record<string, string>;
-  setPlaceholderValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  setPlaceholderValuesAction: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-export function TelegramContentTab({ form, mode, templates, placeholderValues, setPlaceholderValues }: TelegramContentTabProps) {
+export function TelegramContentTab({ form, mode, templates, placeholderValues, setPlaceholderValuesAction }: TelegramContentTabProps) {
   const selectedTemplateRef = form.watch('content.telegram.template');
   const telegramButtons = form.watch('content.telegram.buttons') || [];
 
@@ -42,11 +42,11 @@ export function TelegramContentTab({ form, mode, templates, placeholderValues, s
       const message = form.getValues('content.telegram.message');
       if (mode === 'edit' && message) {
         const values = extractPlaceholderValues(tpl.html, message);
-        setPlaceholderValues(values);
+        setPlaceholderValuesAction(values);
       } else if (Object.keys(placeholderValues).length === 0) {
         const emptyValues: Record<string, string> = {};
         tpl.placeholders.forEach((key) => (emptyValues[key] = ''));
-        setPlaceholderValues(emptyValues);
+        setPlaceholderValuesAction(emptyValues);
       }
     }
   }, [selectedTemplateRef]);
@@ -112,7 +112,7 @@ export function TelegramContentTab({ form, mode, templates, placeholderValues, s
             placeholders={selectedTemplate.placeholders}
             values={placeholderValues}
             onChange={(key, val) =>
-              setPlaceholderValues((prev) => ({ ...prev, [key]: val }))
+              setPlaceholderValuesAction((prev) => ({ ...prev, [key]: val }))
             }
           />
         ) : (

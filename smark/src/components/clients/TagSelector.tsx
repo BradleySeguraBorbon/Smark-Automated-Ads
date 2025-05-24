@@ -11,16 +11,16 @@ interface Tag {
 interface TagSelectorProps {
     tags: Tag[]
     selected: string[]
-    onChange: (newSelected: string[]) => void
+    onChangeAction: (newSelected: string[]) => void
 }
 
-export const TagSelector: React.FC<TagSelectorProps> = ({ tags, selected, onChange }) => {
+export const TagSelector: React.FC<TagSelectorProps> = ({ tags, selected, onChangeAction }) => {
     const handleToggle = (tagId: string) => {
         if (selected.includes(tagId)) {
-            onChange(selected.filter((id) => id !== tagId))
+            onChangeAction(selected.filter((id) => id !== tagId))
             console.log('TagSelector:', { tags, selected });
         } else {
-            onChange([...selected, tagId])
+            onChangeAction([...selected, tagId])
         }
     }
 

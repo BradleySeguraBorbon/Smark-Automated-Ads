@@ -9,10 +9,10 @@ import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
 import { Tag } from 'lucide-react';
 
 export function CampaignSummary({
-  onSubmit,
+  onSubmitAction,
   mode,
 }: {
-  onSubmit: (data: MarketingCampaignFormData) => void,
+  onSubmitAction: (data: MarketingCampaignFormData) => void,
   mode: 'new' | 'edit';
 }) {
   const { watch } = useFormContext<MarketingCampaignFormData>();
@@ -66,7 +66,7 @@ export function CampaignSummary({
             </div>
           </div>
           <div className="mt-8">
-            <Button className="w-full bg-purple-600 hover:bg-purple-800 text-white" onClick={handleSubmit(onSubmit)}>
+            <Button className="w-full bg-purple-600 hover:bg-purple-800 text-white" onClick={handleSubmit(onSubmitAction)}>
               {mode === 'edit' ? 'Save Changes' : 'Create Campaign'}
             </Button>
           </div>

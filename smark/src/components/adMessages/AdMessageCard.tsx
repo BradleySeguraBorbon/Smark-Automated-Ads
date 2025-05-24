@@ -87,9 +87,9 @@ export function AdMessageCard({ adMessage, onDelete, userRole }: AdMessageCardPr
                 description={'Are you sure you want to delete "${adMessage.name}"? This action cannot be undone.'}
                 confirmLabel="Delete"
                 cancelLabel="Cancel"
-                onConfirm={onDelete}
-                onCancel={() => setAlertOpen(false)}
-                onOpenChange={setAlertOpen}
+                onConfirmAction={onDelete}
+                onCancelAction={() => setAlertOpen(false)}
+                onOpenChangeAction={setAlertOpen}
             />
         </>
     )

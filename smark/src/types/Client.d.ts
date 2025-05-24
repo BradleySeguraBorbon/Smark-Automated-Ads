@@ -22,7 +22,7 @@ export interface IClient extends Document {
     phone: string;
     telegramChatId: string;
     preferredContactMethod: string;
-    subscriptions: ("email" | "telegram")[];
+    subscriptions: string[];
     birthDate: Date;
     preferences: string[];
     tags: TagRef[];

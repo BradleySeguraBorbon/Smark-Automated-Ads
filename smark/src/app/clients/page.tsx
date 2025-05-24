@@ -161,7 +161,7 @@ export default function ClientsPage() {
                 <LoadingSpinner/>
             ) : (
                 <>
-                    <ClientsList clients={filteredClients} loadingIds={loadingIds} onDelete={handleDelete} userRole={userInfo?.role as string}/>
+                    <ClientsList clients={filteredClients} loadingIds={loadingIds} onDeleteAction={handleDelete} userRole={userInfo?.role as string}/>
                     {totalPages > 1 && (
                         <PaginationControls
                             currentPage={currentPage}
@@ -177,8 +177,8 @@ export default function ClientsPage() {
                 title="Client deleted successfully"
                 description="The client was removed from the list."
                 confirmLabel="OK"
-                onConfirm={() => setShowSuccessDialog(false)}
-                onOpenChange={setShowSuccessDialog}
+                onConfirmAction={() => setShowSuccessDialog(false)}
+                onOpenChangeAction={setShowSuccessDialog}
             />
 
             <CustomAlertDialog
@@ -187,8 +187,8 @@ export default function ClientsPage() {
                 title="Deletion failed"
                 description={errorMessage}
                 confirmLabel="Close"
-                onConfirm={() => setShowErrorDialog(false)}
-                onOpenChange={setShowErrorDialog}
+                onConfirmAction={() => setShowErrorDialog(false)}
+                onOpenChangeAction={setShowErrorDialog}
             />
             <ClientImportModal open={showImportModal} onClose={() => setShowImportModal(false)} />
         </div>

@@ -184,7 +184,7 @@ export default function EditClientPage() {
                 {apiError && (
                     <div className="text-center py-4 text-red-500 bg-red-100 rounded-md mb-6">{apiError}</div>
                 )}
-                <EditClientForm form={form} onSubmit={onSubmit} tags={fetchedTags} router={router}/>
+                <EditClientForm form={form} onSubmitAction={onSubmit} tags={fetchedTags} router={router}/>
                 <ClientAdditionalInfo
                     preferences={form.getValues("preferences")}
                     subscriptions={form.getValues("subscriptions")}

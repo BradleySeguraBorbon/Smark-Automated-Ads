@@ -18,14 +18,14 @@ export default function UsersList({ users, currentUserRole, currentUserId, onDel
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
             {users.map((user) => (
                 <UserCard
                     key={user._id as string}
                     user={user}
                     currentUserRole={currentUserRole as string}
                     currentUserId={currentUserId}
-                    onDelete={onDelete}
+                    onDeleteAction={onDelete}
                 />
 
             ))}
