@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 import crypto from 'crypto';
+import {encryptClient, decryptClient} from "@/lib/clientEncryption";
+import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -68,13 +70,13 @@ export async function GET(request: Request) {
             .populate('adInteractions.adMessage', '_id name type');
 
         const totalPages = Math.ceil(total / limit);
-
+        const decrypted = clients.map(decryptClient);
         return NextResponse.json({
             total,
             totalPages,
             page,
             limit,
-            results: clients,
+            results: decrypted,
         });
     } catch (error) {
         console.error(error);
@@ -154,87 +156,60 @@ Tags disponibles (array de objetos):
 }
 
 export async function POST(request: Request) {
-    try {
-        await connectDB();
-        /*
-            const allowedRoles = ['developer', 'admin'];
+    await connectDB();
 
-            const user = getUserFromRequest(request);
+    const result = await sanitizeRequest(request, {
+        requiredFields: [
+            'firstName', 'lastName', 'email', 'phone', 'preferredContactMethod',
+            'subscriptions', 'birthDate', 'telegramChatId'
+        ],
+        dates: ['birthDate'],
+        emails: ['email'],
+        enums: [{ field: 'preferredContactMethod', allowed: ['email', 'telegram'] }],
+        enumArrays: [{ field: 'subscriptions', allowed: ['email', 'telegram'] }]
+    });
 
-            if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!result.ok) return result.response;
+    const body = result.data;
 
-            if (!allowedRoles.includes(user.role as string)) {
-              return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
-            }
-        */
-        const body = await request.json();
+    if (!body.email && !body.telegramChatId) {
+        return NextResponse.json({
+            message: 'Client must have at least one contact method: email or telegramChatId.'
+        }, { status: 400 });
+    }
 
-        const requiredFields = [
-            'firstName',
-            'lastName',
-            'email',
-            'phone',
-            'preferredContactMethod',
-            'subscriptions',
-            'birthDate'
-        ];
+    if (body.preferredContactMethod === 'email' && !body.email) {
+        return NextResponse.json({
+            message: 'Preferred contact method is email, but email is missing.'
+        }, { status: 400 });
+    }
 
-        const missingFields = requiredFields.filter(
-            field => body[field] === undefined || body[field] === null
-        );
+    if (body.preferredContactMethod === 'telegram' && !body.telegramChatId) {
+        return NextResponse.json({
+            message: 'Preferred contact method is telegram, but telegramChatId is missing.'
+        }, { status: 400 });
+    }
 
-        if (missingFields.length > 0) {
+    if (Array.isArray(body.tags) && body.tags.length > 0) {
+        const invalidTags = await validateObjectIdsExist(body.tags, Tags, 'tags');
+        if (invalidTags) {
             return NextResponse.json(
-                { message: 'Missing required fields', missingFields },
+                { message: 'Invalid tag references', details: invalidTags },
                 { status: 400 }
             );
         }
+    }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(body.email)) {
+    if (Array.isArray(body.adInteractions) && body.adInteractions.length > 0) {
+        const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
+        const invalidAdMessages = await validateObjectIdsExist(adMessageIds, AdMessages, 'adInteractions');
+        if (invalidAdMessages) {
             return NextResponse.json(
-                { message: 'Invalid email format' },
+                { message: 'Invalid ad message references', details: invalidAdMessages },
                 { status: 400 }
             );
         }
-
-        if (isNaN(Date.parse(body.birthDate))) {
-            return NextResponse.json(
-                { message: 'Invalid birthDate format' },
-                { status: 400 }
-            );
-        }
-        if (Array.isArray(body.tags) && body.tags.length > 0) {
-            const invalidTags = await validateObjectIdsExist(body.tags, Tags, 'tags');
-            if (invalidTags) {
-                return NextResponse.json(
-                    { message: 'Invalid tag references', details: invalidTags },
-                    { status: 400 }
-                );
-            }
-        }
-
-        if (Array.isArray(body.adInteractions) && body.adInteractions.length > 0) {
-            const adMessageIds = body.adInteractions.map((interaction: any) => interaction.adMessage);
-            const invalidAdMessages = await validateObjectIdsExist(
-                adMessageIds,
-                AdMessages,
-                'adInteractions'
-            );
-            if (invalidAdMessages) {
-                return NextResponse.json(
-                    { message: 'Invalid ad message references', details: invalidAdMessages },
-                    { status: 400 }
-                );
-            }
-        }
-
-        if (Array.isArray(body.preferences) && body.preferences.length <= 0) {
-            return NextResponse.json(
-                { message: 'No preferences provided' },
-                { status: 400 }
-            );
-        }
+    }
 
         const existingClient = await Clients.findOne({
             $or: [
@@ -286,27 +261,40 @@ export async function POST(request: Request) {
             adInteractions: body.adInteractions || [],
             ...(telegram && { telegram })
         });
+    const encrypted = encryptClient(body);
 
+    try {
+        const newClient = await Clients.create(encrypted);
+
+        (async () => {
+            try {
+                const authHeader = request.headers.get('authorization');
+                const token = authHeader?.split(' ')[1] || '';
+                const tags = await getTagsIdsBasedOnPreference({
+                    name: body.firstName,
+                    preferences: body.preferences,
+                }, token);
+
+                if (tags && tags.length > 0) {
+                    await Clients.findByIdAndUpdate(newClient._id, { tags });
+                }
+            } catch (err) {
+                console.error("Background AI tagging error:", err);
+            }
+        })();
         const client = await Clients.findById(newClient._id)
             .populate('tags', '_id name')
             .populate('adInteractions.adMessage', '_id name type');
 
         return NextResponse.json(
-            { message: 'Client created successfully', result: client},
+            { message: 'Client created successfully', result: decryptClient(client) },
             { status: 201 }
         );
-    } catch
-    (error: any) {
+    } catch (error: any) {
         console.error(error);
-        if (error.name === 'ValidationError') {
-            return NextResponse.json(
-                { error: error.message },
-                { status: 422 }
-            );
-        }
         return NextResponse.json(
-            { error: 'Error creating client' },
-            { status: 500 }
+            { error: error.message || 'Error creating client' },
+            { status: error.name === 'ValidationError' ? 422 : 500 }
         );
     }
 }

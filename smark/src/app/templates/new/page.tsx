@@ -85,7 +85,7 @@ export default function CreateTemplatePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
                 <div>
-                    <TemplateForm form={form} onSubmit={onSubmit} buttonText={"Create Template"}/>
+                    <TemplateForm form={form} onSubmitAction={onSubmit} buttonText={"Create Template"}/>
                 </div>
 
                 <div className="border rounded-md bg-white p-4 shadow-sm">
@@ -114,8 +114,8 @@ export default function CreateTemplatePage() {
                 title="Template Created"
                 description="Your template has been created successfully."
                 confirmLabel="Go to Templates"
-                onConfirm={() => router.push('/templates')}
-                onOpenChange={setSuccessOpen}
+                onConfirmAction={() => router.push('/templates')}
+                onOpenChangeAction={setSuccessOpen}
             />
 
             <CustomAlertDialog
@@ -124,8 +124,8 @@ export default function CreateTemplatePage() {
                 title="Error"
                 description={errorMessage}
                 confirmLabel="OK"
-                onConfirm={() => setErrorOpen(false)}
-                onOpenChange={setErrorOpen}
+                onConfirmAction={() => setErrorOpen(false)}
+                onOpenChangeAction={setErrorOpen}
             />
         </div>
     )

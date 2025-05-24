@@ -9,8 +9,9 @@ import {Button} from "@/components/ui/button"
 import {Alert, AlertDescription} from "@/components/ui/alert"
 import {Eye, EyeOff} from "lucide-react"
 import {useRouter} from "next/navigation"
-import {useAuthStore, useUserStore} from "@/lib/store"
+import {useAuthStore} from "@/lib/store"
 import {decodeToken} from "@/lib/utils/decodeToken";
+import Cookies from 'js-cookie';
 
 interface LoginFormInputs {
     username: string
@@ -53,6 +54,8 @@ export default function LoginForm() {
             }
 
             setToken(result.token)
+            Cookies.set('token', result.token, { path: '/', expires: result.token.expires });
+            console.log(result.token.expires)
             const user = await decodeToken(result.token);
             //setUser({ _id: user?.id as string, username: user?.username as string, role: user?.role as string });
 
@@ -134,6 +137,8 @@ export default function LoginForm() {
                         </form>
                     </Form>
                 </CardContent>
+                <Button variant="outline" onClick={() => router.push('/auth/email-login')}>Login with code</Button>
+                <Button variant="ghost" onClick={() => router.push('/auth/reset-password')}>Forgot password?</Button>
             </Card>
         </div>
     )

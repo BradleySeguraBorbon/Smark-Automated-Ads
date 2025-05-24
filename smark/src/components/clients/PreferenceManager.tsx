@@ -14,14 +14,14 @@ interface PreferenceManagerProps {
     fieldName: "preferences"
     control: Control<IClient>
     newPreference: string
-    setNewPreference: (val: string) => void
+    setNewPreferenceAction: (val: string) => void
 }
 
 export default function PreferenceManager({
                                               fieldName,
                                               control,
                                               newPreference,
-                                              setNewPreference,
+                                              setNewPreferenceAction,
                                           }: PreferenceManagerProps) {
     const { field, fieldState } = useController({ name: fieldName, control })
 
@@ -54,13 +54,13 @@ export default function PreferenceManager({
                         <Input
                             placeholder="Add preference (e.g., electronics, books)"
                             value={newPreference}
-                            onChange={(e) => setNewPreference(e.target.value)}
+                            onChange={(e) => setNewPreferenceAction(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                     e.preventDefault()
                                     if (newPreference && !field.value.includes(newPreference)) {
                                         field.onChange([...field.value, newPreference])
-                                        setNewPreference("")
+                                        setNewPreferenceAction("")
                                     }
                                 }
                             }}
@@ -71,7 +71,7 @@ export default function PreferenceManager({
                             onClick={() => {
                                 if (newPreference && !field.value.includes(newPreference)) {
                                     field.onChange([...field.value, newPreference])
-                                    setNewPreference("")
+                                    setNewPreferenceAction("")
                                 }
                             }}
                         >

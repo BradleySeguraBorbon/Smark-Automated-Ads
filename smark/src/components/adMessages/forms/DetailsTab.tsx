@@ -21,10 +21,10 @@ interface DetailsTabProps {
     form: ReturnType<typeof useFormContext<IAdMessage>>
     campaigns: IMarketingCampaign[];
     messageTypes: { email: boolean; telegram: boolean };
-    setMessageTypes: (val: { email: boolean; telegram: boolean }) => void;
+    setMessageTypesAction: (val: { email: boolean; telegram: boolean }) => void;
 }
 
-export function DetailsTab({ form, campaigns, messageTypes, setMessageTypes }: DetailsTabProps) {
+export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesAction }: DetailsTabProps) {
     const [minDate, setMinDate] = useState<Date | undefined>(undefined);
     const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
 
@@ -160,7 +160,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypes }: D
                                 checked={messageTypes.email}
                                 onCheckedChange={(checked) => {
                                     const updated = { ...messageTypes, email: checked };
-                                    setMessageTypes(updated);
+                                    setMessageTypesAction(updated);
                                     form.setValue('type', [
                                         ...(updated.email ? ['email'] : []),
                                         ...(updated.telegram ? ['telegram'] : []),
@@ -178,7 +178,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypes }: D
                                 checked={messageTypes.telegram}
                                 onCheckedChange={(checked) => {
                                     const updated = { ...messageTypes, telegram: checked };
-                                    setMessageTypes(updated);
+                                    setMessageTypesAction(updated);
                                     form.setValue('type', [
                                         ...(updated.email ? ['email'] : []),
                                         ...(updated.telegram ? ['telegram'] : []),

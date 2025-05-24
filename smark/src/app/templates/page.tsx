@@ -108,7 +108,7 @@ export default function TemplatesPage() {
                     )}
                 </div>
 
-                <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search templates..."/>
+                <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder="Search templates..."/>
 
                 {apiError && (
                     <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
@@ -133,7 +133,7 @@ export default function TemplatesPage() {
                                 key={template._id as string}
                                 template={template}
                                 userRole={userInfo?.role || ''}
-                                onDelete={confirmDelete}
+                                onDeleteAction={confirmDelete}
                             />
                         ))}
                         </tbody>
@@ -153,9 +153,9 @@ export default function TemplatesPage() {
                 type="warning"
                 title="Delete Template"
                 description="Are you sure you want to delete this template? This action cannot be undone."
-                onConfirm={handleDelete}
-                onCancel={() => setAlertOpen(false)}
-                onOpenChange={setAlertOpen}
+                onConfirmAction={handleDelete}
+                onCancelAction={() => setAlertOpen(false)}
+                onOpenChangeAction={setAlertOpen}
             />
 
             <CustomAlertDialog
@@ -164,8 +164,8 @@ export default function TemplatesPage() {
                 title="Template Deleted"
                 description="The template has been successfully removed."
                 confirmLabel="OK"
-                onConfirm={() => setSuccessOpen(false)}
-                onOpenChange={setSuccessOpen}
+                onConfirmAction={() => setSuccessOpen(false)}
+                onOpenChangeAction={setSuccessOpen}
             />
 
         </>

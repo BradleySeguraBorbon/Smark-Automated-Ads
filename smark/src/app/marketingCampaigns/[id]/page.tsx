@@ -130,7 +130,7 @@ export default function MarketingCampaignDetailPage({ params }: { params: { id: 
                         audience={audience}
                         audienceAudienceTotalPages={audienceTotalPages}
                         audienceCurrentPage={audiencePage}
-                        onAudiencePageChange={setAudiencePage}
+                        onAudiencePageChangeAction={setAudiencePage}
                     />
                 </div>
             </main>

@@ -2,7 +2,7 @@ import mongoose, { Model } from 'mongoose';
 import Tags from './Tag';
 import Clients from './Client';
 import Users from './User';
-import { IMarketingCampaign } from "../types/MarketingCampaign";
+import { IMarketingCampaign } from "@/types/MarketingCampaign";
 
 const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
   {
@@ -25,7 +25,8 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+      strict:true
   }
 );
 

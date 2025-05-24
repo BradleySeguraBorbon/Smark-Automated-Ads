@@ -21,7 +21,7 @@ export interface IClient extends Document {
     email: string;
     phone: string;
     preferredContactMethod: string;
-    subscriptions: ("email" | "telegram")[];
+    subscriptions: string[];
     birthDate: Date;
     preferences: string[];
     tags: TagRef[];

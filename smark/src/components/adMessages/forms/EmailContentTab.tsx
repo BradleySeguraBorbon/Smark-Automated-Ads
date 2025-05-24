@@ -22,10 +22,10 @@ interface EmailContentTabProps {
   mode: 'new' | 'edit';
   templates: ITemplate[];
   placeholderValues: Record<string, string>;
-  setPlaceholderValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  setPlaceholderValuesAction: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-export function EmailContentTab({ form, mode, templates, placeholderValues, setPlaceholderValues }: EmailContentTabProps) {
+export function EmailContentTab({ form, mode, templates, placeholderValues, setPlaceholderValuesAction }: EmailContentTabProps) {
   const selectedTemplateRef = form.watch('content.email.template');
   const emailSubject = form.watch('content.email.subject');
   const attachments = form.watch('attachments') || [];
@@ -46,11 +46,11 @@ export function EmailContentTab({ form, mode, templates, placeholderValues, setP
       const body = form.getValues('content.email.body');
       if (mode === 'edit' && body) {
         const values = extractPlaceholderValues(tpl.html, body);
-        setPlaceholderValues(values);
+        setPlaceholderValuesAction(values);
       } else if (Object.keys(placeholderValues).length === 0) {
         const emptyValues: Record<string, string> = {};
         tpl.placeholders.forEach((key) => (emptyValues[key] = ''));
-        setPlaceholderValues(emptyValues);
+        setPlaceholderValuesAction(emptyValues);
       }
     }
   }, [selectedTemplateRef]);
@@ -139,7 +139,7 @@ export function EmailContentTab({ form, mode, templates, placeholderValues, setP
             placeholders={selectedTemplate.placeholders}
             values={placeholderValues}
             onChange={(key, val) =>
-              setPlaceholderValues((prev) => ({ ...prev, [key]: val }))
+              setPlaceholderValuesAction((prev) => ({ ...prev, [key]: val }))
             }
           />
         ) : (

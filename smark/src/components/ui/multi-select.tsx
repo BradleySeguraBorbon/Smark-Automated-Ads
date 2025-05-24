@@ -13,7 +13,7 @@ type Option = {
 interface MultiSelectProps {
   options: Option[]
   selected: string[]
-  onChange: (selected: string[]) => void
+  onChangeAction: (selected: string[]) => void
   placeholder?: string
   className?: string
 }
@@ -21,7 +21,7 @@ interface MultiSelectProps {
 export function MultiSelect({
   options = [], // Default to empty array
   selected = [], // Default to empty array
-  onChange,
+  onChangeAction,
   placeholder = "Select options...",
   className = "",
 }: MultiSelectProps) {
@@ -34,7 +34,7 @@ export function MultiSelect({
   const safeSelected = Array.isArray(selected) ? selected : []
 
   const handleUnselect = (option: string) => {
-    onChange(safeSelected.filter((s) => s !== option))
+    onChangeAction(safeSelected.filter((s) => s !== option))
   }
 
   const selectables = safeOptions.filter((option) => !safeSelected.includes(option.value))
@@ -102,7 +102,7 @@ export function MultiSelect({
                     e.stopPropagation()
                   }}
                   onSelect={() => {
-                    onChange([...safeSelected, option.value])
+                    onChangeAction([...safeSelected, option.value])
                     setInputValue("")
                   }}
                   className={"cursor-pointer"}

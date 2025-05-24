@@ -1,0 +1,1289 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AutoSmark API",
+    "version": "1.0.0",
+    "description": "AutoSmark API REST documentation."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local Development" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AdMessage": {
+        "type": "object",
+        "required": ["name", "marketingCampaign", "type", "status", "content", "sendDate"],
+        "properties": {
+          "name": { "type": "string" },
+          "marketingCampaign": { "type": "string", "format": "objectId" },
+          "type": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["email", "telegram"] }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["sent", "editing", "programmed"]
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "object",
+                "properties": {
+                  "subject": { "type": "string" },
+                  "body": { "type": "string" },
+                  "template": { "type": "string", "format": "objectId" }
+                }
+              },
+              "telegram": {
+                "type": "object",
+                "properties": {
+                  "message": { "type": "string" },
+                  "parseMode": { "type": "string", "enum": ["Markdown", "HTML"] },
+                  "template": { "type": "string", "format": "objectId" },
+                  "buttons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": { "type": "string" },
+                        "url": { "type": "string", "format": "uri" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "path": { "type": "string" }
+              }
+            }
+          },
+          "sendDate": { "type": "string", "format": "date-time" }
+        }
+      },"CampaignAudience": {
+        "type": "object",
+        "required": ["campaign", "audience", "status"],
+        "properties": {
+          "campaign": { "type": "string", "format": "objectId" },
+          "audience": {
+            "type": "array",
+            "items": { "type": "string", "format": "objectId" }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["approved", "pending", "rejected"]
+          }
+        }
+      },
+      "Client": {
+        "type": "object",
+        "required": [
+          "firstName", "lastName", "email", "phone",
+          "preferredContactMethod", "subscriptions",
+          "birthDate", "telegramChatId"
+        ],
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "preferredContactMethod": {
+            "type": "string",
+            "enum": ["email", "telegram"]
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["email", "telegram"] }
+          },
+          "birthDate": { "type": "string", "format": "date" },
+          "telegramChatId": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "format": "objectId" }
+          },
+          "preferences": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "adInteractions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "adMessage": { "type": "string", "format": "objectId" },
+                "interactionType": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "MarketingCampaign": {
+        "type": "object",
+        "required": ["name", "description", "startDate", "endDate", "tags"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "completed"],
+            "default": "inactive"
+          },
+          "startDate": { "type": "string", "format": "date" },
+          "endDate": { "type": "string", "format": "date" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "format": "objectId" }
+          },
+          "users": {
+            "type": "array",
+            "items": { "type": "string", "format": "objectId" }
+          },
+          "performance": {
+            "type": "object",
+            "properties": {
+              "totalEmailsSent": { "type": "integer", "default": 0 },
+              "totalEmailsOpened": { "type": "integer", "default": 0 },
+              "telegramMessagesSent": { "type": "integer", "default": 0 },
+              "telegramMessagesOpened": { "type": "integer", "default": 0 }
+            }
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "required": ["name", "keywords"],
+        "properties": {
+          "name": { "type": "string" },
+          "keywords": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "Template": {
+        "type": "object",
+        "required": ["name", "type", "html", "placeholders"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["email", "telegram"]
+          },
+          "html": { "type": "string" },
+          "placeholders": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": ["username", "password", "email", "role"],
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "employee", "developer"]
+          },
+          "marketingCampaigns": {
+            "type": "array",
+            "items": { "type": "string", "format": "objectId" }
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "BearerAuth": [] }],
+  "paths": {
+    "/api/adMessages": {
+      "get": {
+        "tags": ["AdMessages"],
+        "summary": "Get a paginated list of AdMessages",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["sent", "editing", "programmed"] }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["email", "telegram"] }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of AdMessages" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "No AdMessages found" }
+        }
+      },
+      "post": {
+        "tags": ["AdMessages"],
+        "summary": "Create a new AdMessage",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "AdMessage created successfully" },
+          "400": { "description": "Validation error or invalid references" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/adMessages/[id]": {
+      "get": {
+        "tags": ["AdMessages"],
+        "summary": "Get a specific AdMessage by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "AdMessage found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "AdMessage not found" }
+        }
+      },
+      "put": {
+        "tags": ["AdMessages"],
+        "summary": "Update an AdMessage by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AdMessage updated successfully" },
+          "400": { "description": "Invalid ID or data" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "AdMessage not found" },
+          "422": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["AdMessages"],
+        "summary": "Delete an AdMessage by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "AdMessage deleted successfully" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "AdMessage not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/campaignAudiences": {
+      "get": {
+        "tags": ["CampaignAudiences"],
+        "summary": "Get a campaign audience by campaign ID with pagination",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["approved", "pending", "rejected"] }
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "objectId" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Campaign audience data" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "No audience found" }
+        }
+      },
+      "post": {
+        "tags": ["CampaignAudiences"],
+        "summary": "Create a new campaign audience",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CampaignAudience" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Campaign audience created" },
+          "400": { "description": "Invalid campaign ID or audience" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/campaignAudiences/[id]": {
+      "get": {
+        "tags": ["CampaignAudiences"],
+        "summary": "Get a campaign audience by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Campaign audience found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Campaign audience not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["CampaignAudiences"],
+        "summary": "Update a campaign audience by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CampaignAudience" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Campaign audience updated" },
+          "400": { "description": "Invalid ID or input" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Campaign audience not found" },
+          "422": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["CampaignAudiences"],
+        "summary": "Delete a campaign audience by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Campaign audience deleted" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/clients": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Get a paginated list of clients with optional filters",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "preferredContactMethod",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["email", "telegram"] }
+          },
+          {
+            "name": "subscription",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["email", "telegram"] }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "tagIds[]",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string", "format": "objectId" }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Clients retrieved successfully" },
+          "400": { "description": "Invalid pagination parameters" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["Clients"],
+        "summary": "Create a new client",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Client" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Client created successfully" },
+          "400": { "description": "Validation error or missing fields" },
+          "422": { "description": "Schema validation failed" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/clients/[id]": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Get a client by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Client found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Client not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["Clients"],
+        "summary": "Update a client by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Client" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Client updated successfully" },
+          "400": { "description": "Invalid input or ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Client not found" },
+          "422": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["Clients"],
+        "summary": "Delete a client by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Client deleted successfully" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Client not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/clients/register": {
+      "post": {
+        "tags": ["Clients"],
+        "summary": "Public route to register a new client",
+        "description": "This route allows public client registration without authorization header.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Client" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Client registered successfully" },
+          "400": { "description": "Validation error" },
+          "422": { "description": "Schema validation failed" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/marketingCampaigns": {
+      "get": {
+        "tags": ["MarketingCampaigns"],
+        "summary": "Get a paginated list of marketing campaigns",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "assignedTo", "in": "query", "schema": { "type": "string", "format": "objectId" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "inactive", "completed"] } },
+          { "name": "startDate", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "List of marketing campaigns" },
+          "400": { "description": "Invalid pagination or filter parameters" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["MarketingCampaigns"],
+        "summary": "Create a new marketing campaign",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MarketingCampaign" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Marketing campaign created successfully" },
+          "400": { "description": "Invalid input or references" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "409": { "description": "Campaign name already exists" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/marketingCampaigns/[id]": {
+      "get": {
+        "tags": ["MarketingCampaigns"],
+        "summary": "Get a marketing campaign by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Marketing campaign found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Campaign not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["MarketingCampaigns"],
+        "summary": "Update a marketing campaign by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MarketingCampaign" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Campaign updated successfully" },
+          "400": { "description": "Invalid ID or input" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Campaign not found" },
+          "422": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["MarketingCampaigns"],
+        "summary": "Delete a marketing campaign and its associated ad messages",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Campaign and related ad messages deleted successfully" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Campaign not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "tags": ["Tags"],
+        "summary": "Get a paginated list of tags with optional filters",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of tags" },
+          "404": { "description": "No tags found" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["Tags"],
+        "summary": "Create a new tag",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Tag" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Tag created successfully" },
+          "400": { "description": "Missing or invalid fields" },
+          "409": { "description": "Tag with this name already exists" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/tags/[id]": {
+      "get": {
+        "tags": ["Tags"],
+        "summary": "Get a tag by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Tag found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Tag not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["Tags"],
+        "summary": "Update a tag by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Tag" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tag updated successfully" },
+          "400": { "description": "Invalid name or keywords" },
+          "409": { "description": "Tag name already exists" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Tag not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["Tags"],
+        "summary": "Delete a tag by ID",
+        "description": "Also removes references from MarketingCampaigns and Clients",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Tag deleted successfully" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Tag not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/templates": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "Get a paginated list of templates",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["email", "telegram"] }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Templates retrieved successfully" },
+          "400": { "description": "Invalid pagination parameters" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["Templates"],
+        "summary": "Create a new template",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Template" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Template created successfully" },
+          "400": { "description": "Missing or invalid fields" },
+          "409": { "description": "Template name already exists" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/templates/[id]": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "Get a template by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Template found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Template not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["Templates"],
+        "summary": "Update a template by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Template" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Template updated successfully" },
+          "400": { "description": "Invalid input or ID" },
+          "409": { "description": "Template name already exists" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Template not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["Templates"],
+        "summary": "Delete a template by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Template deleted successfully" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Template not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/user": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get a paginated list of users with optional filters",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "role", "in": "query", "schema": { "type": "string", "enum": ["admin", "employee", "developer"] } },
+          { "name": "username", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "List of users" },
+          "400": { "description": "Invalid pagination parameters" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/User" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created successfully" },
+          "400": { "description": "Validation or reference error" },
+          "409": { "description": "User already exists" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/user/[id]": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get a user by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "User found" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "User not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update a user by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/User" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User updated successfully" },
+          "400": { "description": "Invalid input or ID" },
+          "409": { "description": "Username or email already exists" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "User not found" },
+          "422": { "description": "Validation error" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete a user by ID and remove from marketing campaigns",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "User deleted successfully" },
+          "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "User not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Authenticate user and return JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful, returns JWT" },
+          "400": { "description": "Invalid credentials format" },
+          "401": { "description": "Incorrect credentials" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password", "role"],
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" },
+                  "role": { "type": "string", "enum": ["admin", "employee", "developer"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "400": { "description": "Missing data" },
+          "409": { "description": "User already registered" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/auth/send-code": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Send a one-time code for login or password reset",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "purpose"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "purpose": { "type": "string", "enum": ["login", "reset"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Code sent and temp token returned" },
+          "400": { "description": "Invalid email or purpose" },
+          "404": { "description": "User not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/auth/verify-code": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Verify code and return login token or reset password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tempToken", "code"],
+                "properties": {
+                  "tempToken": { "type": "string" },
+                  "code": { "type": "string" },
+                  "newPassword": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login token or reset confirmation" },
+          "400": { "description": "Invalid input or weak password" },
+          "401": { "description": "Invalid or expired code/token" },
+          "404": { "description": "User not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/api/auth/decode": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Decode a JWT token to get user data",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["token"],
+                "properties": {
+                  "token": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Token decoded successfully" },
+          "400": { "description": "No token provided" },
+          "401": { "description": "Invalid or expired token" },
+          "500": { "description": "Missing secret or server error" }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "tags": ["Chat"],
+        "summary": "Generate a language-based response from a prompt",
+        "description": "This endpoint sends a prompt to the AI model (via OpenRouter) and returns the generated response.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": { "type": "string", "description": "The user prompt to send to the chat model" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI-generated response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "response": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing or invalid prompt" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/api/email/sendAds": {
+      "post": {
+        "tags": ["Email"],
+        "summary": "Send marketing email to a target audience",
+        "description": "Retrieves an adMessage by ID, formats its email content, and sends it to a list of email contacts using nodemailer with batching and rate limits.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["adMessageId"],
+                "properties": {
+                  "adMessageId": { "type": "string", "format": "objectId", "description": "ID of the adMessage to send via email" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Emails sent successfully" },
+          "400": { "description": "Invalid adMessage ID or missing email content" },
+          "500": { "description": "Internal server error while sending emails" }
+        }
+      }
+    },
+    "/api/telegram/sendAds": {
+      "post": {
+        "tags": ["Telegram"],
+        "summary": "Send marketing message via Telegram to target audience",
+        "description": "Fetches an AdMessage by ID, extracts Telegram message content, and sends it to all clients with a valid telegramChatId using the Telegram Bot API.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["adMessageId"],
+                "properties": {
+                  "adMessageId": { "type": "string", "format": "objectId", "description": "ID of the adMessage to send via Telegram" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Telegram messages sent successfully" },
+          "400": { "description": "Invalid adMessage ID or missing message content" },
+          "500": { "description": "Internal server error or Telegram rate limit exceeded" }
+        }
+      }
+    }
+    
+  }
+}

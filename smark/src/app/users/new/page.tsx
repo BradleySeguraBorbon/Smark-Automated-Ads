@@ -10,10 +10,12 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import {decodeToken} from "@/lib/utils/decodeToken";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 import CustomAlertDialog from "@/components/CustomAlertDialog";
+import {IUser} from "@/types/User";
 
 interface CreateUserFormData {
     username: string;
     password: string;
+    email: string;
     role?: string;
 }
 
@@ -28,10 +30,11 @@ export default function CreateUserPage() {
     const [alertType, setAlertType] = useState<"success" | "error">("success");
     const [alertMessage, setAlertMessage] = useState("");
 
-    const form = useForm<CreateUserFormData>({
+    const form = useForm<IUser>({
         defaultValues: {
             username: '',
             password: '',
+            email: '',
             role: 'employee',
         },
     });
@@ -60,6 +63,7 @@ export default function CreateUserPage() {
             const payload = {
                 username: data.username,
                 password: data.password,
+                email: data.email,
                 role: userInfo?.role === 'developer' ? data.role : 'employee',
             };
 
@@ -128,7 +132,7 @@ export default function CreateUserPage() {
                         )}
                         <UserForm
                             form={form}
-                            onSubmit={handleSubmit}
+                            onSubmitAction={handleSubmit}
                             userRole={userInfo?.role || ''}
                             isSubmitting={isSubmitting}
                         />
@@ -141,11 +145,13 @@ export default function CreateUserPage() {
                 title={alertType === "success" ? "Success" : "Error"}
                 description={alertMessage}
                 confirmLabel="OK"
-                onConfirm={() => {
-                    setAlertOpen(false);
-                    router.back();
+                onConfirmAction={() => {
+                    if(alertType!=='error'){
+                        setAlertOpen(false);
+                        router.back();
+                    }
                 }}
-                onOpenChange={setAlertOpen}
+                onOpenChangeAction={setAlertOpen}
             />
         </>
     );

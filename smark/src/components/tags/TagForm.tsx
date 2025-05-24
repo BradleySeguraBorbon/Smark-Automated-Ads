@@ -16,10 +16,10 @@ import { Trash2, PlusCircle } from 'lucide-react'
 
 interface TagFormProps {
     form: ReturnType<typeof useFormContext>
-    onSubmit: (data: any) => void
+    onSubmitAction: (data: any) => void
 }
 
-export default function TagForm({ form, onSubmit }: TagFormProps) {
+export default function TagForm({ form, onSubmitAction }: TagFormProps) {
     const [newKeyword, setNewKeyword] = useState('')
 
     const addKeyword = () => {
@@ -39,7 +39,7 @@ export default function TagForm({ form, onSubmit }: TagFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
                 <FormField
                     control={form.control}
                     name="name"

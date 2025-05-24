@@ -8,10 +8,10 @@ import { ITemplate } from "@/types/Template"
 interface Props {
     template: ITemplate
     userRole: string
-    onDelete: (id: string) => void
+    onDeleteAction: (id: string) => void
 }
 
-export default function TemplateRow({ template, userRole, onDelete }: Props) {
+export default function TemplateRow({ template, userRole, onDeleteAction }: Props) {
     const canEdit = userRole === 'developer'
     //const badgeClass = "text-xs bg-muted px-2 py-0.5 rounded-full border"
 
@@ -42,7 +42,7 @@ export default function TemplateRow({ template, userRole, onDelete }: Props) {
                             <Link href={`/templates/${template._id}/edit`}>
                                 <Button variant="secondary" className="bg-blue-500 hover:bg-blue-800" size="icon"><Pencil className="h-4 w-4" /></Button>
                             </Link>
-                            <Button onClick={() => onDelete(template._id! as string)} variant="secondary" className={"bg-red-500 hover:bg-red-800"} size="icon">
+                            <Button onClick={() => onDeleteAction(template._id! as string)} variant="secondary" className={"bg-red-500 hover:bg-red-800"} size="icon">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </>

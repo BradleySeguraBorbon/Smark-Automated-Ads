@@ -23,7 +23,7 @@ export default function TagsField({ form, tagOptions }: TagsFieldProps) {
                         <TagSelector
                             tags={tagOptions}
                             selected={field.value || []}
-                            onChange={(newSelected) => field.onChange(newSelected)}
+                            onChangeAction={(newSelected) => field.onChange(newSelected)}
                         />
                     </FormControl>
                     <FormMessage />

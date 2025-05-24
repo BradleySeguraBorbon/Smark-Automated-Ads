@@ -12,10 +12,10 @@ interface AudienceCardProps {
     audience: ClientRef[];
     currentPage: number;
     totalPages: number;
-    onPageChange: (page: number) => void;
+    onPageChangeAction: (page: number) => void;
 }
 
-export default function CampaignAudienceCard({ audience, currentPage, totalPages, onPageChange }: AudienceCardProps) {
+export default function CampaignAudienceCard({ audience, currentPage, totalPages, onPageChangeAction }: AudienceCardProps) {
     return (
         <Card className='no-hover-effect'>
             <CardHeader>
@@ -54,7 +54,7 @@ export default function CampaignAudienceCard({ audience, currentPage, totalPages
                     <PaginationControls
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={(page) => onPageChange(page)}
+                        onPageChange={(page) => onPageChangeAction(page)}
                     />
                 )}
             </CardContent>

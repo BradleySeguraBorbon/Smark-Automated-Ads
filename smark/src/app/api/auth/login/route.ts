@@ -4,28 +4,27 @@ import jwt from 'jsonwebtoken';
 import dbConnect from '@/config/db';
 import User from '@/models/User';
 import { IUser } from '@/types/User';
+import {deepSanitize} from "@/lib/utils/inputSecurity";
 
 export async function POST(request: Request) {
   await dbConnect();
-  const { username, password } = await request.json();
-  if (!username || !password) {
-    return NextResponse.json({ error: 'Missing username or password' }, { status: 400 });
+  const { username, password } = deepSanitize(await request.json());
+
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return NextResponse.json({ error: 'Invalid credentials format' }, { status: 400 });
   }
 
   try {
-    const user: IUser | null = await User.findOne({ username });
-    if (!user) {
-      return NextResponse.json({ error: 'Incorrect Credentials' }, { status: 401 });
-    }
+    const user = await User.findOne({ username });
+    if (!user) return NextResponse.json({ error: 'Incorrect Credentials' }, { status: 401 });
+
     const passOk = await bcrypt.compare(password, user.password);
-    if (!passOk) {
-      return NextResponse.json({ error: 'Incorrect Credentials' }, { status: 401 });
-    }
+    if (!passOk) return NextResponse.json({ error: 'Incorrect Credentials' }, { status: 401 });
 
     const token = jwt.sign(
-      { uid: user._id, username: user.username, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '24h' }
+        { uid: user._id, username: user.username, role: user.role },
+        process.env.JWT_SECRET!,
+        { expiresIn: '24h' }
     );
 
     return NextResponse.json({ token }, { status: 200 });

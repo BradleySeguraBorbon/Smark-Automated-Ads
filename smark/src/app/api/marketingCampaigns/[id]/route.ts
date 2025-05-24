@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { MarketingCampaigns, AdMessages, Tags, Users, Clients } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
 
 function isValidObjectId(id: string) {
   return mongoose.Types.ObjectId.isValid(id);
@@ -64,111 +65,64 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    await connectDB();
+  await connectDB();
 
-    const allowedRoles = ['developer', 'admin'];
+  const allowedRoles = ['developer', 'admin'];
+  const user = getUserFromRequest(request);
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!allowedRoles.includes(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
+  }
 
-    const user = getUserFromRequest(request);
+  const { id } = await params;
+  if (!id || !isValidObjectId(id)) {
+    return NextResponse.json({ message: 'Invalid or missing ID' }, { status: 400 });
+  }
 
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const result = await sanitizeRequest(request, {
+    requiredFields: ['name', 'description', 'startDate', 'endDate', 'tags'],
+    dates: ['startDate', 'endDate'],
+    enums: [{ field: 'status', allowed: ['active', 'inactive', 'completed'] }]
+  });
+  if (!result.ok) return result.response;
+  const body = result.data;
 
-    if (!allowedRoles.includes(user.role as string)) {
-      return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
-    }
+  if (new Date(body.endDate) <= new Date(body.startDate)) {
+    return NextResponse.json({ message: 'End date must be after start date' }, { status: 400 });
+  }
 
-    const { id } = await params;
+  const tags = body.tags;
+  const userIds = body.users || [];
 
-    if (!id || !isValidObjectId(id)) {
-      return NextResponse.json(
-        { message: 'Invalid or missing ID parameter' },
-        { status: 400 }
-      );
-    }
+  const [invalidTags, invalidUsers] = await Promise.all([
+    validateObjectIdsExist(tags, Tags, 'tags'),
+    validateObjectIdsExist(userIds, Users, 'users'),
+  ]);
 
-    const body = await request.json();
-
-    if (body.startDate && isNaN(Date.parse(body.startDate))) {
-      return NextResponse.json(
-        { message: 'Invalid startDate format' },
-        { status: 400 }
-      );
-    }
-
-    if (body.endDate && isNaN(Date.parse(body.endDate))) {
-      return NextResponse.json(
-        { message: 'Invalid endDate format' },
-        { status: 400 }
-      );
-    }
-
-    if (body.startDate && body.endDate && new Date(body.endDate) <= new Date(body.startDate)) {
-      return NextResponse.json(
-        { message: 'End date must be after start date' },
-        { status: 400 }
-      );
-    }
-
-    if (body.name) {
-      const existingCampaign = await MarketingCampaigns.findOne({
-        name: body.name,
-        _id: { $ne: id }
-      });
-      if (existingCampaign) {
-        return NextResponse.json(
-          { message: 'A campaign with this name already exists' },
-          { status: 409 }
-        );
-      }
-    }
-
-    const tags = body.tags || [];
-    const userIds = body.users || [];
-
-    const [invalidTags, invalidUsers] = await Promise.all([
-      tags.length ? validateObjectIdsExist(tags, Tags, 'tags') : null,
-      userIds.length ? validateObjectIdsExist(userIds, Users, 'users') : null,
-    ]);
-
-    const invalidRefs = [invalidTags, invalidUsers].filter(Boolean);
-    if (invalidRefs.length > 0) {
-      return NextResponse.json({
-        message: 'Invalid references found in update',
-        details: invalidRefs
-      }, { status: 400 });
-    }
-
-
-    const updatedCampaign = await MarketingCampaigns.findByIdAndUpdate(
-      id,
-      body,
-      { new: true, runValidators: true }
-    )
-      .populate('tags', 'name')
-      .populate('users', 'name email');
-
-    if (!updatedCampaign) {
-      return NextResponse.json(
-        { message: 'Marketing campaign not found' },
-        { status: 404 }
-      );
-    }
-
+  const invalidRefs = [invalidTags, invalidUsers].filter(Boolean);
+  if (invalidRefs.length > 0) {
     return NextResponse.json({
-      message: 'Marketing campaign updated successfully',
-      result: updatedCampaign,
-    });
+      message: 'Invalid references found in request',
+      details: invalidRefs
+    }, { status: 400 });
+  }
+
+  try {
+    const updated = await MarketingCampaigns.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+    if (!updated) {
+      return NextResponse.json({ message: 'Marketing campaign not found' }, { status: 404 });
+    }
+
+    const campaign = await MarketingCampaigns.findById(id)
+        .populate('tags', '_id name')
+        .populate('users', '_id username role');
+
+    return NextResponse.json({ message: 'Marketing campaign updated successfully', result: campaign });
   } catch (error: any) {
     console.error(error);
-    if (error.name === 'ValidationError') {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 422 }
-      );
-    }
     return NextResponse.json(
-      { error: 'Error updating marketing campaign' },
-      { status: 500 }
+        { error: error.message || 'Error updating marketing campaign' },
+        { status: error.name === 'ValidationError' ? 422 : 500 }
     );
   }
 }

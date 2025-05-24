@@ -1,0 +1,182 @@
+/* 🌙 Swagger UI Dark Theme Customizations */
+
+/* HTTP method buttons */
+.dark .swagger-ui .opblock.opblock-get .opblock-summary-method,
+.dark .swagger-ui .opblock.opblock-post .opblock-summary-method,
+.dark .swagger-ui .opblock.opblock-put .opblock-summary-method,
+.dark .swagger-ui .opblock.opblock-delete .opblock-summary-method,
+.dark .swagger-ui .opblock.opblock-patch .opblock-summary-method {
+    color: white !important;
+}
+
+/* Endpoint summary and paths */
+.dark .swagger-ui .opblock .opblock-summary-description,
+.dark .swagger-ui .opblock .opblock-summary-path {
+    color: #e2e8f0 !important;
+}
+
+/* Headings and general titles */
+.dark .swagger-ui h2,
+.dark .swagger-ui h3,
+.dark .swagger-ui section h4,
+.dark .swagger-ui .opblock-tag,
+.dark .swagger-ui .info,
+.dark .swagger-ui .info p,
+.dark .swagger-ui .info .title,
+.dark .swagger-ui .models h4,
+.dark .swagger-ui .model-title,
+.dark .swagger-ui .info hgroup > h2,
+.dark .swagger-ui .info hgroup > h3,
+.dark .swagger-ui .model-container .model-box .model,
+.dark .swagger-ui .model-container .model-box .model-title,
+.dark .swagger-ui .response-col_description__inner > span:first-child,
+.dark .swagger-ui .scheme-container > label {
+    color: #f8fafc !important;
+}
+
+/* Selects, Inputs and Textareas */
+.dark .swagger-ui select,
+.dark .swagger-ui input,
+.dark .swagger-ui textarea,
+.dark .swagger-ui input[type="text"],
+.dark .swagger-ui input[type="password"],
+.dark .swagger-ui .auth-container input[type="text"],
+.dark .swagger-ui .auth-container input[type="password"] {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid #475569 !important;
+}
+
+/* Auth input placeholder */
+.dark .swagger-ui .auth-container input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Schema detail formatting */
+.dark .swagger-ui .parameter__in,
+.dark .servers-title,
+.dark .swagger-ui .prop-format,
+.dark .swagger-ui em {
+    color: #c9d1dd !important;
+    font-style: italic !important;
+}
+
+/* Section headers (Parameters, Responses) */
+.dark .swagger-ui .parameters-container > h4,
+.dark .swagger-ui .responses-inner > h4,
+.dark .swagger-ui .responses-inner > div > h4,
+.dark .swagger-ui .opblock-section-header h4,
+.dark .swagger-ui .opblock-section-header label {
+    background-color: #182343 !important;
+    color: #f1f5f9 !important;
+    padding: 0.75rem 1rem;
+}
+
+/* Tables and code responses */
+.dark .swagger-ui td.col_status,
+.dark .swagger-ui .responses-inner td,
+.dark .swagger-ui th {
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+/* Transparent backgrounds for structure */
+.dark .swagger-ui .parameters,
+.dark .swagger-ui .responses-inner,
+.dark .swagger-ui .opblock-section-header,
+.dark .swagger-ui .responses-table,
+.dark .swagger-ui table.responses-table,
+.dark .swagger-ui .model-box {
+    background-color: transparent !important;
+}
+
+/* Scheme dropdown container */
+.dark .swagger-ui .scheme-container {
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+}
+
+/* "Try it out" button */
+.dark .swagger-ui .btn.try-out__btn {
+    color: #f8fafc !important;
+    border: 1px solid #f1f5f9 !important;
+    background-color: transparent !important;
+}
+.dark .swagger-ui .btn.try-out__btn:hover,
+.dark .swagger-ui .btn.try-out__btn:focus {
+    color: #ffffff !important;
+    background-color: #334155 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Authorization modal buttons */
+.dark .swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.authorize,
+.dark .swagger-ui .btn.modal-btn.auth.authorize {
+    background-color: #16a34a !important;
+    border: 1px solid #15803d !important;
+    color: white !important;
+}
+.dark .swagger-ui .auth-btn-wrapper .btn.modal-btn.auth.logout,
+.dark .swagger-ui .auth-btn-wrapper .btn.modal-btn,
+.dark .swagger-ui .btn.modal-btn {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #f8fafc !important;
+}
+
+/* Modal fallback */
+.dark .modal-ux-content ,
+.dark .modal-ux-header {
+    background-color: #1e293b !important;
+}
+
+.dark .swagger-ui .model-box {
+    background-color: #1e293b !important;
+}
+
+.dark .swagger-ui .model-box:hover,
+.dark .button.opblock-summary-control div{
+    background-color: #2e415c !important;
+}
+
+.dark .swagger-ui .dialog-ux h6,
+.dark .swagger-ui .dialog-ux label,
+.dark .swagger-ui .dialog-ux code{
+    color: #f8fafc !important;
+}
+
+.swagger-ui {
+    background-color: #ffffff !important;
+}
+
+.dark .swagger-ui {
+    background-color: #0f172a !important;
+}
+
+/* 🌙 Textos dentro de parámetros, enums y secciones: blancos */
+.dark .swagger-ui .parameter__name,
+.dark .swagger-ui .parameter__type,
+.dark .swagger-ui .parameter__in,
+.dark .swagger-ui .parameter__enum p,
+.dark .swagger-ui .parameter__default p,
+.dark .swagger-ui .renderedMarkdown p,
+.dark .swagger-ui .opblock-description-wrapper p,
+.dark .swagger-ui .opblock-description-wrapper,
+.dark .swagger-ui .parameter__name.required,
+.dark .swagger-ui .opblock-body .opblock-section-header {
+    color: #f8fafc !important; /* slate-50 */
+}
+
+.dark .swagger-ui .tab button.tablinks,
+.dark .swagger-ui .tab .tablinks {
+    color: #f8fafc !important; /* slate-50 */
+}
+
+.dark .swagger-ui .authorization__btn svg path,
+.dark .swagger-ui .opblock-control-arrow svg path,
+.dark .swagger-ui .expand-operation svg path,
+.dark .swagger-ui .models-control svg path,
+.dark .swagger-ui .close-modal svg path {
+    fill: #f8fafc !important; /* blanco (slate-50) */
+}
+

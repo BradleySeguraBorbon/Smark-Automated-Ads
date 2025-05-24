@@ -20,9 +20,9 @@ interface CustomAlertDialogProps {
     description: string;
     confirmLabel?: string;
     cancelLabel?: string;
-    onConfirm: () => void;
-    onCancel?: () => void;
-    onOpenChange: (open: boolean) => void;
+    onConfirmAction: () => void;
+    onCancelAction?: () => void;
+    onOpenChangeAction: (open: boolean) => void;
 }
 
 export default function CustomAlertDialog({
@@ -32,9 +32,9 @@ export default function CustomAlertDialog({
     description,
     confirmLabel = 'Accept',
     cancelLabel = 'Cancel',
-    onConfirm,
-    onCancel,
-    onOpenChange,
+    onConfirmAction,
+    onCancelAction,
+    onOpenChangeAction,
 }: CustomAlertDialogProps) {
     const typeClasses = {
         error: 'text-red-500',
@@ -58,7 +58,7 @@ export default function CustomAlertDialog({
     };
 
     return (
-        <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialog open={open} onOpenChange={onOpenChangeAction}>
             <AlertDialogContent className={`border-2 ${borderClasses[type]}`}>
                 <AlertDialogHeader>
                     <AlertDialogTitle className={typeClasses[type]}>
@@ -68,13 +68,13 @@ export default function CustomAlertDialog({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     {type === 'warning' && (
-                        <AlertDialogCancel onClick={onCancel}>
+                        <AlertDialogCancel onClick={onCancelAction}>
                             {cancelLabel}
                         </AlertDialogCancel>
                     )}
                     <AlertDialogAction
                         className={actionButtonClasses[type]}
-                        onClick={onConfirm}
+                        onClick={onConfirmAction}
                     >
                         {confirmLabel}
                     </AlertDialogAction>

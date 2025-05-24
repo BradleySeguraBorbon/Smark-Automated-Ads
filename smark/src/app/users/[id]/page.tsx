@@ -16,6 +16,7 @@ interface MarketingCampaign {
 interface UserInfo {
     _id: string;
     username: string;
+    email: string;
     role: string;
     marketingCampaigns?: MarketingCampaign[];
     createdAt?: string;
@@ -89,6 +90,9 @@ export default function ProfilePage() {
                         )}
                         <p>
                             <span className="font-semibold">Username:</span> {userInfo?.username}
+                        </p>
+                        <p>
+                            <span className="font-semibold">Email:</span> {userInfo?.email}
                         </p>
                         <p>
                             <span className="font-semibold">Role:</span> {userInfo?.role}
