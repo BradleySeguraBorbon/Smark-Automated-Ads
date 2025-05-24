@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import crypto from 'crypto';
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -238,7 +239,7 @@ export async function POST(request: Request) {
         const existingClient = await Clients.findOne({
             $or: [
                 { email: body.email },
-                { telegramChatId: body.telegramChatId }
+                { "telegram.chatId": body.telegram?.chatId }
             ]
         });
 
@@ -263,18 +264,27 @@ export async function POST(request: Request) {
             return NextResponse.json({error: "Error generating tags"}, {status: 500});
         }
 
+        let telegram;
+        if (body.subscriptions?.includes("telegram")) {
+            telegram = {
+                chatId: null,
+                tokenKey: crypto.randomBytes(16).toString("hex"),
+                isConfirmed: false
+            };
+        }
+
         const newClient = await Clients.create({
             firstName: body.firstName,
             lastName: body.lastName,
             email: body.email,
             phone: body.phone,
-            telegramChatId: body.telegramChatId,
             preferredContactMethod: body.preferredContactMethod,
             subscriptions: body.subscriptions,
             birthDate: body.birthDate,
             preferences: body.preferences || [],
             tags: clientTags || [],
-            adInteractions: body.adInteractions || []
+            adInteractions: body.adInteractions || [],
+            ...(telegram && { telegram })
         });
 
         const client = await Clients.findById(newClient._id)

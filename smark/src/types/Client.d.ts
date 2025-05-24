@@ -20,7 +20,6 @@ export interface IClient extends Document {
     lastName: string;
     email: string;
     phone: string;
-    telegramChatId: string;
     preferredContactMethod: string;
     subscriptions: ("email" | "telegram")[];
     birthDate: Date;
@@ -28,6 +27,11 @@ export interface IClient extends Document {
     tags: TagRef[];
     adInteractions: AdInteractions[];
     tagsPending: boolean;
+    telegram: {
+        tokenKey: string;
+        chatId: string;
+        isConfirmed: boolean;
+    };
     createdAt?: Date;
     updatedAt?: Date;
 }

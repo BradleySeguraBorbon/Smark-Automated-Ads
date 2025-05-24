@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { Clients } from "@/models/models";
+import crypto from "crypto";
+import { sendTelegramInvite } from "@/lib/sendTelegramInvite";
 
 export async function POST(req: NextRequest) {
     try {
@@ -13,7 +15,6 @@ export async function POST(req: NextRequest) {
 
         const validClients: any[] = [];
         const seenEmails = new Set();
-        const seenChatIds = new Set();
 
         for (const rawClient of clients) {
             const {
@@ -21,7 +22,6 @@ export async function POST(req: NextRequest) {
                 lastName,
                 email,
                 phone,
-                telegramChatId,
                 preferredContactMethod,
                 subscriptions,
                 birthDate,
@@ -54,14 +54,12 @@ export async function POST(req: NextRequest) {
                 continue;
             }
 
-            if (seenEmails.has(email) || (telegramChatId && seenChatIds.has(telegramChatId))) {
+            if (seenEmails.has(email)) {
                 console.warn(`Duplicate in upload skipped: ${email}`);
                 continue;
             }
 
-            const alreadyExists = await Clients.findOne({
-                $or: [{ email }, { telegramChatId }],
-            });
+            const alreadyExists = await Clients.findOne({email});
 
             if (alreadyExists) {
                 console.warn(`Duplicate in DB skipped: ${email}`);
@@ -69,14 +67,23 @@ export async function POST(req: NextRequest) {
             }
 
             seenEmails.add(email);
-            if (telegramChatId) seenChatIds.add(telegramChatId);
+
+
+            let telegram: any = undefined;
+            if (subscriptions?.includes("telegram")) {
+                const tokenKey = crypto.randomBytes(16).toString("hex");
+                telegram = {
+                    tokenKey,
+                    chatId: null,
+                    isConfirmed: false,
+                };
+            }
 
             const clientData = {
                 firstName,
                 lastName,
                 email,
                 phone,
-                telegramChatId,
                 preferredContactMethod,
                 subscriptions,
                 birthDate,
@@ -84,6 +91,7 @@ export async function POST(req: NextRequest) {
                 adInteractions,
                 tags: [],
                 tagsPending: true,
+                ...(telegram && { telegram })
             };
 
             const sanitized = Object.fromEntries(

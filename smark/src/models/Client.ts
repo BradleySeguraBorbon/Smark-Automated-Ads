@@ -12,7 +12,6 @@ const clientSchema = new Schema<IClient>({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  telegramChatId: { type: String, unique: true, sparse: true },
   preferredContactMethod: { type: String, enum: ["email", "telegram"], required: true },
   subscriptions: [{ type: String, enum: ["email", "telegram"], required: true }],
   birthDate: { type: Date, required: true },
@@ -20,6 +19,11 @@ const clientSchema = new Schema<IClient>({
   tags: [{ type: Types.ObjectId, ref: "Tags" }],
   adInteractions: [adInteractionsSchema],
   tagsPending: { type: Boolean, default: false },
+  telegram: {
+    tokenKey: { type: String },
+    chatId: { type: String },
+    isConfirmed: { type: Boolean, default: false },
+  }
 }, {
   timestamps: true,
   validateBeforeSave: true
@@ -30,7 +34,7 @@ clientSchema.pre("validate", function (next) {
   const client = this as IClient;
 
   const hasEmail = !!client.email;
-  const hasTelegram = !!client.telegramChatId;
+  const hasTelegram = !!client.telegram;
 
   if (!hasEmail && !hasTelegram) {
     return next(new Error("Client must have at least one contact method: email or telegramChatId."));
