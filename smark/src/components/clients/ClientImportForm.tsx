@@ -126,8 +126,8 @@ export default function ClientImportForm() {
                 title="Importación exitosa"
                 description={successMessage}
                 confirmLabel="Aceptar"
-                onConfirm={() => setSuccessOpen(false)}
-                onOpenChange={setSuccessOpen}
+                onConfirmAction={() => setSuccessOpen(false)}
+                onOpenChangeAction={setSuccessOpen}
             />
 
             <CustomAlertDialog
@@ -136,8 +136,8 @@ export default function ClientImportForm() {
                 title="Error al importar"
                 description={errorMessage}
                 confirmLabel="Cerrar"
-                onConfirm={() => setErrorOpen(false)}
-                onOpenChange={setErrorOpen}
+                onConfirmAction={() => setErrorOpen(false)}
+                onOpenChangeAction={setErrorOpen}
             />
         </div>
     );
