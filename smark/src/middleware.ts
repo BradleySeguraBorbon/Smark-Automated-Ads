@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/api/clients/register') ||
         pathname.startsWith('/api/chat') ||
         pathname.startsWith('/api/telegram/webhook') ||
+        pathname.startsWith('/api/adMessages/dispatch') ||
         PUBLIC_FILE.test(pathname)
     ) {
         return response;
