@@ -3,7 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { CampaignAudiences, Clients } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
-import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -88,7 +88,6 @@ export async function POST(request: Request) {
 
     const result = await sanitizeRequest(request, {
         requiredFields: ['campaign', 'audience', 'status'],
-        enumArrays: [{ field: 'audience', allowed: [] }],
         enums: [{ field: 'status', allowed: ['approved', 'pending', 'rejected'] }]
     });
 

@@ -8,7 +8,7 @@ import { IMarketingCampaign } from "@/types/MarketingCampaign"
 import { Button } from "@/components/ui/button"
 import { Pencil, ChevronLeft } from "lucide-react"
 import Link from "next/link"
-import { useParams, usePathname, useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import { useAuthStore } from "@/lib/store"
 import { decodeToken } from "@/lib/utils/decodeToken"
@@ -18,7 +18,6 @@ import { ClientRef } from "@/types/Client"
 
 export default function MarketingCampaignDetailPage({ params }: { params: { id: string } }) {
     const { id } = useParams();
-    const currentPath = usePathname();
     const router = useRouter();
 
     const [campaign, setCampaign] = useState<IMarketingCampaign | null>(null);
@@ -47,7 +46,6 @@ export default function MarketingCampaignDetailPage({ params }: { params: { id: 
             setCampaign(null);
         } finally {
             setLoading(false);
-            adMessageStore.setState({ _hasHydrated: true });
         }
     }
 
