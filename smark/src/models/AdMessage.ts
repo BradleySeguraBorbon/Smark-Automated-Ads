@@ -6,7 +6,7 @@ const adMessagesSchema = new mongoose.Schema<IAdMessage>(
     name: { type: String, required: true },
     marketingCampaign: { type: mongoose.Schema.Types.ObjectId, ref: "MarketingCampaigns", required: true },
     type: [{ type: String, enum: ["email", "telegram"], required: true }],
-    status: { type: String, enum: ["sent", "editing", "programmed"], default: "editing" },
+    status: { type: String, enum: ["sent", "programmed", "draft"], default: "programmed" },
     content: {
       email: {
         subject: { type: String, required: true },

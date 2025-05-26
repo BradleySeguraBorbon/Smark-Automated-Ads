@@ -13,6 +13,7 @@ import LoadingSpinner from "@/components/LoadingSpinner"
 import { useAuthStore } from "@/lib/store"
 import { decodeToken } from "@/lib/utils/decodeToken"
 import { ClientRef } from "@/types/Client"
+import { SuccessSentData } from "@/types/SuccessSentData"
 
 export default function MarketingCampaignDetailPage() {
     const { id } = useParams();
@@ -28,6 +29,7 @@ export default function MarketingCampaignDetailPage() {
     const [audience, setAudience] = useState<ClientRef[]>([]);
     const [audiencePage, setAudiencePage] = useState(1);
     const [audienceTotalPages, setAudienceTotalPages] = useState(1);
+    const [successData, setSuccessData] = useState<SuccessSentData | null>(null);
 
     const fetchCampaign = async () => {
         try {
@@ -64,6 +66,18 @@ export default function MarketingCampaignDetailPage() {
         }
     };
 
+    const fetchSuccessData = async () => {
+        try {
+            const res = await fetch(`/api/marketingCampaigns/${id}/successRates`);
+            if (!res.ok) throw new Error('Failed to fetch success rates');
+            const data: SuccessSentData = await res.json();
+            setSuccessData(data);
+        } catch (err) {
+            console.error(err);
+            setSuccessData(null);
+        }
+    }
+
     useEffect(() => {
         if (!hydrated) return;
 
@@ -82,6 +96,7 @@ export default function MarketingCampaignDetailPage() {
             setUserInfo(user);
             fetchCampaign();
             fetchAudience();
+            fetchSuccessData();
         };
 
         init();
@@ -127,6 +142,7 @@ export default function MarketingCampaignDetailPage() {
                         audienceAudienceTotalPages={audienceTotalPages}
                         audienceCurrentPage={audiencePage}
                         onAudiencePageChangeAction={setAudiencePage}
+                        successData={successData}
                     />
                 </div>
             </main>

@@ -38,7 +38,7 @@ export interface IAdMessage extends Document {
   name: string;
   marketingCampaign: MarketingCampaignRef;
   type: ('email' | 'telegram')[];
-  status?: 'sent' | 'editing' | 'programmed';
+  status?: 'sent' | 'programmed' | 'draft';
   content: {
     email?: AdMessageContentEmail;
     telegram?: AdMessageContentTelegram;

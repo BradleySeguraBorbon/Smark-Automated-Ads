@@ -6,12 +6,12 @@ interface PerformanceCardProps {
     title: string
     icon: React.ReactNode
     rate: number
+    total: number
     sent: number
-    opened: number
     isGeneral?: boolean
   }
   
-  export function PerformanceCard({ title, icon, rate, sent, opened, isGeneral = false }: PerformanceCardProps) {
+  export function PerformanceCard({ title, icon, rate, total, sent, isGeneral = false }: PerformanceCardProps) {
     const getColorClass = (rate: number) => {
       if (rate >= 40) return "text-green-500"
       if (rate >= 20) return "text-amber-500"
@@ -41,12 +41,12 @@ interface PerformanceCardProps {
   
         <div className="mt-auto grid grid-cols-2 gap-2 text-sm">
           <div className="border rounded p-2 text-center">
-            <p className="text-muted-foreground">Sent</p>
-            <p className="font-medium">{sent.toLocaleString()}</p>
+            <p className="text-muted-foreground">total</p>
+            <p className="font-medium">{total.toLocaleString()}</p>
           </div>
           <div className="border rounded p-2 text-center">
-            <p className="text-muted-foreground">Opened</p>
-            <p className="font-medium">{opened.toLocaleString()}</p>
+            <p className="text-muted-foreground">sent</p>
+            <p className="font-medium">{sent.toLocaleString()}</p>
           </div>
         </div>
       </div>
