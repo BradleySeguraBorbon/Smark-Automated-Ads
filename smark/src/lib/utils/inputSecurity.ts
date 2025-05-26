@@ -17,7 +17,17 @@ export function deepSanitize<T>(value: T): T {
 }
 
 export function validateRequiredFields(obj: Record<string, any>, required: string[]) {
-    return required.filter(field => obj[field] === undefined || obj[field] === null);
+    return required.filter(field => {
+        const keys = field.split('.');
+        let current = obj;
+        for (const key of keys) {
+            if (current == null || typeof current !== 'object' || !(key in current)) {
+                return true;
+            }
+            current = current[key];
+        }
+        return false;
+    });
 }
 
 export function validateObjectId(id: string) {

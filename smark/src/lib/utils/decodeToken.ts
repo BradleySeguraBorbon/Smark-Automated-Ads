@@ -23,6 +23,7 @@ export async function decodeToken(token: string | null | undefined) {
 
         const data = await res.json();
         console.log('Token decodificado en servidor:', data);
+        Cookies.set('token', token, { path: '/', expires: data.expires });
         return data;
     } catch (error) {
         console.log('Failed to decode token via API:', error);

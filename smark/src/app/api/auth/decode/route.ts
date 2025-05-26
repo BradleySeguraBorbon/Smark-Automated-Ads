@@ -20,6 +20,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             username: payload.username,
             role: payload.role,
+            expires: payload.exp,
             id: payload.uid,
             email: payload.email,
             code: payload.code,
