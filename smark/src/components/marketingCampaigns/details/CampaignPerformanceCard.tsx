@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { PerformanceCard } from '@/components/marketingCampaigns/PerformanceCard'
 import { Performance } from '@/types/MarketingCampaign'
@@ -9,12 +9,20 @@ import MessageSentLineChart from '@/components/marketingCampaigns/details/Messag
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-interface ClientData {
-    birthDate: string
-    preferredContactMethod: string
+interface CampaignPerformanceCardProps {
+    campaignId: string
+    performance: Performance
+    audience: {
+        birthDate: string
+        preferredContactMethod: string
+    }[]
 }
 
-export default function CampaignPerformanceCard({ performance } : { performance: Performance }) {
+export default function CampaignPerformanceCard({
+    performance,
+    audience,
+    campaignId
+}: CampaignPerformanceCardProps) {
     const emailOpenRate = performance.totalEmailsSent > 0
         ? (performance.totalEmailsOpened / performance.totalEmailsSent) * 100
         : 0;
@@ -27,47 +35,30 @@ export default function CampaignPerformanceCard({ performance } : { performance:
     const totalOpened = performance.totalEmailsOpened + performance.telegramMessagesOpened
     const generalOpenRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0
 
-    const [clients, setClients] = useState<ClientData[]>([])
-
-    useEffect(() => {
-        const fetchClients = async () => {
-            try {
-                const res = await fetch('/api/clients?page=1&limit=1000')
-                const data = await res.json()
-
-                if (!data.results || !Array.isArray(data.results)) return
-
-                const filtered = data.results.map((client: any) => ({
-                    birthDate: client.birthDate,
-                    preferredContactMethod: client.preferredContactMethod
-                })).filter(c => c.birthDate && c.preferredContactMethod)
-
-                setClients(filtered)
-            } catch (error) {
-                console.error('Failed to fetch clients for chart:', error)
-            }
+    const { ageGroups, contactPrefs } = useMemo(() => {
+        const ageGroups = {
+            '18-24': 0,
+            '25-34': 0,
+            '35-44': 0,
+            '45-54': 0,
+            '55+': 0
         }
+        const contactPrefs = { email: 0, telegram: 0 }
 
-        fetchClients()
-    }, [])
+        audience.forEach(({ birthDate, preferredContactMethod }) => {
+            const age = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+            if (age >= 18 && age <= 24) ageGroups['18-24']++
+            else if (age <= 34) ageGroups['25-34']++
+            else if (age <= 44) ageGroups['35-44']++
+            else if (age <= 54) ageGroups['45-54']++
+            else ageGroups['55+']++
 
-    const ageGroups = {
-        '18-24': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0
-    }
+            if (preferredContactMethod === 'email') contactPrefs.email++
+            else if (preferredContactMethod === 'telegram') contactPrefs.telegram++
+        })
 
-    const contactPrefs = { email: 0, telegram: 0 }
-
-    clients.forEach(({ birthDate, preferredContactMethod }) => {
-        const age = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
-        if (age >= 18 && age <= 24) ageGroups['18-24']++
-        else if (age <= 34) ageGroups['25-34']++
-        else if (age <= 44) ageGroups['35-44']++
-        else if (age <= 54) ageGroups['45-54']++
-        else ageGroups['55+']++
-
-        if (preferredContactMethod === 'email') contactPrefs.email++
-        else if (preferredContactMethod === 'telegram') contactPrefs.telegram++
-    })
+        return { ageGroups, contactPrefs }
+    }, [audience])
 
     return (
         <Card>
@@ -173,7 +164,7 @@ export default function CampaignPerformanceCard({ performance } : { performance:
                     </div>
                 </div>
                 {/* 📈 Time Data */}
-                <MessageSentLineChart />
+                <MessageSentLineChart campaignId={ campaignId }/>
             </CardContent>
         </Card>
     )

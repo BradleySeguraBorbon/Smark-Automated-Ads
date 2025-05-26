@@ -48,7 +48,7 @@ export async function GET(request: Request) {
 
         const campaignAudience = await CampaignAudiences.findOne(filter)
             .populate('campaign', '_id name description status')
-            .populate('audience', '_id email firstName lastName');
+            .populate('audience', '_id email firstName lastName birthDate preferredContactMethod');
 
         if (!campaignAudience) {
             return NextResponse.json({ message: 'No audience found' }, { status: 404 });
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         const newAudience = await CampaignAudiences.create(body);
         const campaignAudience = await CampaignAudiences.findById(newAudience._id)
             .populate('campaign', '_id name description status')
-            .populate('audience', '_id email firstName lastName');
+            .populate('audience', '_id email firstName lastName birthDate preferredContactMethod');
 
         return NextResponse.json({
             message: 'Campaign audience created successfully',

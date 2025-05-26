@@ -7,17 +7,21 @@ import { subDays, format } from 'date-fns'
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend)
 
+interface MessageSentLineChartProps {
+    campaignId: string;
+}
+
 interface MessageData {
     date: string
     count: number
 }
 
-export default function MessageSentLineChart() {
+export default function MessageSentLineChart({ campaignId }: MessageSentLineChartProps) {
     const [data, setData] = useState<MessageData[]>([])
 
     useEffect(() => {
         const fetchMessages = async () => {
-            const res = await fetch('/api/adMessages/sentDates')
+            const res = await fetch(`/api/adMessages/sentDates?campaignId=${campaignId}`)
             const raw = await res.json()
             const grouped = raw.reduce((acc: Record<string, number>, msg: { sendDate: string }) => {
                 const date = format(new Date(msg.sendDate), 'yyyy-MM-dd')
