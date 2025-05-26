@@ -1,3 +1,5 @@
+import MarkdownIt from 'markdown-it';
+
 export function isValidHtml(html: string): boolean {
     try {
         const parser = new DOMParser()
@@ -8,5 +10,15 @@ export function isValidHtml(html: string): boolean {
         return hasBody && hasTags && isNotErrorDoc
     } catch {
         return false
+    }
+}
+
+export function isValidMarkdown(markdown: string): boolean {
+    try {
+        const md = new MarkdownIt();
+        const result = md.render(markdown);
+        return result.trim().length > 0;
+    } catch (e) {
+        return false;
     }
 }

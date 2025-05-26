@@ -14,6 +14,7 @@ interface AdMessageFormTabsProps {
     onSubmit: (data: IAdMessage) => void;
     allMarketingCampaigns: IMarketingCampaign[];
     allTemplates: ITemplate[];
+    token:string;
     form: ReturnType<typeof useForm<IAdMessage>>;
 }
 
@@ -22,6 +23,7 @@ export function AdMessageFormTabs({
     onSubmit,
     allMarketingCampaigns,
     allTemplates,
+    token,
     form,
 }: AdMessageFormTabsProps) {
     const [isLoading, setIsLoading] = useState(false);
@@ -79,6 +81,7 @@ export function AdMessageFormTabs({
                     <EmailContentTab
                         form={form}
                         mode={mode}
+                        token={token}
                         templates={allTemplates}
                         placeholderValues={emailPlaceholderValues}
                         setPlaceholderValuesAction={setEmailPlaceholderValues} />
@@ -88,6 +91,7 @@ export function AdMessageFormTabs({
                     <TelegramContentTab
                         form={form}
                         mode={mode}
+                        token={token}
                         templates={allTemplates}
                         placeholderValues={telegramPlaceholderValues}
                         setPlaceholderValuesAction={setTelegramPlaceholderValues}

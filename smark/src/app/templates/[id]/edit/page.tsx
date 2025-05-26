@@ -12,7 +12,8 @@ import TemplateForm from '@/components/templates/TemplateForm'
 import DOMPurify from 'dompurify'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
-import { isValidHtml } from '@/lib/utils/validateHtml'
+import {isValidHtml, isValidMarkdown} from '@/lib/utils/validateHtml'
+import MarkdownIt from 'markdown-it'
 
 export default function EditTemplatePage() {
     const router = useRouter()
@@ -74,10 +75,10 @@ export default function EditTemplatePage() {
     }, [_hasHydrated, token, id])
 
     const onSubmit = async (data: ITemplate) => {
-        if (!isValidHtml(data.html)) {
-            setErrorMessage("The HTML content appears to be invalid. Please check the html.")
-            setErrorOpen(true)
-            return
+        if (!isValidHtml(data.html) && !isValidMarkdown(data.html)) {
+            setErrorMessage("The content must be valid HTML or Markdown. Please check your input.");
+            setErrorOpen(true);
+            return;
         }
         try {
             const res = await fetch(`/api/templates/${id}`, {
@@ -126,6 +127,21 @@ export default function EditTemplatePage() {
         )
     }
 
+    const md = new MarkdownIt()
+    const rawContent = form.watch("html") || ""
+    const isHtml = isValidHtml(rawContent)
+    const renderedHtml = isHtml
+        ? rawContent
+        : md.render(rawContent)
+
+    const sanitizedHtml = DOMPurify.sanitize(renderedHtml, {
+        ALLOWED_ATTR: ['style', 'href', 'target'],
+        ALLOWED_TAGS: [
+            'a', 'p', 'h1', 'h2', 'h3', 'ul', 'li', 'strong', 'em', 'div', 'span', 'br', 'hr',
+            'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'b', 'i'
+        ],
+    })
+
     return (
         <div className="container mx-auto py-6 px-7">
             <BreadcrumbHeader backHref="/templates" title="Edit Template" />
@@ -145,12 +161,7 @@ export default function EditTemplatePage() {
                             borderRadius: '8px',
                             boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
                         }}
-                        dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(form.watch('html') || '', {
-                                ALLOWED_ATTR: ['style', 'href', 'target'],
-                                ALLOWED_TAGS: ['a', 'p', 'h1', 'h2', 'h3', 'ul', 'li', 'strong', 'em', 'div', 'span', 'br', 'hr', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'b', 'i']
-                            })
-                        }}
+                        dangerouslySetInnerHTML={{__html: sanitizedHtml}}
                     />
                 </div>
             </div>

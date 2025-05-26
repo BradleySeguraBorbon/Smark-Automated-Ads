@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
-import { ITemplate } from '@/types/Template'
-import { useAuthStore } from '@/lib/store'
+import {useState, useEffect} from 'react'
+import {useForm} from 'react-hook-form'
+import {useRouter} from 'next/navigation'
+import {ITemplate} from '@/types/Template'
+import {useAuthStore} from '@/lib/store'
 import BreadcrumbHeader from '@/components/BreadcrumbHeader'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import TemplateForm from '@/components/templates/TemplateForm'
 import DOMPurify from 'dompurify'
-import { isValidHtml } from '@/lib/utils/validateHtml'
+import {isValidHtml, isValidMarkdown} from '@/lib/utils/validateHtml'
+import MarkdownIt from 'markdown-it'
 
 export default function CreateTemplatePage() {
     const router = useRouter()
@@ -41,10 +42,10 @@ export default function CreateTemplatePage() {
     }, [_hasHydrated, token])
 
     const onSubmit = async (data: ITemplate) => {
-        if (!isValidHtml(data.html)) {
-            setErrorMessage("The HTML content appears to be invalid. Please check the html.")
-            setErrorOpen(true)
-            return
+        if (!isValidHtml(data.html) && !isValidMarkdown(data.html)) {
+            setErrorMessage("The content must be valid HTML or Markdown. Please check your input.");
+            setErrorOpen(true);
+            return;
         }
         try {
             const res = await fetch('/api/templates', {
@@ -76,12 +77,26 @@ export default function CreateTemplatePage() {
     }
 
     if (!mounted) {
-        return <LoadingSpinner />
+        return <LoadingSpinner/>
     }
 
+    const md = new MarkdownIt()
+    const rawContent = form.watch("html") || ""
+    const isHtml = isValidHtml(rawContent)
+    const renderedHtml = isHtml
+        ? rawContent
+        : md.render(rawContent)
+
+    const sanitizedHtml = DOMPurify.sanitize(renderedHtml, {
+        ALLOWED_ATTR: ['style', 'href', 'target'],
+        ALLOWED_TAGS: [
+            'a', 'p', 'h1', 'h2', 'h3', 'ul', 'li', 'strong', 'em', 'div', 'span', 'br', 'hr',
+            'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'b', 'i'
+        ],
+    })
     return (
         <div className="container mx-auto py-6">
-            <BreadcrumbHeader backHref="/templates" title="Create New Template" />
+            <BreadcrumbHeader backHref="/templates" title="Create New Template"/>
 
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
                 <div>
@@ -98,12 +113,7 @@ export default function CreateTemplatePage() {
                             padding: "20px",
                             fontFamily: "Arial, sans-serif",
                         }}
-                        dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(form.watch("html") || "", {
-                                ALLOWED_ATTR: ['style', 'href', 'target'],
-                                ALLOWED_TAGS: ['a', 'p', 'h1', 'h2', 'h3', 'ul', 'li', 'strong', 'em', 'div', 'span', 'br', 'hr', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'b', 'i'],
-                            })
-                        }}
+                        dangerouslySetInnerHTML={{__html: sanitizedHtml}}
                     />
                 </div>
             </div>

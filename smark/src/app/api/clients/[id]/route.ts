@@ -3,6 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, AdMessages, Tags } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
+import {decryptClient} from "@/lib/clientEncryption";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -49,10 +50,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 { status: 404 }
             );
         }
-
+        const decrypted = decryptClient(client);
         return NextResponse.json({
             message: 'Client found',
-            result: client,
+            result: decrypted,
         });
     } catch (error) {
         console.error(error);
