@@ -100,8 +100,11 @@ export async function POST(request: Request) {
 
     if (!result.ok) return result.response;
     const body = result.data;
+    const { marketingCampaign, type, content, attachments } = body;
 
-    const {marketingCampaign, type, content, attachments} = body;
+    if (!isValidObjectId(marketingCampaign) || !(await MarketingCampaigns.findById(marketingCampaign))) {
+        return NextResponse.json({ message: 'Invalid or non-existent marketingCampaign' }, { status: 400 });
+    }
 
     if (!Array.isArray(attachments)) {
         return NextResponse.json({message: 'Attachments must be an array'}, {status: 400});
@@ -117,17 +120,31 @@ export async function POST(request: Request) {
     }
 
     if (type.includes('email')) {
-        const emailTemplate = content?.email?.template;
-        if (!isValidObjectId(emailTemplate) || !(await Templates.findById(emailTemplate))) {
-            return NextResponse.json({message: 'Invalid or missing email template'}, {status: 400});
+        const email = content?.email;
+        const template = email?.template;
+        if (
+            !email?.subject || !email?.body ||
+            !isValidObjectId(template) ||
+            !(await Templates.findById(template))
+        ) {
+            return NextResponse.json({ message: 'Invalid or missing email fields' }, { status: 400 });
         }
+    } else {
+        delete body.content.email;
     }
 
     if (type.includes('telegram')) {
-        const telegramTemplate = content?.telegram?.template;
-        if (!isValidObjectId(telegramTemplate) || !(await Templates.findById(telegramTemplate))) {
-            return NextResponse.json({message: 'Invalid or missing telegram template'}, {status: 400});
+        const telegram = content?.telegram;
+        const template = telegram?.template;
+        if (
+            !telegram?.message || !Array.isArray(telegram?.buttons) ||
+            !isValidObjectId(template) ||
+            !(await Templates.findById(template))
+        ) {
+            return NextResponse.json({ message: 'Invalid or missing telegram fields' }, { status: 400 });
         }
+    } else {
+        delete body.content.telegram;
     }
 
     try {
