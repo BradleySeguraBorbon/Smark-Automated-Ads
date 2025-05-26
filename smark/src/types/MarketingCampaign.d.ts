@@ -27,7 +27,8 @@ export interface IMarketingCampaign extends Document {
     endDate: Date;
     tags: TagRef[];  
     users: UserRef[]; 
-    performance: Performance; 
+    performance: Performance;
+    audienceCount?: number;
     createdAt?: Date;
     updatedAt?: Date; 
 }

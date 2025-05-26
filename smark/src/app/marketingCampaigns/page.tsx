@@ -5,18 +5,13 @@ import { useAuthStore } from '@/lib/store';
 import { decodeToken } from '@/lib/utils/decodeToken';
 import { useRouter } from 'next/navigation';
 import { useMarketingCampaignStore } from '@/lib/store'
-import { Button } from '@/components/ui/button'
-import { CampaignCard } from '@/components/marketingCampaigns/CampaignCard'
-import { PlusCircle, Filter } from 'lucide-react'
-import Link from 'next/link'
+import CampaignList from '@/components/marketingCampaigns/CampaignList'
+import CampaignsListHeader from '@/components/marketingCampaigns/CampaignsListHeader'
 import { IMarketingCampaign } from '@/types/MarketingCampaign'
-import { usePathname } from 'next/navigation';
 import PaginationControls from '@/components/PaginationControls'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
 export default function MarketingCampaignsPage() {
-    const currentPath = usePathname();
-
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -96,48 +91,25 @@ export default function MarketingCampaignsPage() {
         }
     };
 
-    if (loading || !userInfo || !campaignsHydrated || !hasFetched || !_hasHydrated) {
-        return <LoadingSpinner />
-    }
+    const isReady = _hasHydrated && hasFetched && campaignsHydrated && userInfo;
+    if (!isReady || loading) return <LoadingSpinner />
 
     return (
         <div>
             <main>
                 <div className="container mx-auto py-8 px-50">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold">Campaigns</h1>
-                            <p className="text-muted-foreground">Manage your marketing campaigns</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <Button variant="outline" size="sm">
-                                <Filter className="h-4 w-4 mr-2" />
-                                Filter
-                            </Button>
-                            <Button className="bg-purple-600 hover:bg-purple-800 text-white" asChild>
-                                {userInfo && userInfo?.role !== 'employee' &&
-                                    <Link href="/marketingCampaigns/new">
-                                        <PlusCircle className="h-4 w-4 mr-2" />
-                                        New Campaign
-                                    </Link>
-                                }
-                            </Button>
-                        </div>
-                    </div>
+                    {userInfo &&
+                        <CampaignsListHeader userRole={userInfo.role} />
+                    }
                     {loading ? (
                         <LoadingSpinner />
                     ) : (
                         <>
-                            <div className="grid gap-6">
-                                {campaigns?.map((campaign) => (
-                                    <CampaignCard
-                                        key={String(campaign._id)}
-                                        campaign={campaign}
-                                        onDelete={() => handleDelete(String(campaign._id))}
-                                        userRole={userInfo?.role as string}
-                                    />
-                                ))}
-                            </div>
+                            <CampaignList
+                                campaigns={campaigns}
+                                onDelete={handleDelete}
+                                userRole={userInfo?.role}
+                            />
                             {totalPages > 1 && (
                                 <PaginationControls
                                     currentPage={currentPage}

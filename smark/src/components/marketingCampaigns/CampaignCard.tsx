@@ -1,4 +1,5 @@
 import Link from "next/link";
+import React from "react";
 import {
     Card,
     CardHeader,
@@ -12,9 +13,8 @@ import { Badge } from "@/components/ui/badge"
 import { TagIcon, Trash2 } from 'lucide-react'
 import { IMarketingCampaign } from "@/types/MarketingCampaign";
 import { format } from 'date-fns';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CustomAlertDialog from "../CustomAlertDialog";
-import { useAuthStore } from "@/lib/store";
 
 interface CampaignCardProps {
     campaign: IMarketingCampaign;
@@ -22,36 +22,9 @@ interface CampaignCardProps {
     userRole: string;
 }
 
-export function CampaignCard({ campaign, onDelete, userRole }: CampaignCardProps) {
+const CampaignCardComponent = ({ campaign, onDelete, userRole }: CampaignCardProps) => {
 
-    const [audienceCount, setAudienceCount] = useState<number | null>(null);
     const [alertOpen, setAlertOpen] = useState(false);
-    const [successDelete, setSuccessDelete] = useState(false);
-    const token = useAuthStore((state) => state.token);
-
-    useEffect(() => {
-        const fetchAudienceCount = async () => {
-            if (!campaign._id) return;
-            try {
-                const response = await fetch(
-                    `/api/campaignAudiences/countByCampaignId?campaignId=${campaign._id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    }
-                });
-                const data = await response.json();
-                if (data.count !== undefined) {
-                    setAudienceCount(data.count);
-                } else {
-                    setAudienceCount(0);
-                }
-            } catch (err) {
-                console.error('Failed to fetch audience count:', err);
-            }
-        };
-        
-        fetchAudienceCount();
-    }, [campaign._id]);
 
     const totalEmailsOpened = campaign.performance?.totalEmailsOpened ?? 0,
         telegramMessagesOpened = campaign.performance?.telegramMessagesOpened ?? 0,
@@ -104,7 +77,7 @@ export function CampaignCard({ campaign, onDelete, userRole }: CampaignCardProps
                         <div>
                             <span className="text-muted-foreground">Sent to: </span>
                             <span className="font-medium">
-                                {audienceCount !== null ? `${audienceCount} clients` : 'Loading...'}
+                                {campaign.audienceCount !== undefined ? `${campaign.audienceCount} clients` : '...'}
                             </span>
                         </div>
                         <div>
@@ -141,3 +114,5 @@ export function CampaignCard({ campaign, onDelete, userRole }: CampaignCardProps
 
     )
 }
+
+export const CampaignCard = React.memo(CampaignCardComponent);

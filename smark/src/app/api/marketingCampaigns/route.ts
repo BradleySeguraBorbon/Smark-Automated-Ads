@@ -1,9 +1,10 @@
 import {NextResponse} from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import {Tags, Users, MarketingCampaigns} from '@/models/models';
-import {getUserFromRequest} from '@/lib/auth';
-import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import { Tags, Users, MarketingCampaigns } from '@/models/models';
+import { getUserFromRequest } from '@/lib/auth';
+import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
+import { CampaignAudiences } from '@/models/models';
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
 
         if (searchParams.has('assignedTo')) {
             const userId = searchParams.get('assignedTo');
-            if (mongoose.Types.ObjectId.isValid(userId)) {
+            if (userId && mongoose.Types.ObjectId.isValid(userId)) {
                 filter.users = userId;
             } else {
                 return NextResponse.json({error: 'Invalid user ID format'}, {status: 400});
@@ -65,7 +66,15 @@ export async function GET(request: Request) {
             .skip(skip)
             .limit(limit)
             .populate('tags', '_id name')
-            .populate('users', '_id username role');
+            .populate('users', '_id username role')
+            .lean();
+
+        const enrichedCampaigns = await Promise.all(
+            campaigns.map(async (c) => {
+                const count = await CampaignAudiences.countDocuments({ marketingCampaign: c._id });
+                return { ...c, audienceCount: count };
+            })
+        );
 
         const totalPages = Math.ceil(total / limit);
 
@@ -73,7 +82,7 @@ export async function GET(request: Request) {
             totalPages,
             page,
             limit,
-            results: campaigns,
+            results: enrichedCampaigns,
         });
     } catch (error) {
         console.error(error);

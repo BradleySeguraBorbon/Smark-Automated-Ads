@@ -86,7 +86,7 @@ export default function CampaignPerformanceCard({
                     />
 
                     <PerformanceCard
-                        title="General Open Rate"
+                        title="General Successful Sent Rate"
                         icon={<BarChart3 className="h-5 w-5"/>}
                         rate={generalRate}
                         total={successData.general.total}

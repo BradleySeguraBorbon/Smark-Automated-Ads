@@ -12,6 +12,7 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     tags: [{ type: mongoose.Types.ObjectId, ref: "Tags" }],
+    audienceCount: { type: Number },
     users: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
