@@ -38,8 +38,8 @@ export default function AdMessageHeader({ adMessage }: AdMessageHeaderProps) {
                         </p>
                     </div>
                     <div>
-                        <p className="text-muted-foreground">Name</p>
-                        <p className="mt-1">{adMessage.name}</p>
+                        <p className="text-muted-foreground">Campaign</p>
+                        <p className="mt-1">{adMessage.marketingCampaign.name}</p>
                     </div>
                 </div>
             </CardContent>

@@ -1,7 +1,18 @@
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { PerformanceCard } from '@/components/marketingCampaigns/PerformanceCard'
 import { Performance } from '@/types/MarketingCampaign'
 import { Mail, MessageSquare, BarChart3, PieChart, Check } from 'lucide-react'
+import { Pie } from 'react-chartjs-2'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import MessageSentLineChart from '@/components/marketingCampaigns/details/MessageSentLineChart'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
+
+interface ClientData {
+    birthDate: string
+    preferredContactMethod: string
+}
 
 export default function CampaignPerformanceCard({ performance } : { performance: Performance }) {
     const emailOpenRate = performance.totalEmailsSent > 0
@@ -15,6 +26,48 @@ export default function CampaignPerformanceCard({ performance } : { performance:
     const totalSent = performance.totalEmailsSent + performance.telegramMessagesSent
     const totalOpened = performance.totalEmailsOpened + performance.telegramMessagesOpened
     const generalOpenRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0
+
+    const [clients, setClients] = useState<ClientData[]>([])
+
+    useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const res = await fetch('/api/clients?page=1&limit=1000')
+                const data = await res.json()
+
+                if (!data.results || !Array.isArray(data.results)) return
+
+                const filtered = data.results.map((client: any) => ({
+                    birthDate: client.birthDate,
+                    preferredContactMethod: client.preferredContactMethod
+                })).filter(c => c.birthDate && c.preferredContactMethod)
+
+                setClients(filtered)
+            } catch (error) {
+                console.error('Failed to fetch clients for chart:', error)
+            }
+        }
+
+        fetchClients()
+    }, [])
+
+    const ageGroups = {
+        '18-24': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0
+    }
+
+    const contactPrefs = { email: 0, telegram: 0 }
+
+    clients.forEach(({ birthDate, preferredContactMethod }) => {
+        const age = Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+        if (age >= 18 && age <= 24) ageGroups['18-24']++
+        else if (age <= 34) ageGroups['25-34']++
+        else if (age <= 44) ageGroups['35-44']++
+        else if (age <= 54) ageGroups['45-54']++
+        else ageGroups['55+']++
+
+        if (preferredContactMethod === 'email') contactPrefs.email++
+        else if (preferredContactMethod === 'telegram') contactPrefs.telegram++
+    })
 
     return (
         <Card>
@@ -84,6 +137,43 @@ export default function CampaignPerformanceCard({ performance } : { performance:
                         </li>
                     </ul>
                 </div>
+                {/* 👥 Public Distribution */}
+                <div className="grid md:grid-cols-2 border rounded-md gap-6 p-10">
+                    <div>
+                        <h4 className="font-medium mb-4 text-center">Age Distribution</h4>
+                        <Pie
+                            data={{
+                                labels: Object.keys(ageGroups),
+                                datasets: [{
+                                    data: Object.values(ageGroups),
+                                    backgroundColor: ['#f87171', '#facc15', '#34d399', '#60a5fa', '#a78bfa']
+                                }]
+                            }}
+                            options={{
+                                plugins: { legend: { position: 'bottom' } }
+                            }}
+                        />
+                    </div>
+
+                    <div>
+                        <h4 className="font-medium mb-4 text-center">Preferred Contact Method</h4>
+                        <Pie
+                            data={{
+                                labels: ['Email', 'Telegram'],
+                                datasets: [{
+                                    data: [contactPrefs.email, contactPrefs.telegram],
+                                    backgroundColor: ['#3b82f6', '#22c55e'],
+                                    borderRadius: 5,
+                                }]
+                            }}
+                            options={{
+                                plugins: { legend: { position: 'bottom' } }
+                            }}
+                        />
+                    </div>
+                </div>
+                {/* 📈 Time Data */}
+                <MessageSentLineChart />
             </CardContent>
         </Card>
     )
