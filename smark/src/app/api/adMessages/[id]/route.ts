@@ -69,7 +69,7 @@ export async function PUT(request: Request, {params}: { params: Promise<{ id: st
             'name', 'marketingCampaign', 'type', 'status', 'content', 'sendDate'
         ],
         dates: ['sendDate'],
-        enums: [{field: 'status', allowed: ['sent', 'editing', 'programmed']}],
+        enums: [{field: 'status', allowed: ['sent', 'programmed', 'draft']}],
         enumArrays: [{field: 'type', allowed: ['email', 'telegram']}]
     });
 

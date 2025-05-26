@@ -7,6 +7,7 @@ import CampaignAudienceCard from './CampaignAudienceCard'
 import CampaignPerformanceCard from './CampaignPerformanceCard'
 import { IMarketingCampaign } from '@/types/MarketingCampaign'
 import { ClientRef } from '@/types/Client'
+import { SuccessSentData } from '@/types/SuccessSentData'
 
 interface CampaignInfoTabsProps {
     campaign: IMarketingCampaign;
@@ -14,6 +15,7 @@ interface CampaignInfoTabsProps {
     audienceAudienceTotalPages: number;
     audienceCurrentPage: number;
     onAudiencePageChangeAction: (page: number) => void;
+    successData: SuccessSentData | null;
 }
 
 export default function CampaignInfoTabs({
@@ -21,7 +23,8 @@ export default function CampaignInfoTabs({
     audience,
     audienceAudienceTotalPages,
     audienceCurrentPage,
-    onAudiencePageChangeAction
+    onAudiencePageChangeAction,
+    successData
 }: CampaignInfoTabsProps) {
     const [activeTab, setActiveTab] = useState<'details' | 'audience' | 'performance'>('details');
 
@@ -50,7 +53,9 @@ export default function CampaignInfoTabs({
                 <CampaignPerformanceCard
                     campaignId={ campaign._id }
                     performance={campaign.performance}
-                    audience={audience} />
+                    audience={audience}
+                    successData={successData}
+                />
             </TabsContent>
         </Tabs>
     )

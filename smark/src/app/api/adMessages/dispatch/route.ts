@@ -15,6 +15,11 @@ export async function GET(req: NextRequest) {
         });
 
         for (const msg of messages) {
+            if (msg.sendDate < now) {
+                msg.status = 'draft';
+                await msg.save();
+                continue;
+            }
             try {
                 await fetch(`${process.env.APP_URL}/api/email/sendAds`, {
                     method: 'POST',

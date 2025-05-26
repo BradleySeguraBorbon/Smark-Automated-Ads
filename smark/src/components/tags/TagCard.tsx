@@ -58,7 +58,7 @@ export default function TagCard({ tag, refreshAction, onSuccessDelete, currentUs
                             </Button>
                         </Link>}
                         {currentUserRole !== 'employee' && <Button
-                            className="bg-red-500 hover:bg-red-600"
+                            className="bg-teal-600 hover:bg-teal-800"
                             variant="secondary"
                             size="icon"
                             onClick={() => setAlertOpen(true)}

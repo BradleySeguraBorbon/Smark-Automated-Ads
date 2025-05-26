@@ -46,7 +46,7 @@ export default function ClientCard({client, onDeleteAction, isLoading, userRole}
                             </Button>
                         </Link>}
                         {userRole !== 'employee' && <Button
-                            className={"bg-red-500 hover:bg-red-800"}
+                            className={"bg-teal-600 hover:bg-teal-800"}
                             variant="secondary"
                             size="icon"
                             onClick={() => setAlertOpen(true)}
