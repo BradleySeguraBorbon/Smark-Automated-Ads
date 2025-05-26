@@ -1,0 +1,9 @@
+{
+  "cron": [
+    {
+      "path": "/api/adNessages/dispatch",
+      "schedule": "0 8 * * *",
+      "timezone": "America/Costa_Rica"
+    }
+  ]
+}

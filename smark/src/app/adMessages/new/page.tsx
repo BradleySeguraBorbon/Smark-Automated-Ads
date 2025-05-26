@@ -15,6 +15,8 @@ import { AdMessageSummary } from '@/components/adMessages/forms/AdMessageSummary
 import CustomAlertDialog from '@/components/CustomAlertDialog';
 import { transformAdMessageForSave } from '@/lib/transformers';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { IMarketingCampaign } from "@/types/MarketingCampaign";
+import { ITemplate } from "@/types/Template";
 
 export default function NewAdMessagePage() {
   const router = useRouter();
@@ -22,8 +24,8 @@ export default function NewAdMessagePage() {
   const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
   const [userInfo, setUserInfo] = useState<{ id: string; username: string; role: string } | null>(null);
-  const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
-  const [templates, setTemplates] = useState<{ id: string; name: string }[]>([]);
+  const [campaigns, setCampaigns] = useState<IMarketingCampaign[]>([]);
+  const [templates, setTemplates] = useState<ITemplate[]>([]);
   const [successOpen, setSuccessOpen] = useState(false);
 
   const form = useForm<IAdMessage>({

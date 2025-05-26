@@ -8,7 +8,7 @@ export async function getAudience(adMessageId: string, field: 'email' | 'telegra
     if (!adMessage) throw new Error('AdMessage not found');
 
     const campaignAudience = await CampaignAudiences.findOne({
-        marketingCampaign: adMessage.marketingCampaign,
+        campaign: adMessage.marketingCampaign,
     }).populate({ path: 'audience', select: field });
 
     if (!campaignAudience || !campaignAudience.audience || campaignAudience.audience.length === 0)

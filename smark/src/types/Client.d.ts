@@ -13,6 +13,8 @@ export interface ClientRef {
     email: string;
     firstName: string;
     lastName: string;
+    preferredContactMethod: string;
+    birthDate: Date;
 }
 
 export interface IClient extends Document {

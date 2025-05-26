@@ -97,34 +97,6 @@ export default function NewCampaignPage() {
 
     }, [token]);
 
-    /*useEffect(() => {
-        if (!tagsHydrated) return;
-    
-        if (!allTags || !Array.isArray(allTags) || allTags.length === 0) {
-            fetchTags();
-        }
-    }, [tagsHydrated, allTags, setTags]);
-    
-    useEffect(() => {
-        if (allTags && allTags.length > 0) {
-            useTagStore.setState({ hasHydrated: true });
-        }
-    }, [allTags]);
-    
-    useEffect(() => {
-        if (!usersHydrated) return;
-    
-        if (!allUsers || !Array.isArray(allUsers) || allUsers.length === 0) {
-            fetchUsers();
-        }
-    }, [usersHydrated, allUsers, setUsers]);
-    
-    useEffect(() => {
-        if (allUsers && allUsers.length > 0) {
-            useUserListStore.setState({ hasHydrated: true });
-        }
-    }, [allUsers]);*/
-
     const handleCreate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
         console.log("Submitting payload:", payload);

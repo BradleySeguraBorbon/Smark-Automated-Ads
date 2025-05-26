@@ -112,7 +112,7 @@ export default function AdMessagesPage() {
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
-              <Button className="bg-purple-500 hover:bg-purple-800" asChild>
+              <Button className="bg-purple-500 hover:bg-purple-800 text-white" asChild>
                 {userInfo && userInfo?.role !== 'employee' && (
                   <Link href="/adMessages/new">
                     <PlusCircle className="h-4 w-4 mr-2" />

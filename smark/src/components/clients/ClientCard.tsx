@@ -66,9 +66,11 @@ export default function ClientCard({client, onDeleteAction, isLoading, userRole}
                         <p className="text-sm">
                             <span className="font-medium">Phone:</span> {client.phone}
                         </p>
-                        <p className="text-sm">
-                            <span className="font-medium">Telegram:</span> {client.telegramChatId}
-                        </p>
+                        { "telegram" in client.subscriptions &&
+                            <p className="text-sm">
+                                <span className="font-medium">Telegram:</span> {client.telegram?.chatId}
+                            </p>
+                        }
                         <p className="text-sm">
                             <span className="font-medium">Subscriptions:</span> {client.subscriptions.join(", ")}
                         </p>

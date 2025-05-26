@@ -10,18 +10,27 @@ interface EmailPreviewProps {
   senderEmail?: string
   recipientName?: string
   recipientEmail?: string
+  emailData?: { subject: string, body: string, attachments: { name: string; path: string }[] }
 }
 
 export function EmailPreview({
   senderName = "MarketReach",
   senderEmail = "marketing@marketreach.com",
   recipientName = "John Doe",
-  recipientEmail = "john.doe@example.com"
+  recipientEmail = "john.doe@example.com",
+  emailData
 }: EmailPreviewProps) {
-  const { control } = useFormContext<IAdMessage>();
-  const subject = useWatch({ control, name: 'content.email.subject' });
-  const body = useWatch({ control, name: 'content.email.body' });
-  const attachments = useWatch({ control, name: 'attachments' }) || [];
+  let subject, body, attachments;
+  if (emailData) {
+    subject = emailData.subject;
+    body = emailData.body;
+    attachments = emailData.attachments || [];
+  } else {
+    const {control} = useFormContext<IAdMessage>();
+    subject = useWatch({control, name: 'content.email.subject'});
+    body = useWatch({control, name: 'content.email.body'});
+    attachments = useWatch({control, name: 'attachments'}) || [];
+  }
 
   const normalizedAttachments = attachments.map((att) =>
     typeof att === 'string' ? { name: att, path: '' } : att

@@ -47,7 +47,10 @@ export default function CampaignInfoTabs({
             </TabsContent>
 
             <TabsContent value="performance" className="space-y-6">
-                <CampaignPerformanceCard performance={campaign.performance} />
+                <CampaignPerformanceCard
+                    campaignId={ campaign._id }
+                    performance={campaign.performance}
+                    audience={audience} />
             </TabsContent>
         </Tabs>
     )
