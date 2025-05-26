@@ -91,7 +91,7 @@ export async function POST(request: Request) {
         ],
         dates: ['sendDate'],
         enums: [
-            {field: 'status', allowed: ['sent', 'editing', 'programmed']}
+            {field: 'status', allowed: ['sent', 'programmed', 'draft']}
         ],
         enumArrays: [
             {field: 'type', allowed: ['email', 'telegram']}
