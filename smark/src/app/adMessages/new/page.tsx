@@ -132,7 +132,7 @@ export default function NewAdMessagePage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 px-50">
+        <div className="container mx-auto py-8 px-24">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" asChild className="mr-2">
               <Link href="/adMessages">
@@ -149,6 +149,7 @@ export default function NewAdMessagePage() {
                 <AdMessageFormTabs
                   mode="new"
                   onSubmit={handleCreate}
+                  token={token}
                   form={form}
                   allMarketingCampaigns={campaigns}
                   allTemplates={templates}

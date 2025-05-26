@@ -172,6 +172,7 @@ export default function EditAdMessagePage() {
                   mode="edit"
                   onSubmit={handleUpdate}
                   form={form}
+                  token={token}
                   allMarketingCampaigns={campaigns}
                   allTemplates={templates}
                 />
