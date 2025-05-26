@@ -80,7 +80,7 @@ Absolutely. Templates are reusable and can be used across multiple messages and 
 
 ### 🤖 Does AI replace my content?
 
-No. The AI tool **suggests placeholder values** and optionally fills the email subject. You can always modify the results manually before sending.
+Yes. The AI tool **replace placeholder values** and fills the email subject. You can always modify the results manually before sending.
 
 ---
 
