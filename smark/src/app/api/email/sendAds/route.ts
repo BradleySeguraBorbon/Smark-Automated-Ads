@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAudience } from '@/app/api/utils/getAudience';
 import { sendEmailMessages } from '../route';
+import { AdMessages } from '@/models/models';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +23,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error(err);
+    if (adMessageId) {
+      await AdMessages.findByIdAndUpdate(adMessageId, { status: 'draft' });
+    }
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
