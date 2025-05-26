@@ -182,9 +182,6 @@ export default function EditAdMessagePage() {
                 <AdMessageSummary
                   onSubmitAction={handleUpdate}
                   mode="edit"
-                  campaignName={
-                    campaigns.find((c) => c.id === form.watch('marketingCampaign'))?.name || ''
-                  }
                 />
               </div>
             </div>
