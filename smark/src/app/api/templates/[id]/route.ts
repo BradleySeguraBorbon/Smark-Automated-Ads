@@ -69,7 +69,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 
   const result = await sanitizeRequest(request, {
-    requiredFields: ['name', 'type', 'content'],
+    requiredFields: ['name', 'type', 'html'],
     enums: [{ field: 'type', allowed: ['email', 'telegram'] }]
   });
   if (!result.ok) return result.response;

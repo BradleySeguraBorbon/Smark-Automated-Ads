@@ -15,8 +15,7 @@ import { decodeToken } from "@/lib/utils/decodeToken"
 import { ClientRef } from "@/types/Client"
 import { SuccessSentData } from "@/types/SuccessSentData"
 
-
-export default function MarketingCampaignDetailPage({ params }: { params: { id: string } }) {
+export default function MarketingCampaignDetailPage() {
     const { id } = useParams();
     const router = useRouter();
 

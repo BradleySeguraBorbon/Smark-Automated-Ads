@@ -36,6 +36,7 @@
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.503.0",
+    "markdown-it": "^14.1.0",
     "mongo-sanitize": "^1.1.0",
     "mongoose": "^8.13.2",
     "next": "15.2.4",
