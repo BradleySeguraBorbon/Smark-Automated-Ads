@@ -137,8 +137,10 @@ export default function LoginForm() {
                         </form>
                     </Form>
                 </CardContent>
-                <Button variant="outline" onClick={() => router.push('/auth/email-login')}>Login with code</Button>
-                <Button variant="ghost" onClick={() => router.push('/auth/reset-password')}>Forgot password?</Button>
+                <div className="px-20 flex gap-5 justify-between mt-5">
+                    <Button variant="outline" onClick={() => router.push('/auth/email-login')}>Login with code</Button>
+                    <Button variant="outline" onClick={() => router.push('/auth/reset-password')}>Forgot password?</Button>
+                </div>
             </Card>
         </div>
     )

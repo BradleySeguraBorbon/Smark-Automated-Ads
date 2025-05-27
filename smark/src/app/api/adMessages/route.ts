@@ -147,7 +147,14 @@ export async function POST(request: Request) {
         delete body.content.telegram;
     }
 
+    if (!type.includes('telegram')) {
+        if (body.content?.telegram) delete body.content.telegram;
+    }
+    if (!type.includes('email')) {
+        if (body.content?.email) delete body.content.email;
+    }
     try {
+        console.log(JSON.stringify(body, null, 2));
         const adMessage = await AdMessages.create(body);
         const savedAdMessage = await AdMessages.findById(adMessage._id)
             .populate('marketingCampaign', '_id name description status startDate endDate')
