@@ -5,6 +5,8 @@ import { Tags, Users, MarketingCampaigns } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
 import { CampaignAudiences } from '@/models/models';
+import { ICampaignAudience } from "@/types/CampaignAudience"
+
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -71,7 +73,9 @@ export async function GET(request: Request) {
 
         const enrichedCampaigns = await Promise.all(
             campaigns.map(async (c) => {
-                const count = await CampaignAudiences.countDocuments({ marketingCampaign: c._id });
+                const audienceDoc = await CampaignAudiences.findOne({ campaign: c._id }).lean();
+                const count = audienceDoc?.audience?.length || 0;
+                console.log(audienceDoc);
                 return { ...c, audienceCount: count };
             })
         );

@@ -9,23 +9,23 @@ const adMessagesSchema = new mongoose.Schema<IAdMessage>(
     status: { type: String, enum: ["sent", "programmed", "draft"], default: "programmed" },
     content: {
       email: {
-        subject: { type: String, required: true },
-        body: { type: String, required: true },
+        subject: { type: String},
+        body: { type: String},
         openRate: { type: Number, default: 0 },
         clickRate: { type: Number, default: 0 },
         bounceRate: { type: Number, default: 0 },
-        template: { type: mongoose.Schema.Types.ObjectId, ref: "Templates", required: true },
+        template: { type: mongoose.Schema.Types.ObjectId, ref: "Templates" },
       },
       telegram: {
-        message: { type: String, required: true },
+        message: { type: String },
         buttons: [{
-          text: { type: String, required: true },
-          url: { type: String, required: true }
+          text: { type: String },
+          url: { type: String }
         }],
         parseMode: { type: String, enum: ["Markdown", "HTML"], default: "Markdown" },
         views: { type: Number, default: 0 },
         clicks: { type: Number, default: 0 },
-        template: { type: mongoose.Schema.Types.ObjectId, ref: "Templates", required: true },
+        template: { type: mongoose.Schema.Types.ObjectId, ref: "Templates" },
       }
     },
     attachments: [
