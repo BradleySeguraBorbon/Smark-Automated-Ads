@@ -18,7 +18,7 @@ export default function BreadcrumbHeader({ backHref, title }: BreadcrumbHeaderPr
                     Back
                 </Link>
             </Button>
-            <h1 className="text-2xl font-bold ml-3">{title}</h1>
+            <h1 className="text-xl font-bold ml-3">{title}</h1>
         </div>
     );
 }

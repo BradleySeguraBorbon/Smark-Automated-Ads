@@ -24,7 +24,6 @@ export default function EditClientPage() {
     const [loading, setLoading] = useState(true)
     const [fetchedTags, setFetchedTags] = useState<ITag[]>([])
     const token = useAuthStore((state) => state.token);
-    const [userInfo, setUserInfo] = useState<IUser | null>(null)
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
     const form = useForm<IClient>({
@@ -118,7 +117,6 @@ export default function EditClientPage() {
                 return;
             }
 
-            setUserInfo(user);
             fetchClient()
             fetchTags()
         };

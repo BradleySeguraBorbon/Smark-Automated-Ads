@@ -17,7 +17,6 @@ import CustomAlertDialog from "@/components/CustomAlertDialog";
 import ClientImportModal from "@/components/clients/ClientImportModal";
 
 export default function ClientsPage() {
-    const [searchTerm, setSearchTerm] = useState("")
     const [apiError, setApiError] = useState<string | null>(null);
     const [fetchedClients, setFetchedClients] = useState<IClient[]>([]);
     const [loadingIds, setLoadingIds] = useState<string[]>([]);
@@ -123,11 +122,6 @@ export default function ClientsPage() {
         }
     }
 
-    const filteredClients = fetchedClients.filter((client) => {
-        const fullName = `${client.firstName} ${client.lastName}`.toLowerCase()
-        return fullName.includes(searchTerm.toLowerCase())
-    })
-
     return (
         <div className="max-w-6xl mx-auto mt-8">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
@@ -142,7 +136,7 @@ export default function ClientsPage() {
                             Import Clients
                         </Button>
                         <Link href="/clients/create">
-                            <Button className="bg-purple-500 hover:bg-purple-800 dark:text-white">
+                            <Button className="bg-purple-700 hover:bg-purple-900 dark:text-white">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add New Client
                             </Button>
@@ -150,8 +144,6 @@ export default function ClientsPage() {
                     </div>
                 )}
             </div>
-
-            {/*<SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={"Search Clients..."}/>*/}
 
             {apiError && (
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
@@ -161,7 +153,7 @@ export default function ClientsPage() {
                 <LoadingSpinner/>
             ) : (
                 <>
-                    <ClientsList clients={filteredClients} loadingIds={loadingIds} onDeleteAction={handleDelete} userRole={userInfo?.role as string}/>
+                    <ClientsList clients={fetchedClients} loadingIds={loadingIds} onDeleteAction={handleDelete} userRole={userInfo?.role as string}/>
                     {totalPages > 1 && (
                         <PaginationControls
                             currentPage={currentPage}

@@ -75,7 +75,7 @@ export default function PreferenceManager({
                                 }
                             }}
                         >
-                            <Plus className="h-4 w-4" />
+                            Add<Plus className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
