@@ -2,7 +2,7 @@
 
 import { UseFormReturn } from "react-hook-form"
 import { IClient } from "@/types/Client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import ClientInfoFields from "@/components/clients/ClientInfoFields"

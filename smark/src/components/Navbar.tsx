@@ -66,7 +66,7 @@ export function Navbar({currentPath}: NavbarProps) {
     );
 
     return (
-        <div className="flex items-center justify-between w-full px-4 py-4 border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
+        <div className="flex items-center justify-between w-full px-4 py-4 min-h-[96px] border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
             <Link href="/" className="text-lg font-bold whitespace-nowrap flex-shrink-0 mr-4">
                 AutoSmark
             </Link>

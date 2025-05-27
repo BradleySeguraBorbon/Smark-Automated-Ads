@@ -32,7 +32,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({ tags, selected, onChan
                     <Badge
                         key={tag._id}
                         variant={isSelected ? "default" : "outline"}
-                        className={`cursor-pointer select-none ${isSelected ? "bg-emerald-600 text-white hover:bg-emerald-800" : ""}`}
+                        className={`cursor-pointer select-none ${isSelected ? "bg-emerald-700 text-white hover:bg-emerald-900" : ""}`}
                         onClick={() => handleToggle(tag._id)}
                     >
                         {tag.name}

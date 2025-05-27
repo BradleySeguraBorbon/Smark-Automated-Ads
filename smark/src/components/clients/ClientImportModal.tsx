@@ -1,6 +1,5 @@
 'use client';
 
-import { X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import ClientImportForm from './ClientImportForm';
 

@@ -8,7 +8,6 @@ export function encryptClient(client: Partial<IClient>): Partial<IClient> {
     if (enc.lastName) enc.lastName = encrypt(enc.lastName);
     if (enc.email) enc.email = encrypt(enc.email);
     if (enc.phone) enc.phone = encrypt(enc.phone);
-    if (enc.telegramChatId) enc.telegramChatId = encrypt(enc.telegramChatId);
     if (enc.preferredContactMethod) enc.preferredContactMethod = encrypt(enc.preferredContactMethod);
     if (enc.birthDate) enc.birthDate = encrypt(enc.birthDate.toString());
     if (enc.subscriptions) enc.subscriptions = enc.subscriptions.map(encrypt);
@@ -24,7 +23,6 @@ export function decryptClient(client: IClient): IClient {
     dec.lastName = tryDecrypt(dec.lastName);
     dec.email = tryDecrypt(dec.email);
     dec.phone = tryDecrypt(dec.phone);
-    if (dec.telegramChatId) dec.telegramChatId = tryDecrypt(dec.telegramChatId);
     if (dec.preferences) dec.preferences = dec.preferences.map(tryDecrypt);
     if (dec.preferredContactMethod) dec.preferredContactMethod = tryDecrypt(dec.preferredContactMethod);
     if (dec.birthDate && typeof dec.birthDate === 'string') {

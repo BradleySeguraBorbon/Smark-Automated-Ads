@@ -69,7 +69,10 @@ export default function ClientImportForm() {
 
             const result = await response.json();
 
-            if (!response.ok) throw new Error(result.message || 'Failed to import clients');
+            if (!response.ok) {
+                setLoading(false);
+                throw new Error(result.message || 'Failed to import clients');
+            }
 
             setSuccessMessage(result.message + " La asignación de tags se realizará en segundo plano.");
             setSuccessOpen(true);
