@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    console.log("✅ POST webhook hit");
+    console.log("POST webhook hit");
 
     try {
         await connectDB();
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         const chatId = body.message?.chat?.id;
 
         if (!text?.startsWith("/start")) {
-            console.log("⏭️ Not a /start message");
+            console.log("⏭Not a /start message");
             return NextResponse.json({ message: "Ignored non-start message" }, { status: 200 });
         }
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         const client = await Clients.findOne({ "telegram.tokenKey": tokenKey });
 
         if (!client) {
-            console.warn("❌ No client found for tokenKey:", tokenKey);
+            console.warn("No client found for tokenKey:", tokenKey);
             return NextResponse.json({ error: "Invalid tokenKey" }, { status: 404 });
         }
 
@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
         client.telegram.isConfirmed = true;
         await client.save();
 
-        console.log("✅ Client updated:", client.email || client._id);
+        console.log("Client updated:", client.email || client._id);
 
-        await sendToTelegram(chatId, "✅ You are now subscribed to Telegram notifications!");
+        await sendToTelegram(chatId, "You are now subscribed to Telegram notifications!");
 
         return NextResponse.json({ message: "Client updated successfully" }, { status: 200 });
 

@@ -12,10 +12,6 @@ const CampaignsHeader = React.memo(({ userRole }: { userRole: string }) => (
             <p className="text-muted-foreground">Manage your marketing campaigns</p>
         </div>
         <div className="flex gap-4">
-            <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-            </Button>
             {userRole !== 'employee' &&
                 <Button className="bg-purple-600 hover:bg-purple-800 text-white" asChild>
                     <Link href="/marketingCampaigns/new">

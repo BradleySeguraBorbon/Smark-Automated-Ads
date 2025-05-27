@@ -23,26 +23,35 @@ export function transformClientForSave(data: IClient) {
 export function transformAdMessageForSave(data: IAdMessage) {
     const base: any = {
         ...data,
-        marketingCampaign: data.marketingCampaign._id,
+        marketingCampaign: (data.marketingCampaign as any)._id,
         content: {},
     };
+
+    let hasContent = false;
 
     if (data.type.includes('email') && data.content.email) {
         base.content.email = {
             ...data.content.email,
-            template: data.content.email.template._id,
+            template: (data.content.email.template as any)._id,
         };
+        hasContent = true;
     }
 
     if (data.type.includes('telegram') && data.content.telegram) {
         base.content.telegram = {
             ...data.content.telegram,
-            template: data.content.telegram.template._id,
+            template: (data.content.telegram.template as any)._id,
         };
+        hasContent = true;
+    }
+
+    if (!hasContent) {
+        delete base.content;
     }
 
     return base;
 }
+
 
 export function transformCampaignAudienceForSave(data: ICampaignAudience) {
     return {

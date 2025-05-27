@@ -9,7 +9,7 @@ export async function POST(req: Request) {
         }
 
         const [campaignRes, templateRes] = await Promise.all([
-            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/marketingCampaigns/${marketingCampaignId}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/marketingCampaigns/${marketingCampaignId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
