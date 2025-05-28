@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     const result = await sanitizeRequest(request, {
         requiredFields: [
             'firstName', 'lastName', 'email', 'phone', 'preferredContactMethod',
-            'subscriptions', 'birthDate', 'telegramChatId'
+            'subscriptions', 'birthDate'
         ],
         dates: ['birthDate'],
         emails: ['email'],
@@ -109,12 +109,6 @@ export async function POST(request: Request) {
     if (body.preferredContactMethod === 'email' && !body.email) {
         return NextResponse.json({
             message: 'Preferred contact method is email, but email is missing.'
-        }, { status: 400 });
-    }
-
-    if (body.preferredContactMethod === 'telegram' && !body.telegramChatId) {
-        return NextResponse.json({
-            message: 'Preferred contact method is telegram, but telegramChatId is missing.'
         }, { status: 400 });
     }
 
@@ -156,8 +150,24 @@ export async function POST(request: Request) {
                 if (tags && tags.length > 0) {
                     await Clients.findByIdAndUpdate(newClient._id, { tags });
                 }
+
+                if (body.subscriptions?.includes("telegram") && body.email) {
+                    const crypto = await import("crypto");
+                    const tokenKey = crypto.randomBytes(16).toString("hex");
+
+                    await Clients.findByIdAndUpdate(newClient._id, {
+                        telegram: {
+                            tokenKey,
+                            chatId: null,
+                            isConfirmed: false,
+                        }
+                    });
+
+                    const { sendTelegramInvite } = await import("@/lib/sendTelegramInvite");
+                    await sendTelegramInvite(body.email, tokenKey);
+                }
             } catch (err) {
-                console.error("Background AI tagging error:", err);
+                console.error("Background tagging or invite error:", err);
             }
         })();
         const client = await Clients.findById(newClient._id)

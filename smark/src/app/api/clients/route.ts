@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     const result = await sanitizeRequest(request, {
         requiredFields: [
             'firstName', 'lastName', 'email', 'phone', 'preferredContactMethod',
-            'subscriptions', 'birthDate', 'telegramChatId'
+            'subscriptions', 'birthDate'
         ],
         dates: ['birthDate'],
         emails: ['email'],

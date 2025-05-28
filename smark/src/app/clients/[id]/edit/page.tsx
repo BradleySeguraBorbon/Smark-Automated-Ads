@@ -33,7 +33,11 @@ export default function EditClientPage() {
             lastName: "",
             email: "",
             phone: "",
-            telegramChatId: "",
+            telegram: {
+                chatId: "",
+                tokenKey: "",
+                isConfirmed: false,
+            },
             preferredContactMethod: "email",
             birthDate: new Date(),
             preferences: [],

@@ -25,9 +25,8 @@ export default function CreateClientPage() {
             lastName: "",
             email: "",
             phone: "",
-            telegramChatId: "",
             preferredContactMethod: "email",
-            birthDate: new Date(),
+            birthDate: new Date(2005, 1,1),
             preferences: [],
             tags: [],
             subscriptions: [],
@@ -68,7 +67,7 @@ export default function CreateClientPage() {
         <div className="container mx-auto py-2 mb-4">
             <div className="lg:max-w-3xl mx-auto px-4 mt-4">
                 <div className="mb-4">
-                    <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
+                    <BreadcrumbHeader backHref="/clients" title="Register"/>
                 </div>
                 <Card>
                     <CardHeader>
@@ -88,8 +87,8 @@ export default function CreateClientPage() {
             <CustomAlertDialog
                 open={successOpen}
                 type="success"
-                title="¡Client created successfully!"
-                description="The new client has been added to the database."
+                title="¡You have been register successfully!"
+                description="Please Check your email, we have sent you an email."
                 confirmLabel="Accept"
                 onConfirmAction={() => {
                     setSuccessOpen(false)

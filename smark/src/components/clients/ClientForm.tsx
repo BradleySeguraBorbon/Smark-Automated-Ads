@@ -103,7 +103,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         )}
                     />
 
-                    <FormField
+                    {/*<FormField
                         control={form.control}
                         name="telegramChatId"
                         rules={{
@@ -124,7 +124,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    />*/}
 
                     <FormField
                         control={form.control}
@@ -234,7 +234,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                 <SubscriptionsSelector control={form.control} />
 
                 <div className="flex justify-end">
-                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Create Client</Button>
+                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Register</Button>
                 </div>
             </form>
         </Form>

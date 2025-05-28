@@ -75,12 +75,12 @@ export default function ClientInfoFields({ form }: ClientInfoFieldsProps) {
 
             <FormField
                 control={form.control}
-                name="telegramChatId"
+                name="telegram.chatId"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Telegram Chat ID</FormLabel>
                         <FormControl>
-                            <Input {...field} />
+                            <Input {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

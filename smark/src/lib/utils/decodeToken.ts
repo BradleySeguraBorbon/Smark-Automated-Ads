@@ -17,7 +17,7 @@ export async function decodeToken(token: string | null | undefined) {
         });
 
         if (!res.ok) {
-            console.error('Error verificando el token en el servidor');
+            console.log('Error verificando el token en el servidor');
             return handleInvalidToken();
         }
 

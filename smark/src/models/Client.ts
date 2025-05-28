@@ -12,7 +12,6 @@ const clientSchema = new Schema<IClient>({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  telegramChatId: { type: String, unique: true },
   preferredContactMethod: { type: String, required: true },
   subscriptions: [{ type: String, required: true }],
   birthDate: { type: String, required: true },

@@ -89,7 +89,7 @@ export default function ClientViewPage() {
                 <CardContent className="space-y-3">
                     <p><span className="font-medium">Email:</span> {client.email}</p>
                     <p><span className="font-medium">Phone:</span> {client.phone}</p>
-                    <p><span className="font-medium">Telegram ID:</span> {client.telegramChatId || "—"}</p>
+                    <p><span className="font-medium">Telegram ID:</span> {client.telegram.chatId || "—"}</p>
                     <p><span className="font-medium">Preferred Contact:</span> {client.preferredContactMethod}</p>
                     <p><span className="font-medium">Subscriptions:</span> {client.subscriptions.join(", ")}</p>
                     <p><span className="font-medium">Birth Date:</span> {new Date(client.birthDate).toLocaleDateString()}</p>
