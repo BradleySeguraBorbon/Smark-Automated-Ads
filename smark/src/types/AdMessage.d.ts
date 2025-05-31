@@ -13,7 +13,7 @@ export interface AdMessageContentEmail {
 
 export interface AdMessageContentTelegram {
     message: string;
-    buttons: string[];
+    buttons: { text: string; url: string }[];
     parseMode?: 'Markdown' | 'HTML';
     views?: number;
     clicks?: number;

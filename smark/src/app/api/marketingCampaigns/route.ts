@@ -73,7 +73,7 @@ export async function GET(request: Request) {
 
         const enrichedCampaigns = await Promise.all(
             campaigns.map(async (c) => {
-                const audienceDoc = await CampaignAudiences.findOne({ campaign: c._id }).lean();
+                const audienceDoc = await CampaignAudiences.findOne({ campaign: c._id }).lean<ICampaignAudience>();
                 const count = audienceDoc?.audience?.length || 0;
                 console.log(audienceDoc);
                 return { ...c, audienceCount: count };

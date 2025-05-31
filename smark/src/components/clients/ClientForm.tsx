@@ -92,7 +92,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                 message: "Invalid phone number format",
                             },
                         }}
-                        render={({ field }: ControllerRenderProps<IClient, 'phone'>) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Phone</FormLabel>
                                 <FormControl>
@@ -134,7 +134,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             validate: (value: Date) =>
                                 value <= new Date() || "Birth date cannot be in the future",
                         }}
-                        render={({ field }: ControllerRenderProps<IClient, 'birthDate'>) => (
+                        render={({field}) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Date of Birth</FormLabel>
                                 <Popover>
@@ -162,6 +162,8 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                                 !date || date > new Date() || date < new Date("1900-01-01")
                                             }
                                             initialFocus
+                                            captionLayout="dropdown"
+                                            defaultMonth={new Date(2005, 1)}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -179,7 +181,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         validate: (value: string) =>
                             ["email", "telegram"].includes(value) || "Invalid contact method",
                     }}
-                    render={({ field }: ControllerRenderProps<IClient, 'preferredContactMethod'>) => (
+                    render={({field}) => (
                         <FormItem className="space-y-3">
                             <FormLabel>Preferred Contact Method</FormLabel>
                             <FormControl>
@@ -225,8 +227,6 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             control={form.control}
                             newPreference={newPreferenceAction}
                             setNewPreferenceAction={setNewPreference}
-                            field={field}
-                            error={fieldState.error?.message}
                         />
                     )}
                 />

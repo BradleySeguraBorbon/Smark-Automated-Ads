@@ -16,9 +16,10 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Mail, MessageSquare } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { IMarketingCampaign, MarketingCampaignRef } from '@/types/MarketingCampaign';
+import {AdMessageFormData, FormMarketingCampaign} from '@/types/forms/AdMessageFormData';
 
 interface DetailsTabProps {
-    form: ReturnType<typeof useFormContext<IAdMessage>>
+    form: ReturnType<typeof useFormContext<AdMessageFormData>>
     campaigns: IMarketingCampaign[];
     messageTypes: { email: boolean; telegram: boolean };
     setMessageTypesAction: (val: { email: boolean; telegram: boolean }) => void;
@@ -29,7 +30,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
     const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
 
     useEffect(() => {
-        const selected : MarketingCampaignRef = form.getValues('marketingCampaign');
+        const selected = form.getValues('marketingCampaign');
         if (selected && selected.startDate && selected.endDate) {
             const start = new Date(selected.startDate);
             const end = new Date(selected.endDate);
@@ -38,7 +39,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
 
             const currentSendDate = form.getValues('sendDate');
             if (currentSendDate && (currentSendDate < start || currentSendDate > end)) {
-                form.setValue('sendDate', undefined);
+                form.setValue('sendDate', new Date(currentSendDate));
             }
         }
     }, []);
@@ -73,7 +74,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
                                 onValueChange={(selectedId) => {
                                     const selected = campaigns.find((c) => c._id === selectedId);
                                     if (selected) {
-                                        form.setValue('marketingCampaign', selected as MarketingCampaignRef);
+                                        form.setValue('marketingCampaign', selected as FormMarketingCampaign);
 
                                         const start = new Date(selected.startDate);
                                         const end = new Date(selected.endDate);
@@ -82,7 +83,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
 
                                         const currentSendDate = form.getValues('sendDate');
                                         if (currentSendDate && (currentSendDate < start || currentSendDate > end)) {
-                                            form.setValue('sendDate', undefined);
+                                            form.setValue('sendDate', currentSendDate);
                                         }
                                     }
                                 }}
@@ -96,7 +97,7 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
                                 </FormControl>
                                 <SelectContent>
                                     {campaigns.map((campaign) => (
-                                        <SelectItem key={campaign._id} value={campaign._id}>
+                                        <SelectItem key={String(campaign._id)} value={String(campaign._id)}>
                                             {campaign.name}
                                         </SelectItem>
                                     ))}
@@ -162,8 +163,8 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
                                     const updated = { ...messageTypes, email: checked };
                                     setMessageTypesAction(updated);
                                     form.setValue('type', [
-                                        ...(updated.email ? ['email'] : []),
-                                        ...(updated.telegram ? ['telegram'] : []),
+                                        ...(updated.email ? ['email' as const] : []),
+                                        ...(updated.telegram ? ['telegram' as const] : []),
                                     ]);
                                 }}
                             />
@@ -180,8 +181,8 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
                                     const updated = { ...messageTypes, telegram: checked };
                                     setMessageTypesAction(updated);
                                     form.setValue('type', [
-                                        ...(updated.email ? ['email'] : []),
-                                        ...(updated.telegram ? ['telegram'] : []),
+                                        ...(updated.email ? ['email' as const] : []),
+                                        ...(updated.telegram ? ['telegram' as const] : []),
                                     ]);
                                 }}
                             />

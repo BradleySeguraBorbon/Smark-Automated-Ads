@@ -25,6 +25,11 @@ export default function CreateClientPage() {
             lastName: "",
             email: "",
             phone: "",
+            telegram: {
+                chatId: "",
+                tokenKey: "",
+                isConfirmed: false
+            },
             preferredContactMethod: "email",
             birthDate: new Date(2005, 1,1),
             preferences: [],

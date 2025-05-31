@@ -8,9 +8,16 @@ import { useState } from "react";
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 
+interface CreateUserFormData {
+    username: string;
+    password: string;
+    email: string;
+    role?: string;
+}
+
 interface UserFormProps {
-    form: UseFormReturn<{ username: string; password: string; email:string; role?: string }>;
-    onSubmitAction: (data: { username: string; password: string; role?: string }) => void;
+    form: UseFormReturn<CreateUserFormData>;
+    onSubmitAction: (data: CreateUserFormData) => void;
     userRole: string;
     isSubmitting: boolean;
 }

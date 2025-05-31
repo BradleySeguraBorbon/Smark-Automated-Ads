@@ -7,14 +7,15 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { Mail, MessageSquare } from 'lucide-react';
 import { IAdMessage } from '@/types/AdMessage';
+import { AdMessageFormData } from '@/types/forms/AdMessageFormData';
 
 interface AdMessageSummaryProps {
-  onSubmitAction: (data: IAdMessage) => void;
+  onSubmitAction: (data: AdMessageFormData) => void;
   mode: 'new' | 'edit';
 }
 
 export function AdMessageSummary({ onSubmitAction, mode }: AdMessageSummaryProps) {
-  const { watch, handleSubmit } = useFormContext<IAdMessage>();
+  const { watch, handleSubmit } = useFormContext<AdMessageFormData>();
   const name = watch('name');
   const campaign = watch('marketingCampaign');
   const sendDate = watch('sendDate');

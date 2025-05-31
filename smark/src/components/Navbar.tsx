@@ -23,9 +23,10 @@ import {useTheme} from "next-themes";
 import {useAuthStore} from "@/lib/store";
 import {decodeToken} from "@/lib/utils/decodeToken";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {toUpperCase} from "uri-js/dist/esnext/util";
 import CustomAlertDialog from '@/components/CustomAlertDialog';
 import Cookies from 'js-cookie';
+
+const getInitials = (username: string) => username.slice(0, 2).toUpperCase();
 
 interface NavbarProps {
     currentPath: string;
@@ -146,7 +147,7 @@ export function Navbar({currentPath}: NavbarProps) {
                         <div className="flex items-center gap-2">
                             <Avatar>
                                 <AvatarFallback>
-                                    {toUpperCase(userInfo.username[0] + userInfo.username[1])}
+                                    {userInfo?.username ? getInitials(userInfo.username) : ""}
                                 </AvatarFallback>
                             </Avatar>
                             <span className="font-medium text-sm text-foreground truncate max-w-[160px]">

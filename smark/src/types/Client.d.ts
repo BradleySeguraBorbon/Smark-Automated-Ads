@@ -29,9 +29,9 @@ export interface IClient extends Document {
     tags: TagRef[];
     adInteractions: AdInteractions[];
     tagsPending: boolean;
-    telegram: {
+    telegram?: {
         tokenKey: string;
-        chatId: string;
+        chatId?: string;
         isConfirmed: boolean;
     };
     createdAt?: Date;

@@ -27,7 +27,9 @@ export default function AdMessageHeader({ adMessage }: AdMessageHeaderProps) {
                                         : 'outline'
                             }
                         >
-                            {adMessage.status.charAt(0).toUpperCase() + adMessage.status.slice(1)}
+                            {adMessage.status
+                                ? adMessage.status.charAt(0).toUpperCase() + adMessage.status.slice(1)
+                                : 'Unknown'}
                         </Badge>
                     </div>
                     <div>

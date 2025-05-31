@@ -29,31 +29,43 @@ export default function AdMessageInfoTabs({ adMessage }: AdMessageInfoTabsProps)
             <TabsContent value="email" className="space-y-6">
                 <Card className="p-4">
                     <h3 className="font-semibold text-lg mb-2">Email Preview</h3>
-                    <EmailPreview
-                        emailData={{
-                            subject: adMessage.content.email.subject,
-                            body: adMessage.content.email.body,
-                            attachments: adMessage.attachments
-                        }}
-                    />
+                    {adMessage.content.email ? (
+                        <EmailPreview
+                            emailData={{
+                                subject: adMessage.content.email?.subject || '',
+                                body: adMessage.content.email?.body || '',
+                                attachments: adMessage.attachments ?? []
+                            }}
+                        />
+                    ) : (
+                        <p className="text-sm text-muted-foreground">No email content available.</p>
+                    )}
                 </Card>
             </TabsContent>
 
             <TabsContent value="telegram" className="space-y-6">
                 <Card className="p-4">
                     <h3 className="font-semibold text-lg mb-2">Telegram Preview</h3>
-                    <div className="bg-gray-100 p-3 rounded-lg max-w-md text-sm whitespace-pre-wrap text-muted-foreground">
-                        {adMessage.content.telegram.message}
-                        {adMessage.content.telegram.buttons?.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                                {adMessage.content.telegram.buttons.map((btn, index) => (
-                                    <div key={index} className="text-blue-600 underline cursor-pointer">
-                                        {btn.text}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    {adMessage.content.telegram ? (
+                        <div className="bg-gray-100 p-3 rounded-lg max-w-md text-sm whitespace-pre-wrap text-muted-foreground">
+                            {adMessage.content.telegram?.message}
+                            {Array.isArray(adMessage.content.telegram.buttons) && adMessage.content.telegram.buttons.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                    {adMessage.content.telegram?.buttons?.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-3">
+                                            {adMessage.content.telegram.buttons.map((btn, index) => (
+                                                <div key={index} className="text-blue-600 underline cursor-pointer">
+                                                    {btn.text}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">No telegram content available.</p>
+                    )}
                 </Card>
             </TabsContent>
         </Tabs>

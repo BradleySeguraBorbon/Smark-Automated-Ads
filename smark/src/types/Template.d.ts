@@ -4,6 +4,8 @@ export interface TemplateRef {
     _id: Types.ObjectId;
     name: string;
     type: 'email' | 'telegram';
+    placeholders: string[];
+    html: string;
 }
 
 export interface ITemplate extends Document {

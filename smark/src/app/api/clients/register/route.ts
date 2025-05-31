@@ -139,9 +139,10 @@ export async function POST(request: Request) {
         const newClient = await Clients.create(encrypted);
 
         (async () => {
+            const authHeader = request.headers.get('authorization');
+            const token = authHeader?.split(' ')[1] || '';
+
             try {
-                const authHeader = request.headers.get('authorization');
-                const token = authHeader?.split(' ')[1] || '';
                 const tags = await getTagsIdsBasedOnPreference({
                     name: body.firstName,
                     preferences: body.preferences,
@@ -150,7 +151,11 @@ export async function POST(request: Request) {
                 if (tags && tags.length > 0) {
                     await Clients.findByIdAndUpdate(newClient._id, { tags });
                 }
+            } catch (err) {
+                console.error("Tagging error:", err);
+            }
 
+            try {
                 if (body.subscriptions?.includes("telegram") && body.email) {
                     const crypto = await import("crypto");
                     const tokenKey = crypto.randomBytes(16).toString("hex");
@@ -163,11 +168,11 @@ export async function POST(request: Request) {
                         }
                     });
 
-                    const { sendTelegramInvite } = await import("@/lib/sendTelegramInvite");
+                    const {sendTelegramInvite} = await import("@/lib/sendTelegramInvite");
                     await sendTelegramInvite(body.email, tokenKey);
                 }
             } catch (err) {
-                console.error("Background tagging or invite error:", err);
+                console.error("Telegram invite error:", err);
             }
         })();
         const client = await Clients.findById(newClient._id)

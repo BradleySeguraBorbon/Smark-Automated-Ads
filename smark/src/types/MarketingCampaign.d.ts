@@ -1,6 +1,5 @@
 import { Types, Document } from 'mongoose';
 import { TagRef } from './Tag';
-import { ClientRef } from './Client';
 import { UserRef } from './User';
 
 interface Performance {

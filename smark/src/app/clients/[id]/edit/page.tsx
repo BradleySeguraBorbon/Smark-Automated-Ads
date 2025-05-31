@@ -3,7 +3,6 @@
 import {useEffect, useState} from "react"
 import {useRouter, useParams} from "next/navigation"
 import {useForm} from "react-hook-form"
-import {IClient} from "@/types/Client"
 import {ITag} from "@/types/Tag"
 import EditClientForm from "@/components/clients/EditClientForm"
 import ClientAdditionalInfo from "@/components/clients/ClientAdditionalInfo"
@@ -11,9 +10,9 @@ import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import LoadingSpinner from "@/components/LoadingSpinner"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
 import Link from "next/link"
-import {IUser} from "@/types/User"
 import {useAuthStore} from "@/lib/store";
 import {decodeToken} from "@/lib/utils/decodeToken";
+import {ClientFormFields} from "@/types/forms/ClientForm";
 
 export default function EditClientPage() {
     const params = useParams()
@@ -26,7 +25,7 @@ export default function EditClientPage() {
     const token = useAuthStore((state) => state.token);
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
-    const form = useForm<IClient>({
+    const form = useForm<ClientFormFields>({
         defaultValues: {
             _id: id,
             firstName: "",
@@ -128,7 +127,7 @@ export default function EditClientPage() {
         init();
     }, [_hasHydrated, token, params.id, form])
 
-    async function onSubmit(data: IClient) {
+    async function onSubmit(data: ClientFormFields) {
         try {
             const response = await fetch(`/api/clients/${data._id}/`, {
                 method: "PUT",

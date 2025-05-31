@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import {NextResponse} from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { CampaignAudiences, Clients } from '@/models/models';
-import { getUserFromRequest } from '@/lib/auth';
-import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
+import {CampaignAudiences, Clients} from '@/models/models';
+import {getUserFromRequest} from '@/lib/auth';
+import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import {decryptClient} from "@/lib/clientEncryption";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -54,7 +55,10 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'No audience found' }, { status: 404 });
         }
 
-        const fullAudience = campaignAudience.audience;
+        console.log(campaignAudience.audience)
+        const decryptedAudience = campaignAudience.audience.map(decryptClient);
+        console.log("Decrypt: ",decryptedAudience)
+        const fullAudience = decryptedAudience;
         const total = fullAudience.length;
         const paginatedAudience = fullAudience.slice(skip, skip + limit);
 

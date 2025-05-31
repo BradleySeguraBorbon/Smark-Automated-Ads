@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Clients } from "@/models/models";
 import connectDB from "@/config/db";
-import { sendToTelegram } from "../route";
+import { sendToTelegram } from "@/lib/utils/telegramSender";
 
 export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Webhook is working" });

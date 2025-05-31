@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import ClientInfoFields from "@/components/clients/ClientInfoFields"
 import TagsField from "@/components/clients/TagsField"
 import { ITag } from "@/types/Tag"
+import {ClientFormFields} from "@/types/forms/ClientForm";
 
 interface EditClientFormProps {
-    form: UseFormReturn<IClient>
+    form: UseFormReturn<ClientFormFields>
     onSubmitAction: (data: IClient) => void
     tags: ITag[]
     router: any

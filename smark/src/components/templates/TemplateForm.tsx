@@ -12,7 +12,7 @@ import PlaceholdersInput from "@/components/templates/PlaceholdersInputs";
 interface TemplateFormProps {
     form: UseFormReturn<ITemplate>
     onSubmitAction: (data: ITemplate) => void
-    buttonText: boolean
+    buttonText: string
 }
 
 export default function TemplateForm({form, onSubmitAction, buttonText}: TemplateFormProps) {

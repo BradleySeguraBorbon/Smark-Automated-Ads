@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { UseFormReturn } from 'react-hook-form'
 import {
     Form,
     FormControl,
@@ -13,9 +13,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Trash2, PlusCircle } from 'lucide-react'
+import {ITag} from "@/types/Tag";
 
 interface TagFormProps {
-    form: ReturnType<typeof useFormContext>
+    form: UseFormReturn<ITag>
     onSubmitAction: (data: any) => void
 }
 

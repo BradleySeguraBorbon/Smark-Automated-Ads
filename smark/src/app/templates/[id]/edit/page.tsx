@@ -128,7 +128,7 @@ export default function EditTemplatePage() {
     }
 
     const md = new MarkdownIt()
-    const rawContent = form.watch("html") || ""
+    const rawContent = (form.watch("html") as string) || ""
     const isHtml = isValidHtml(rawContent)
     const renderedHtml = isHtml
         ? rawContent

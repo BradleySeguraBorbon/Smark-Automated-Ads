@@ -4,6 +4,7 @@ import { Paperclip } from 'lucide-react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { IAdMessage } from '@/types/AdMessage';
 import { format } from 'date-fns';
+import {AdMessageFormData} from "@/types/forms/AdMessageFormData";
 
 interface EmailPreviewProps {
   senderName?: string
@@ -26,7 +27,7 @@ export function EmailPreview({
     body = emailData.body;
     attachments = emailData.attachments || [];
   } else {
-    const {control} = useFormContext<IAdMessage>();
+    const {control} = useFormContext<AdMessageFormData>();
     subject = useWatch({control, name: 'content.email.subject'});
     body = useWatch({control, name: 'content.email.body'});
     attachments = useWatch({control, name: 'attachments'}) || [];
