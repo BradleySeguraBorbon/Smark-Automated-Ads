@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AdMessages } from '@/models/models';
 import connectDB from '@/config/db';
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const auth = req.headers.get('Authorization');
+        const expected = `Bearer ${process.env.CRON_SECRET}`;
+
+        if (auth !== expected) {
+            return new Response('Unauthorized', { status: 401 });
+        }
         await connectDB();
 
         const today = new Date();
