@@ -40,7 +40,7 @@ export async function middleware(request: NextRequest) {
     ) {
         return response;
     }
-    console.log('[Middleware]', { pathname, token });
+
     if (token && isAuthPage) {
         return NextResponse.redirect(new URL('/', request.url));
     }
@@ -54,7 +54,6 @@ export async function middleware(request: NextRequest) {
         '/campaignAudiences',
     ];
     const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
-    console.log('[Middleware/Protected]', { isProtected });
 
     if (!token && isProtected) {
         return NextResponse.redirect(new URL('/auth/login', request.url));

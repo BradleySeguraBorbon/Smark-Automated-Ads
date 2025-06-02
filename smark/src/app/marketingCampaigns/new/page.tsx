@@ -1,39 +1,41 @@
 'use client';
 
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
+
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useTagStore } from '@/lib/store';
-import { useUserListStore } from '@/lib/store';
-import { useEffect, useState } from 'react';
-import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
-import { transformMarketingCampaignForSave } from '@/lib/transformers';
-import { useForm, FormProvider } from 'react-hook-form';
-import CustomAlertDialog from '@/components/CustomAlertDialog'
-import { IClient } from '@/types/Client';
+import CustomAlertDialog from '@/components/CustomAlertDialog';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { useAuthStore } from '@/lib/store';
 
-export default function NewCampaignPage() {
+import { useAuthStore, useTagStore, useUserListStore } from '@/lib/store';
+import { transformMarketingCampaignForSave } from '@/lib/transformers';
+
+import { useForm, FormProvider } from 'react-hook-form';
+import { IClient } from '@/types/Client';
+import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
+
+function NewCampaignPage() {
     const searchParams = useSearchParams();
     const isAiGenerated = searchParams.get('ai') === 'true';
     const initialCriterion = searchParams.get('criterion') || '';
     const initialValue = searchParams.get('value') || '';
 
     const router = useRouter();
-    const [mounted, setMounted] = useState(false)
+    const [mounted, setMounted] = useState(false);
+    const [successOpen, setSuccessOpen] = useState(false);
+
+    const token = useAuthStore((state) => state.token);
+    const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
     const allTags = useTagStore((state) => state.tags);
     const setTags = useTagStore((state) => state.setTags);
 
     const allUsers = useUserListStore((state) => state.users);
     const setUsers = useUserListStore((state) => state.setUsers);
-
-    const [successOpen, setSuccessOpen] = useState(false);
 
     const form = useForm<MarketingCampaignFormData>({
         defaultValues: {
@@ -54,40 +56,6 @@ export default function NewCampaignPage() {
         }
     });
 
-    const fetchTags = async () => {
-        try {
-            const response = await fetch('/api/tags', {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                }
-            });
-            const data = await response.json();
-            setTags(data.results);
-            useTagStore.setState({ hasHydrated: true });
-        } catch (error) {
-            console.error('Failed to fetch tags:', error);
-        }
-    };
-
-    const fetchUsers = async () => {
-        try {
-            const response = await fetch('/api/users', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
-            });
-            const data = await response.json();
-            setUsers(data.results);
-            useUserListStore.setState({ hasHydrated: true });
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-        }
-    };
-
-    const token = useAuthStore((state) => state.token);
-    const _hasHydrated = useAuthStore((state)=>state._hasHydrated);;
-
     useEffect(() => {
         if (!_hasHydrated) return;
         if (!token) {
@@ -95,10 +63,40 @@ export default function NewCampaignPage() {
             return;
         }
 
+        const fetchTags = async () => {
+            try {
+                const response = await fetch('/api/tags', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
+                setTags(data.results);
+                useTagStore.setState({ hasHydrated: true });
+            } catch (error) {
+                console.error('Failed to fetch tags:', error);
+            }
+        };
+
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch('/api/users', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await response.json();
+                setUsers(data.results);
+                useUserListStore.setState({ hasHydrated: true });
+            } catch (error) {
+                console.error('Failed to fetch users:', error);
+            }
+        };
+
         fetchTags();
         fetchUsers();
         setMounted(true);
-
     }, [token]);
 
     const handleCreate = async (data: MarketingCampaignFormData) => {
@@ -116,13 +114,13 @@ export default function NewCampaignPage() {
                     },
                     body: JSON.stringify({
                         filters: [{ field: initialCriterion, match: initialValue }],
-                    })
+                    }),
                 });
 
                 const mcpData = await mcpRes.json();
                 allClientIds = mcpData?.strategy?.selectedClients || [];
             } else {
-                const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
+                const tagQuery = payload.tags.map((id) => `tagIds[]=${id}`).join('&');
                 const clientRes = await fetch(`/api/clients?${tagQuery}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -136,7 +134,7 @@ export default function NewCampaignPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -172,7 +170,7 @@ export default function NewCampaignPage() {
             <div className="container mx-auto py-10">
                 <LoadingSpinner />
             </div>
-        )
+        );
     }
 
     return (
@@ -208,6 +206,7 @@ export default function NewCampaignPage() {
                         </div>
                     </FormProvider>
                 </div>
+
                 <CustomAlertDialog
                     open={successOpen}
                     type="success"
@@ -222,5 +221,13 @@ export default function NewCampaignPage() {
                 />
             </main>
         </div>
+    );
+}
+
+export default function NewCampaignPageWrapper() {
+    return (
+        <Suspense fallback={<div className="py-10"><LoadingSpinner /></div>}>
+            <NewCampaignPage />
+        </Suspense>
     );
 }
