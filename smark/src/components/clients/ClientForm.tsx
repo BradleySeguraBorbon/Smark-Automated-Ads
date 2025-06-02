@@ -13,6 +13,15 @@ import { CalendarIcon } from "lucide-react"
 import PreferenceManager from "@/components/clients/PreferenceManager"
 import SubscriptionsSelector from "@/components/clients/SubscriptionsSelector"
 import {ClientFormData} from "@/types/forms";
+import { CLIENT_LANGUAGES } from "@/types/ClientLanguages"
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem
+} from "@/components/ui/select";
+import MultiSelectField from "@/components/MultiSelectField";
 
 interface ClientFormProps {
     form: UseFormReturn<ClientFormData>
@@ -137,7 +146,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         }}
                         render={({field}) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>Date of Birth</FormLabel>
+                                <FormLabel>Birth Date</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -172,6 +181,59 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             </FormItem>
                         )}
                     />
+
+                    <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Costa Rica" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Gender</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select gender" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="male">Male</SelectItem>
+                                        <SelectItem value="female">Female</SelectItem>
+                                        <SelectItem value="non-binary">Non-binary</SelectItem>
+                                        <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="languages"
+                        render={({ field }) => (
+                            <MultiSelectField
+                                field={field}
+                                label="Languages"
+                                options={CLIENT_LANGUAGES}
+                                placeholder="Select languages"
+                                capitalizeOptions={false}
+                            />
+                        )}
+                    />
+
                 </div>
 
                 <FormField

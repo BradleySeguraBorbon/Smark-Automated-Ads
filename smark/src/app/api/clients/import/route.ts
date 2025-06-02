@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
                 subscriptions,
                 birthDate,
                 preferences = [],
+                gender,
+                country,
+                languages = [],
                 adInteractions = [],
             } = rawClient;
 
@@ -88,6 +91,9 @@ export async function POST(req: NextRequest) {
                 subscriptions,
                 birthDate: new Date(birthDate),
                 preferences,
+                gender,
+                country,
+                languages,
                 adInteractions,
                 tags: [],
                 tagsPending: true,

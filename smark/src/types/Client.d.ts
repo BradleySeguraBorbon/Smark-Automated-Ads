@@ -26,6 +26,9 @@ export interface IClientRaw extends Document {
     subscriptions: string[];
     birthDate: string;
     preferences: string[];
+    gender?: 'male' | 'female' | 'non-binary' | 'prefer_not_to_say';
+    country?: string;
+    languages?: string[];
     tags: TagRef[];
     adInteractions: AdInteractions[];
     tagsPending: boolean;
@@ -48,6 +51,9 @@ export interface IClient {
     subscriptions: string[];
     birthDate: Date;
     preferences: string[];
+    gender?: 'male' | 'female' | 'non-binary' | 'prefer_not_to_say';
+    country?: string;
+    languages?: string[];
     tags: TagRef[];
     adInteractions: AdInteractions[];
     tagsPending: boolean;

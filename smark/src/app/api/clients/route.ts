@@ -4,8 +4,9 @@ import mongoose from 'mongoose';
 import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 import crypto from 'crypto';
-import {encryptClient, decryptClient} from "@/lib/clientEncryption";
-import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import { encryptClient, decryptClient } from "@/lib/clientEncryption";
+import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
+import { CLIENT_LANGUAGES } from "@/types/ClientLanguages";
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -165,8 +166,10 @@ export async function POST(request: Request) {
         ],
         dates: ['birthDate'],
         emails: ['email'],
-        enums: [{ field: 'preferredContactMethod', allowed: ['email', 'telegram'] }],
-        enumArrays: [{ field: 'subscriptions', allowed: ['email', 'telegram'] }]
+        enums: [{ field: 'preferredContactMethod', allowed: ['email', 'telegram'] },
+                { field: 'gender', allowed: ['male', 'female', 'non-binary', 'prefer_not_to_say'] }],
+        enumArrays: [{ field: 'subscriptions', allowed: ['email', 'telegram'] },
+                    { field: 'languages', allowed: CLIENT_LANGUAGES }],
     });
 
     if (!result.ok) return result.response;
@@ -257,6 +260,9 @@ export async function POST(request: Request) {
             subscriptions: body.subscriptions,
             birthDate: new Date(body.birthDate),
             preferences: body.preferences || [],
+            gender: body.gender,
+            country: body.country,
+            languages: body.languages || [],
             tags: clientTags || [],
             adInteractions: body.adInteractions || [],
             ...(telegram && { telegram })
