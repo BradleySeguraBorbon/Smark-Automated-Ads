@@ -23,7 +23,8 @@ const marketingCampaignSchema = new mongoose.Schema<IMarketingCampaign>(
       totalEmailsOpened: { type: Number, default: 0 },
       telegramMessagesSent: { type: Number, default: 0 },
       telegramMessagesOpened: { type: Number, default: 0 }
-    }
+    },
+    isAiGenerated: { type: Boolean, default: false }
   },
   {
     timestamps: true,

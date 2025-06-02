@@ -23,14 +23,16 @@ export function ConnectionsTab({
   return (
     <Card >
       <CardContent className="pt-2 px-4 md:px-6 space-y-6">
-        <div className='space-y-3'>
-          <Label>Campaign Tags</Label>
-          <TagSelector
-            tags={allTags as TagRef[]}
-            selectedTags={selectedTags}
-            onChangeAction={(updated) => form.setValue('tags', updated)}
-          />
-        </div>
+        {!form.watch('isAiGenerated') && (
+            <div className='space-y-3'>
+            <Label>Campaign Tags</Label>
+            <TagSelector
+              tags={allTags as TagRef[]}
+              selectedTags={selectedTags}
+              onChangeAction={(updated) => form.setValue('tags', updated)}
+            />
+            </div>
+        )}
         <div className='space-y-3'>
           <Label>Campaign Team</Label>
           <TeamMemberSelector

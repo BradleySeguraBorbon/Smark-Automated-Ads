@@ -81,7 +81,7 @@ const CampaignCardComponent = ({ campaign, onDelete, userRole }: CampaignCardPro
                             </span>
                         </div>
                         <div>
-                            <span className="text-muted-foreground">Open rate: </span>
+                            <span className="text-muted-foreground">Success-Sent Rate: </span>
                             <span className="font-medium">{openRate}%</span>
                         </div>
                     </div>
