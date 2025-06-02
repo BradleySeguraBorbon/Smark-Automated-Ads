@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { ITag } from '@/types/Tag'
 import { useAuthStore } from '@/lib/store'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import BreadcrumbHeader from '@/components/BreadcrumbHeader'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
 import TagForm from '@/components/tags/TagForm'
+import {TagFormData} from "@/types/forms";
 
 export default function EditTagPage() {
     const { id } = useParams()
@@ -22,7 +23,7 @@ export default function EditTagPage() {
     const [errorOpen, setErrorOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const form = useForm<ITag>({
+    const form = useForm<TagFormData>({
         defaultValues: {
             name: '',
             keywords: []

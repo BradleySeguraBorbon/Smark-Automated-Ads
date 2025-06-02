@@ -1,7 +1,7 @@
 'use client'
 
 import {useState, useEffect} from 'react'
-import {useFormContext} from 'react-hook-form'
+import {useFormContext, UseFormReturn} from 'react-hook-form'
 import {IAdMessage} from '@/types/AdMessage'
 import {ITemplate} from '@/types/Template'
 import {Card, CardContent} from '@/components/ui/card'
@@ -16,9 +16,10 @@ import {Label} from '@/components/ui/label'
 import {PlaceholderInputs} from '@/components/adMessages/forms/PlaceholderInputs'
 import {extractPlaceholderValues} from '@/lib/parsePlaceholders'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
+import {AdMessageFormData} from "@/types/forms/AdMessageFormData";
 
 interface EmailContentTabProps {
-    form: ReturnType<typeof useFormContext<IAdMessage>>;
+    form: UseFormReturn<AdMessageFormData, any, AdMessageFormData>;
     mode: 'new' | 'edit';
     templates: ITemplate[];
     placeholderValues: Record<string, string>;
@@ -193,7 +194,7 @@ export function EmailContentTab({
                                 </FormControl>
                                 <SelectContent>
                                     {templates.filter(t => t.type === 'email').map((tpl) => (
-                                        <SelectItem key={tpl._id} value={tpl._id}>
+                                        <SelectItem key={String(tpl._id)} value={String(tpl._id)}>
                                             {tpl.name}
                                         </SelectItem>
                                     ))}
@@ -214,7 +215,7 @@ export function EmailContentTab({
                         <PlaceholderInputs
                             placeholders={selectedTemplate.placeholders}
                             values={placeholderValues}
-                            onChange={(key, val) =>
+                            onChangeAction={(key, val) =>
                                 setPlaceholderValuesAction((prev) => ({...prev, [key]: val}))
                             }
                         />

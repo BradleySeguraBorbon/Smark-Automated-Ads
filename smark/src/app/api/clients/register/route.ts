@@ -24,19 +24,23 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
     return invalid.length === 0 ? null : {field: fieldName, invalidIds: invalid};
 }
 
-function convertResponseIntoArray(response: string) {
-    const cleaned = response
-        .replace(/```[\s\S]*?\n/, '')
-        .replace(/```/g, '')
-        .trim()
-        .replace(/^"+|"+$/g, '');
-
-    const ids = cleaned.split(',').map(id => id.trim());
-    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
-    if (validIds.length === 0) {
-        console.warn('No valid ObjectIds found in AI response:', response);
+function convertResponseIntoArray(response: string): string[] {
+    try {
+        const parsed = JSON.parse(response);
+        if (Array.isArray(parsed.tagIds)) {
+            const validIds = parsed.tagIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id));
+            if (validIds.length === 0) {
+                console.warn('No valid ObjectIds found in AI response:', response);
+            }
+            return validIds;
+        } else {
+            console.warn('AI response does not contain tagIds array:', response);
+            return [];
+        }
+    } catch (err) {
+        console.warn('Failed to parse AI response as JSON:', response);
+        return [];
     }
-    return validIds;
 }
 
 async function getTagsIdsBasedOnPreference(client: { name: string, preferences: string[] }, token: string) {
@@ -45,23 +49,31 @@ async function getTagsIdsBasedOnPreference(client: { name: string, preferences: 
         throw new Error("No tags found");
     }
     const tagsString = JSON.stringify(tags.map(tag => ({id: tag._id, keywords: tag.keywords})));
-    const prompt = fillPrompt(`Te proporciono la información de un cliente y una lista de tags (cada una con su ID, nombre y keywords).
+    const prompt = `
+You are an expert marketing assistant AI. Based on the client preferences and the available tags, your task is to identify the most relevant tags by matching the client preferences with the keywords of each tag.
 
-1. Analiza las preferencias del cliente.
-2. Relaciona esas preferencias con las keywords de las tags (busca coincidencias directas o sinónimos).
-3. Devuelve SOLO la lista de _id de las tags que mejor coincidan, separados por comas.
+--- Client Information (JSON) ---
+${JSON.stringify(client)}
 
-NO des explicaciones adicionales ni otro formato!!
+--- Available Tags (Array of objects with _id, name, and keywords) ---
+${tagsString}
 
-Si ninguna tag coincide, devuelve un string vacío.
+Instructions:
+- Match client preferences with the tags' keywords using direct matches or clear synonyms.
+- Return ONLY a valid JSON object with the following structure:
 
-Cliente:
-\${client}
+{
+  "tagIds": ["id1", "id2", "id3"]
+}
 
-Tags disponibles (array de objetos):
-\${tags}
-`
-        , {client: JSON.stringify(client), tags: tagsString});
+- If no tags match, return:
+{
+  "tagIds": []
+}
+
+⚠️ Do NOT include any explanation, markdown, commentary, or other text. Return only the JSON.
+`.trim();
+
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${apiUrl}/api/chat/`, {
             method: 'POST',
@@ -89,7 +101,7 @@ export async function POST(request: Request) {
     const result = await sanitizeRequest(request, {
         requiredFields: [
             'firstName', 'lastName', 'email', 'phone', 'preferredContactMethod',
-            'subscriptions', 'birthDate', 'telegramChatId'
+            'subscriptions', 'birthDate'
         ],
         dates: ['birthDate'],
         emails: ['email'],
@@ -109,12 +121,6 @@ export async function POST(request: Request) {
     if (body.preferredContactMethod === 'email' && !body.email) {
         return NextResponse.json({
             message: 'Preferred contact method is email, but email is missing.'
-        }, { status: 400 });
-    }
-
-    if (body.preferredContactMethod === 'telegram' && !body.telegramChatId) {
-        return NextResponse.json({
-            message: 'Preferred contact method is telegram, but telegramChatId is missing.'
         }, { status: 400 });
     }
 
@@ -145,9 +151,10 @@ export async function POST(request: Request) {
         const newClient = await Clients.create(encrypted);
 
         (async () => {
+            const authHeader = request.headers.get('authorization');
+            const token = authHeader?.split(' ')[1] || '';
+
             try {
-                const authHeader = request.headers.get('authorization');
-                const token = authHeader?.split(' ')[1] || '';
                 const tags = await getTagsIdsBasedOnPreference({
                     name: body.firstName,
                     preferences: body.preferences,
@@ -157,7 +164,27 @@ export async function POST(request: Request) {
                     await Clients.findByIdAndUpdate(newClient._id, { tags });
                 }
             } catch (err) {
-                console.error("Background AI tagging error:", err);
+                console.error("Tagging error:", err);
+            }
+
+            try {
+                if (body.subscriptions?.includes("telegram") && body.email) {
+                    const crypto = await import("crypto");
+                    const tokenKey = crypto.randomBytes(16).toString("hex");
+
+                    await Clients.findByIdAndUpdate(newClient._id, {
+                        telegram: {
+                            tokenKey,
+                            chatId: null,
+                            isConfirmed: false,
+                        }
+                    });
+
+                    const {sendTelegramInvite} = await import("@/lib/sendTelegramInvite");
+                    await sendTelegramInvite(body.email, tokenKey);
+                }
+            } catch (err) {
+                console.error("Telegram invite error:", err);
             }
         })();
         const client = await Clients.findById(newClient._id)

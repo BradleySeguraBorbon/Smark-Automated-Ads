@@ -154,7 +154,6 @@ export async function POST(request: Request) {
         if (body.content?.email) delete body.content.email;
     }
     try {
-        console.log(JSON.stringify(body, null, 2));
         const adMessage = await AdMessages.create(body);
         const savedAdMessage = await AdMessages.findById(adMessage._id)
             .populate('marketingCampaign', '_id name description status startDate endDate')

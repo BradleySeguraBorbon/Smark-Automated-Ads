@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAudience } from '@/app/api/utils/getAudience';
-import { sendEmailMessages } from '../route';
+import { sendEmailMessages } from '@/lib/utils/mailSender';
 import { AdMessages } from '@/models/models';
 
 export async function POST(req: NextRequest) {
+  const { adMessageId } = await req.json();
   try {
-    const { adMessageId } = await req.json();
     const { adMessage, contacts } = await getAudience(adMessageId, 'email');
 
     if (!adMessage.content?.email) {

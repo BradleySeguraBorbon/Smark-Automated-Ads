@@ -2,7 +2,7 @@
 
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
@@ -14,7 +14,7 @@ import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
 import { transformMarketingCampaignForSave } from '@/lib/transformers';
 import { useForm, FormProvider } from 'react-hook-form';
 import CustomAlertDialog from '@/components/CustomAlertDialog'
-import { IClient, ClientRef } from '@/types/Client';
+import { IClient } from '@/types/Client';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuthStore } from '@/lib/store';
 
@@ -24,19 +24,15 @@ export default function NewCampaignPage() {
     const initialCriterion = searchParams.get('criterion') || '';
     const initialValue = searchParams.get('value') || '';
 
-    const currentPath = usePathname();
     const router = useRouter();
     const [mounted, setMounted] = useState(false)
 
     const allTags = useTagStore((state) => state.tags);
     const setTags = useTagStore((state) => state.setTags);
-    const tagsHydrated = useTagStore((state) => state.hasHydrated);
 
     const allUsers = useUserListStore((state) => state.users);
     const setUsers = useUserListStore((state) => state.setUsers);
-    const usersHydrated = useUserListStore((state) => state.hasHydrated);
-    
-    const [audience, setAudience] = useState<ClientRef[]>([]);
+
     const [successOpen, setSuccessOpen] = useState(false);
 
     const form = useForm<MarketingCampaignFormData>({
@@ -90,10 +86,13 @@ export default function NewCampaignPage() {
     };
 
     const token = useAuthStore((state) => state.token);
+    const _hasHydrated = useAuthStore((state)=>state._hasHydrated);;
 
     useEffect(() => {
+        if (!_hasHydrated) return;
         if (!token) {
-            return router.push('/auth/login');
+            setTimeout(() => router.push('/auth/login'), 100);
+            return;
         }
 
         fetchTags();
@@ -179,7 +178,7 @@ export default function NewCampaignPage() {
     return (
         <div>
             <main>
-                <div className="container mx-auto py-8 px-50">
+                <div className="container mx-auto py-8 lg:px-44 md:px-20 px-4 transition-all duration-300 ease-in-out">
                     <div className="flex items-center mb-6">
                         <Button variant="ghost" size="sm" asChild className="mr-2">
                             <Link href="/marketingCampaigns">

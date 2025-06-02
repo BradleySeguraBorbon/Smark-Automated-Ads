@@ -12,7 +12,7 @@ import {
 interface PaginationControlsProps {
     currentPage: number
     totalPages: number
-    onPageChange: (page: number) => void
+    onPageChangeAction: (page: number) => void
 }
 
 function getPageNumbers(current: number, total: number): (number | string)[] {
@@ -42,7 +42,7 @@ function getPageNumbers(current: number, total: number): (number | string)[] {
     return range;
 }
 
-export default function PaginationControls({ currentPage, totalPages, onPageChange }: PaginationControlsProps) {
+export default function PaginationControls({ currentPage, totalPages, onPageChangeAction }: PaginationControlsProps) {
     const pages = getPageNumbers(currentPage, totalPages);
 
     return (
@@ -54,7 +54,7 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
                         onClick={(e) => {
                             e.preventDefault()
                             if (currentPage > 1) {
-                                onPageChange(currentPage - 1)
+                                onPageChangeAction(currentPage - 1)
                             }
                         }}
                         aria-disabled={currentPage === 1}
@@ -69,7 +69,7 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
                                 isActive={page === currentPage}
                                 onClick={(e) => {
                                     e.preventDefault()
-                                    onPageChange(page)
+                                    onPageChangeAction(page)
                                 }}
                             >
                                 {page}
@@ -86,7 +86,7 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
                         onClick={(e) => {
                             e.preventDefault()
                             if (currentPage < totalPages) {
-                                onPageChange(currentPage + 1)
+                                onPageChangeAction(currentPage + 1)
                             }
                         }}
                         aria-disabled={currentPage === totalPages}

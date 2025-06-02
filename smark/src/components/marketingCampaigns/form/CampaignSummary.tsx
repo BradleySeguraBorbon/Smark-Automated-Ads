@@ -27,7 +27,7 @@ export function CampaignSummary({
   return (
     <Card >
       <CardContent className="pt-1">
-        <h3 className="font-semibold mb-4">Campaign Summary</h3>
+        <h2 className="font-semibold mb-4">Campaign Summary</h2>
         <div className="space-y-4">
           <div>
             <p className="text-sm text-muted-foreground">Status</p>

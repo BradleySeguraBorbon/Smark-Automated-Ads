@@ -8,11 +8,7 @@ const allowedOrigin = process.env.CORS_ALLOWED_ORIGIN || '*';
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    const isAuthPage = [
-        '/auth/login',
-        '/auth/email-login',
-        '/auth/reset-password'
-    ].includes(pathname);
+    const isAuthPage = pathname.startsWith('/auth');
 
     const cookieToken = request.cookies.get('token')?.value;
     const authHeader = request.headers.get('authorization');
@@ -44,7 +40,7 @@ export async function middleware(request: NextRequest) {
     ) {
         return response;
     }
-
+    console.log('[Middleware]', { pathname, token });
     if (token && isAuthPage) {
         return NextResponse.redirect(new URL('/', request.url));
     }
@@ -58,6 +54,7 @@ export async function middleware(request: NextRequest) {
         '/campaignAudiences',
     ];
     const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
+    console.log('[Middleware/Protected]', { isProtected });
 
     if (!token && isProtected) {
         return NextResponse.redirect(new URL('/auth/login', request.url));

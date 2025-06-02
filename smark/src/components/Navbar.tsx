@@ -23,9 +23,10 @@ import {useTheme} from "next-themes";
 import {useAuthStore} from "@/lib/store";
 import {decodeToken} from "@/lib/utils/decodeToken";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {toUpperCase} from "uri-js/dist/esnext/util";
 import CustomAlertDialog from '@/components/CustomAlertDialog';
 import Cookies from 'js-cookie';
+
+const getInitials = (username: string) => username.slice(0, 2).toUpperCase();
 
 interface NavbarProps {
     currentPath: string;
@@ -66,9 +67,13 @@ export function Navbar({currentPath}: NavbarProps) {
     );
 
     return (
-        <div className="flex items-center justify-between w-full px-4 py-4 min-h-[96px] border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
-            <Link href="/" className="text-lg font-bold whitespace-nowrap flex-shrink-0 mr-4">
+        <div
+            className="flex items-center justify-between w-full px-4 py-4 min-h-[96px] border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0 mr-4">
+                <img src="/smark.svg" alt="S" className="h-8 w-8"/>
+                <span className="text-lg font-bold whitespace-nowrap hidden sm:inline">
                 AutoSmark
+            </span>
             </Link>
 
             <div className="flex flex-wrap items-center gap-2 max-h-[5.5rem] overflow-hidden">
@@ -81,7 +86,8 @@ export function Navbar({currentPath}: NavbarProps) {
                                         <NavigationMenuLink
                                             className={cn(
                                                 'px-3 py-2 text-sm font-medium rounded-md hover:bg-blue-600 dark:hover:bg-gray-800 whitespace-nowrap',
-                                                currentPath === route.href && '!bg-blue-800 !dark:bg-gray-700 !font-bold !text-white'
+                                                currentPath === route.href &&
+                                                '!bg-blue-800 !dark:bg-gray-700 !font-bold !text-white'
                                             )}
                                         >
                                             {route.label}
@@ -95,7 +101,8 @@ export function Navbar({currentPath}: NavbarProps) {
                                     <NavigationMenuLink
                                         className={cn(
                                             'px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap',
-                                            currentPath === publicClientRoute.href && 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                            currentPath === publicClientRoute.href &&
+                                            'bg-gray-200 dark:bg-gray-700 font-bold'
                                         )}
                                     >
                                         {publicClientRoute.label}
@@ -108,11 +115,14 @@ export function Navbar({currentPath}: NavbarProps) {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="lg:hidden">
-                            <MoreHorizontal className="h-5 w-5"/>
+                        <Button variant="ghost" size="default" className="lg:hidden">
+                            Menu<MoreHorizontal className="h-5 w-5"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem disabled className="opacity-60">
+                            Menu
+                        </DropdownMenuItem>
                         {userInfo ? (
                             [fixedRoute, ...filteredRoutes].map((route) => (
                                 <DropdownMenuItem key={route.href} onClick={() => router.push(route.href)}>
@@ -129,11 +139,7 @@ export function Navbar({currentPath}: NavbarProps) {
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                >
+                <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
                     <Sun
                         className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"/>
                     <Moon
@@ -142,17 +148,15 @@ export function Navbar({currentPath}: NavbarProps) {
                 </Button>
 
                 {userInfo ? (
-                    <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-xl shadow-md">
-                        <div className="flex items-center gap-2">
-                            <Avatar>
-                                <AvatarFallback>
-                                    {toUpperCase(userInfo.username[0] + userInfo.username[1])}
-                                </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium text-sm text-foreground truncate max-w-[160px]">
-                {userInfo.username} ({userInfo.role})
-              </span>
-                        </div>
+                    <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded-xl shadow-md">
+                        <Avatar>
+                            <AvatarFallback>
+                                {userInfo?.username ? getInitials(userInfo.username) : ""}
+                            </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-sm text-foreground truncate max-w-[160px] hidden sm:inline">
+                        {userInfo.username} ({userInfo.role})
+                    </span>
                         <Button
                             onClick={() => setLogoutDialogOpen(true)}
                             variant="outline"
@@ -169,6 +173,7 @@ export function Navbar({currentPath}: NavbarProps) {
                     </Button>
                 )}
             </div>
+
             <CustomAlertDialog
                 open={logoutDialogOpen}
                 onOpenChangeAction={setLogoutDialogOpen}

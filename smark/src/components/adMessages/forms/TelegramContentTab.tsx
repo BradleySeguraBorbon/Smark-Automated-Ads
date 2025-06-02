@@ -1,6 +1,6 @@
 'use client'
 
-import {useFormContext} from 'react-hook-form'
+import {useFormContext, UseFormReturn} from 'react-hook-form'
 import {useEffect, useMemo, useState} from 'react'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
@@ -17,12 +17,13 @@ import {PlaceholderInputs} from '@/components/adMessages/forms/PlaceholderInputs
 import {extractPlaceholderValues} from '@/lib/parsePlaceholders'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
 import {TemplateRef} from "@/types/Template";
-import Template from "@/models/Template";
+import {Templates} from "@/models/models";
+import {AdMessageFormData} from "@/types/forms/AdMessageFormData";
 
 const md = new MarkdownIt()
 
 interface TelegramContentTabProps {
-    form: ReturnType<typeof useFormContext<IAdMessage>>;
+    form: UseFormReturn<AdMessageFormData, any, AdMessageFormData>;
     mode: 'new' | 'edit';
     templates: TemplateRef[];
     placeholderValues: Record<string, string>;
@@ -40,7 +41,7 @@ export function TelegramContentTab({
                                    }: TelegramContentTabProps) {
     const selectedTemplateRef = form.watch('content.telegram.template')
     const telegramButtons = form.watch('content.telegram.buttons') || []
-    const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+    const [selectedTemplate, setSelectedTemplate] = useState<TemplateRef | null>(null)
     const [newButtonText, setNewButtonText] = useState('')
     const [newButtonUrl, setNewButtonUrl] = useState('')
     const [loading, setLoading] = useState(false)
@@ -196,7 +197,7 @@ export function TelegramContentTab({
                         <PlaceholderInputs
                             placeholders={selectedTemplate.placeholders}
                             values={placeholderValues}
-                            onChange={(key, val) =>
+                            onChangeAction={(key, val) =>
                                 setPlaceholderValuesAction((prev) => ({...prev, [key]: val}))
                             }
                         />

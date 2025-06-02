@@ -5,9 +5,10 @@ import { IClient } from "@/types/Client"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FormItem, FormMessage } from "@/components/ui/form"
 import { Label } from "@/components/ui/label"
+import {ClientFormData} from "@/types/forms";
 
 interface SubscriptionsSelectorProps {
-    control: Control<IClient>
+    control: Control<ClientFormData>
 }
 
 export default function SubscriptionsSelector({ control }: SubscriptionsSelectorProps) {

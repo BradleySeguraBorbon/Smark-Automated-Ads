@@ -28,7 +28,7 @@ export async function sanitizeRequest<T = any>(
         const body = deepSanitize(raw) as T;
 
         if (options.requiredFields) {
-            const missing = validateRequiredFields(body, options.requiredFields);
+            const missing = validateRequiredFields(body as Record<string, any>, options.requiredFields);
             if (missing.length > 0) {
                 return {
                     ok: false,

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAudience } from '@/app/api/utils/getAudience';
-import { sendTelegramMessages } from '../route';
+import { sendTelegramMessages } from '@/lib/utils/telegramSender';
 import { AdMessages } from '@/models/models';
 
 export async function POST(req: NextRequest) {
+
+    const { adMessageId } = await req.json();
     try {
-        const { adMessageId } = await req.json();
         const { adMessage, contacts } = await getAudience(adMessageId, 'telegramChatId');
 
         await sendTelegramMessages(contacts, adMessage.content.telegram.message || '');

@@ -6,10 +6,10 @@ import { Textarea } from "@/components/ui/textarea"
 interface PlaceholderInputsProps {
   placeholders: string[]
   values: Record<string, string>
-  onChange: (placeholder: string, value: string) => void
+  onChangeAction: (placeholder: string, value: string) => void
 }
 
-export function PlaceholderInputs({ placeholders, values, onChange }: PlaceholderInputsProps) {
+export function PlaceholderInputs({ placeholders, values, onChangeAction }: PlaceholderInputsProps) {
   return (
     <div className="space-y-4">
       {placeholders.map((placeholder) => (
@@ -21,7 +21,7 @@ export function PlaceholderInputs({ placeholders, values, onChange }: Placeholde
             id={`placeholder-${placeholder}`}
             placeholder={`Enter ${placeholder.replace(/_/g, " ")}`}
             value={values[placeholder] || ""}
-            onChange={(e) => onChange(placeholder, e.target.value)}
+            onChange={(e) => onChangeAction(placeholder, e.target.value)}
             className="resize-y min-h-[80px] max-h-[200px]"
             rows={3}
           />

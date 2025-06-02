@@ -2,7 +2,6 @@ import Cookies from 'js-cookie';
 import { useAuthStore } from '@/lib/store';
 
 export async function decodeToken(token: string | null | undefined) {
-    console.log('Token recibido:', token);
     if (!token || token.trim() === '') {
         return handleInvalidToken();
     }
@@ -17,12 +16,12 @@ export async function decodeToken(token: string | null | undefined) {
         });
 
         if (!res.ok) {
-            console.error('Error verificando el token en el servidor');
+            console.log('Error verifying token on server');
             return handleInvalidToken();
         }
 
         const data = await res.json();
-        console.log('Token decodificado en servidor:', data);
+
         Cookies.set('token', token, { path: '/', expires: data.expires });
         return data;
     } catch (error) {

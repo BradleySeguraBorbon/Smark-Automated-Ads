@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 
 export interface TagRef {
-    _id: Types.ObjectId;
+    _id: string;
     name: string;
 }
 

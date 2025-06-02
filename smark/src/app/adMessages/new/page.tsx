@@ -17,6 +17,7 @@ import { transformAdMessageForSave } from '@/lib/transformers';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { IMarketingCampaign } from "@/types/MarketingCampaign";
 import { ITemplate } from "@/types/Template";
+import {AdMessageFormData} from "@/types/forms/AdMessageFormData";
 
 export default function NewAdMessagePage() {
   const router = useRouter();
@@ -28,23 +29,24 @@ export default function NewAdMessagePage() {
   const [templates, setTemplates] = useState<ITemplate[]>([]);
   const [successOpen, setSuccessOpen] = useState(false);
 
-  const form = useForm<IAdMessage>({
+  const form = useForm<AdMessageFormData>({
     defaultValues: {
       name: '',
+      marketingCampaign: {
+        _id: '',
+        name: '',
+        startDate: new Date(),
+        endDate: new Date(),
+      },
       type: [],
+      status:"draft",
       sendDate: undefined,
       attachments: [],
       content: {
-        email: {
-          subject: '',
-          body: '',
-        },
-        telegram: {
-          message: '',
-          buttons: [],
-        },
-      },
-    },
+        email: { subject: '', body: '' },
+        telegram: { message: '', buttons: [] },
+      }
+    }
   });
 
   const fetchCampaigns = async (userId: string) => {
@@ -99,7 +101,7 @@ export default function NewAdMessagePage() {
     init();
   }, [_hasHydrated, token]);
 
-  const handleCreate = async (data: IAdMessage) => {
+  const handleCreate = async (data: AdMessageFormData) => {
     try {
       data.status = 'programmed';
       const response = await fetch('/api/adMessages', {
@@ -113,7 +115,7 @@ export default function NewAdMessagePage() {
 
       const result = await response.json();
       if (!response.ok) {
-        console.error(result);
+        console.error('API error:',  result.message || result.error);
         return;
       }
 
@@ -134,7 +136,7 @@ export default function NewAdMessagePage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 px-24">
+        <div className="container mx-auto py-8 lg:px-36 md:px-20 px-4 transition-all duration-300 ease-in-out">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" asChild className="mr-2">
               <Link href="/adMessages">
@@ -151,7 +153,7 @@ export default function NewAdMessagePage() {
                 <AdMessageFormTabs
                   mode="new"
                   onSubmit={handleCreate}
-                  token={token}
+                  token={token!}
                   form={form}
                   allMarketingCampaigns={campaigns}
                   allTemplates={templates}
@@ -161,9 +163,6 @@ export default function NewAdMessagePage() {
                 <AdMessageSummary
                   onSubmitAction={handleCreate}
                   mode="new"
-                  campaignName={
-                    campaigns.find((c) => c.id === form.watch('marketingCampaign'))?.name || ''
-                  }
                 />
               </div>
             </div>

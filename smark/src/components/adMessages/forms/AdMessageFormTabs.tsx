@@ -8,14 +8,15 @@ import { DetailsTab } from "@/components/adMessages/forms/DetailsTab";
 import { EmailContentTab } from "@/components/adMessages/forms/EmailContentTab";
 import { TelegramContentTab } from "@/components/adMessages/forms/TelegramContentTab";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import {AdMessageFormData} from "@/types/forms/AdMessageFormData";
 
 interface AdMessageFormTabsProps {
     mode: 'new' | 'edit';
-    onSubmit: (data: IAdMessage) => void;
+    onSubmit: (data: AdMessageFormData) => void;
     allMarketingCampaigns: IMarketingCampaign[];
     allTemplates: ITemplate[];
     token:string;
-    form: ReturnType<typeof useForm<IAdMessage>>;
+    form: ReturnType<typeof useForm<AdMessageFormData>>
 }
 
 export function AdMessageFormTabs({

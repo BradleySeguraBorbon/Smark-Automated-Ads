@@ -37,6 +37,7 @@ export default function MarketingCampaignsPage() {
             })
             const data = await response.json();
             setCampaigns(data.results as IMarketingCampaign[]);
+            console.log("Campaigns received:", data.results);
             setTotalPages(data.totalPages);
         } catch (error) {
             console.error('Failed to fetch campaigns:', error);
@@ -97,7 +98,7 @@ export default function MarketingCampaignsPage() {
     return (
         <div>
             <main>
-                <div className="container mx-auto py-8 px-50">
+                <div className="container mx-auto py-8 lg:px-44 md:px-20 px-10 transition-all duration-300 ease-in-out">
                     {userInfo &&
                         <CampaignsListHeader userRole={userInfo.role} />
                     }
@@ -114,7 +115,7 @@ export default function MarketingCampaignsPage() {
                                 <PaginationControls
                                     currentPage={currentPage}
                                     totalPages={totalPages}
-                                    onPageChange={(page) => setCurrentPage(page)}
+                                    onPageChangeAction={(page) => setCurrentPage(page)}
                                 />
                             )}
                         </>

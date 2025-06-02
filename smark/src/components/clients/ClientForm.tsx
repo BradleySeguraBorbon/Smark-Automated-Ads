@@ -12,15 +12,16 @@ import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import PreferenceManager from "@/components/clients/PreferenceManager"
 import SubscriptionsSelector from "@/components/clients/SubscriptionsSelector"
+import {ClientFormData} from "@/types/forms";
 
 interface ClientFormProps {
-    form: UseFormReturn<IClient>
-    onSubmitAction: (data: IClient) => void
+    form: UseFormReturn<ClientFormData>
+    onSubmitAction: (data: ClientFormData) => void
     newPreferenceAction: string
-    setNewPreference: (value: string) => void
+    setNewPreferenceAction: (value: string) => void
 }
 
-export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreference }: ClientFormProps) {
+export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreferenceAction }: ClientFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
@@ -92,7 +93,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                 message: "Invalid phone number format",
                             },
                         }}
-                        render={({ field }: ControllerRenderProps<IClient, 'phone'>) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Phone</FormLabel>
                                 <FormControl>
@@ -103,7 +104,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         )}
                     />
 
-                    <FormField
+                    {/*<FormField
                         control={form.control}
                         name="telegramChatId"
                         rules={{
@@ -124,7 +125,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    />*/}
 
                     <FormField
                         control={form.control}
@@ -134,7 +135,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             validate: (value: Date) =>
                                 value <= new Date() || "Birth date cannot be in the future",
                         }}
-                        render={({ field }: ControllerRenderProps<IClient, 'birthDate'>) => (
+                        render={({field}) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Date of Birth</FormLabel>
                                 <Popover>
@@ -162,6 +163,8 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                                 !date || date > new Date() || date < new Date("1900-01-01")
                                             }
                                             initialFocus
+                                            captionLayout="dropdown"
+                                            defaultMonth={new Date(2005, 1)}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -179,7 +182,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         validate: (value: string) =>
                             ["email", "telegram"].includes(value) || "Invalid contact method",
                     }}
-                    render={({ field }: ControllerRenderProps<IClient, 'preferredContactMethod'>) => (
+                    render={({field}) => (
                         <FormItem className="space-y-3">
                             <FormLabel>Preferred Contact Method</FormLabel>
                             <FormControl>
@@ -219,14 +222,12 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             return true
                         },
                     }}
-                    render={({ field, fieldState }) => (
+                    render={() => (
                         <PreferenceManager
                             fieldName="preferences"
                             control={form.control}
                             newPreference={newPreferenceAction}
-                            setNewPreferenceAction={setNewPreference}
-                            field={field}
-                            error={fieldState.error?.message}
+                            setNewPreferenceAction={setNewPreferenceAction}
                         />
                     )}
                 />
@@ -234,7 +235,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                 <SubscriptionsSelector control={form.control} />
 
                 <div className="flex justify-end">
-                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Create Client</Button>
+                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Register</Button>
                 </div>
             </form>
         </Form>

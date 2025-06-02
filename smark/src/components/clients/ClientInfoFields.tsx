@@ -9,9 +9,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
+import {ClientFormData} from "@/types/forms";
 
 interface ClientInfoFieldsProps {
-    form: UseFormReturn<IClient>
+    form: UseFormReturn<ClientFormData>
 }
 
 export default function ClientInfoFields({ form }: ClientInfoFieldsProps) {
@@ -75,12 +76,12 @@ export default function ClientInfoFields({ form }: ClientInfoFieldsProps) {
 
             <FormField
                 control={form.control}
-                name="telegramChatId"
+                name="telegram.chatId"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Telegram Chat ID</FormLabel>
                         <FormControl>
-                            <Input {...field} />
+                            <Input {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

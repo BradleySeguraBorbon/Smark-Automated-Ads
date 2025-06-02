@@ -112,7 +112,7 @@ export function CampaignFormTabs({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmitAction)}>
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'details' | 'connections' | 'audience')} className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-6 rounded-lg border">
           <TabsTrigger value="details">Campaign Details</TabsTrigger>
           <TabsTrigger value="connections">Connections</TabsTrigger>

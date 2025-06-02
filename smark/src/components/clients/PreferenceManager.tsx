@@ -9,10 +9,11 @@ import { FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, X } from "lucide-react"
+import {ClientFormData} from "@/types/forms";
 
 interface PreferenceManagerProps {
     fieldName: "preferences"
-    control: Control<IClient>
+    control: Control<ClientFormData>
     newPreference: string
     setNewPreferenceAction: (val: string) => void
 }

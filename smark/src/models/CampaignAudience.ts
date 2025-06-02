@@ -4,7 +4,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 const campaignAudienceSchema = new Schema<ICampaignAudience>(
   {
     campaign: { type: Schema.Types.ObjectId, ref: 'MarketingCampaigns', required: true },
-    audience: { type: [Schema.Types.ObjectId], ref: 'Clients', required: true },
+    audience: [{ type: Schema.Types.ObjectId, ref: 'Clients', required: true }],
     status: { type: String, enum: ['approved', 'pending', 'rejected'], required: true },
   },
   { timestamps: true,
