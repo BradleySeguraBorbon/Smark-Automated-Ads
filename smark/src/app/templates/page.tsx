@@ -95,7 +95,7 @@ export default function TemplatesPage() {
 
     return (
         <>
-            <div className="max-w-6xl mx-auto mt-8">
+            <div className="mx-auto mt-8 lg:px-36 lx:px-44 md:px-28 sm:px-20 transition-all duration-300 ease-in-out">
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
                     <BreadcrumbHeader backHref='/' title='Templates Management'/>
                     {['developer', 'admin'].includes(userInfo?.role || '') && (

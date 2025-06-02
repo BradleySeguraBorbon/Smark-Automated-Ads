@@ -98,7 +98,7 @@ export default function MarketingCampaignsPage() {
     return (
         <div>
             <main>
-                <div className="container mx-auto py-8 px-50">
+                <div className="container mx-auto py-8 lg:px-44 md:px-20 px-10 transition-all duration-300 ease-in-out">
                     {userInfo &&
                         <CampaignsListHeader userRole={userInfo.role} />
                     }

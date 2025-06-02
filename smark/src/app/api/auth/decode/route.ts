@@ -28,7 +28,6 @@ export async function POST(request: Request) {
         });
     } catch (error: any) {
         if (error?.code === 'ERR_JWT_EXPIRED') {
-            console.warn('Token expired:', error); // log opcional
             return NextResponse.json({ error: 'TokenExpired', ok:false }, { status: 401 });
         }
 

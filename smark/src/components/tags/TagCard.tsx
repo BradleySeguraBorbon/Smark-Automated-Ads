@@ -49,22 +49,31 @@ export default function TagCard({ tag, refreshAction, onSuccessDelete, currentUs
     return (
         <>
             <Card className="relative hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row justify-between items-start">
-                    <CardTitle>{tag.name}</CardTitle>
-                    <div className="flex gap-2">
-                        {currentUserRole !== 'employee' && <Link href={`/tags/${tag._id}/edit`}>
-                            <Button variant="secondary" className="bg-blue-500 hover:bg-blue-800" size="icon">
-                                <Pencil className="h-4 w-4"/>
+                <CardHeader className="flex flex-row justify-between items-start gap-2 flex-wrap">
+                    <CardTitle className="truncate max-w-[70%]">{tag.name}</CardTitle>
+
+                    <div className="flex gap-2 flex-shrink-0 max-w-full">
+                        {currentUserRole !== 'employee' && (
+                            <Link href={`/tags/${tag._id}/edit`}>
+                                <Button
+                                    variant="secondary"
+                                    className="bg-blue-500 hover:bg-blue-800 shrink-0"
+                                    size="icon"
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        )}
+                        {currentUserRole !== 'employee' && (
+                            <Button
+                                className="bg-teal-600 hover:bg-teal-800 shrink-0"
+                                variant="secondary"
+                                size="icon"
+                                onClick={() => setAlertOpen(true)}
+                            >
+                                <Trash2 className="h-4 w-4" />
                             </Button>
-                        </Link>}
-                        {currentUserRole !== 'employee' && <Button
-                            className="bg-teal-600 hover:bg-teal-800"
-                            variant="secondary"
-                            size="icon"
-                            onClick={() => setAlertOpen(true)}
-                        >
-                            <Trash2 className="h-4 w-4"/>
-                        </Button>}
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent>

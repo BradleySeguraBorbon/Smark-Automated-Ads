@@ -1,0 +1,35 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127 149" width="127" height="149">
+	<title>smark</title>
+	<style>
+		.s0 { opacity: .34;fill: #7e9196 } 
+		.s1 { opacity: .24;fill: #716663 } 
+		.s2 { opacity: .99;fill: #354558 } 
+		.s3 { opacity: .2;fill: #222b34 } 
+		.s4 { opacity: 1;fill: #76b0b6 } 
+		.s5 { opacity: 1;fill: #c1c1c7 } 
+		.s6 { opacity: .99;fill: #e9eaee } 
+		.s7 { opacity: 1;fill: #3c7498 } 
+		.s8 { opacity: .26;fill: #436d7b } 
+		.s9 { opacity: 1;fill: #acaeb3 } 
+		.s10 { opacity: 1;fill: #70aab2 } 
+		.s11 { opacity: .99;fill: #548ca0 } 
+		.s12 { opacity: .99;fill: #d6dee2 } 
+		.s13 { opacity: .54;fill: #b9bac2 } 
+	</style>
+	<g id="Background">
+		<path id="Path 0" class="s0" d="m2 65l1-26v2 24zm36-8l2-1v1l-4 21v-4zm31 46l19-14v-23h2v8 16z"/>
+		<path id="Path 1" fill-rule="evenodd" class="s1" d="m88 66l-1-8 3 1v7zm-85 42l-1-43h1zm61 38h1v1h-1z"/>
+		<path id="Path 2" class="s2" d="m41 54l21-45 2 34-9 4zm25-11l52-1-28 17-3-1z"/>
+		<path id="Path 3" class="s3" d="m123 66v-27l2 1v26zm-82-12l14-7-15 10v-1z"/>
+		<path id="Path 4" class="s4" d="m3 39l58-38 2 1-1 7-21 45-1 2-2 1-33-14-2-2zm20 38l13-3v4 11l-7 1z"/>
+		<path id="Path 5" class="s5" d="m90 90v-16l33 27-5 10-9-8zm-61 0l7-1 8 5 10 7 10 6v12 27h-2l-58-38z"/>
+		<path id="Path 6" class="s6" d="m3 65v-24l2 2 18 34 6 13-25 18h-1zm71 56l9-19 26 1 9 8-41 27-7-5z"/>
+		<path id="Path 7" class="s7" d="m62 9l1-7h3l56 37-4 3-52 1h-2zm2 137v-27l10 2-4 12-5 13z"/>
+		<path id="Path 8" class="s8" d="m61 1v-1h3l2 2h-3z"/>
+		<path id="Path 9" class="s9" d="m118 42l4-3h1v27 35l-33-27v-8-7z"/>
+		<path id="Path 10" class="s10" d="m5 43l33 14-2 17-13 3z"/>
+		<path id="Path 11" class="s11" d="m69 103l21-13 19 13-26-1-9 19-10-2v-12z"/>
+		<path id="Path 12" class="s12" d="m65 146l5-13 7 5z"/>
+		<path id="Path 13" class="s13" d="m64 147l-2-1h2z"/>
+	</g>
+</svg>

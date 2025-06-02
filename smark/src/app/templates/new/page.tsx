@@ -95,7 +95,7 @@ export default function CreateTemplatePage() {
         ],
     })
     return (
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 lg:px-36 lx:px-44 md:px-28 sm:px-20 px-8 transition-all duration-300 ease-in-out">
             <BreadcrumbHeader backHref="/templates" title="Create New Template"/>
 
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 mt-6">

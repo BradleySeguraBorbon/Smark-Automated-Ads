@@ -116,7 +116,7 @@ export default function MarketingCampaignDetailPage() {
     return (
         <>
             <main>
-                <div className="container mx-auto py-8 px-50">
+                <div className="container mx-auto py-8 lg:px-44 md:px-20 px-4 transition-all duration-300 ease-in-out">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center">
                             <Button variant="ghost" size="sm" asChild className="mr-2">

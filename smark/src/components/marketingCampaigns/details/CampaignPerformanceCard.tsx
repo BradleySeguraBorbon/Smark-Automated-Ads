@@ -73,30 +73,31 @@ export default function CampaignPerformanceCard({
         <Card>
             <CardHeader>
                 <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>Track successful sent rates to check the correct AdMessage sending through both email
-                    and telegram platforms</CardDescription>
+                <CardDescription>
+                    Track successful sent rates to check the correct AdMessage sending through both email
+                    and telegram platforms
+                </CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <PerformanceCard
                         title="Email Successful Sent Rate"
-                        icon={<Mail className="h-5 w-5"/>}
+                        icon={<Mail className="h-5 w-5" />}
                         rate={emailRate}
                         total={successData?.email.total}
                         sent={successData.email.sent}
                     />
-
                     <PerformanceCard
                         title="Telegram Successful Sent Rate"
-                        icon={<MessageSquare className="h-5 w-5"/>}
+                        icon={<MessageSquare className="h-5 w-5" />}
                         rate={telegramRate}
                         total={successData.telegram.total}
                         sent={successData.telegram.sent}
                     />
-
                     <PerformanceCard
                         title="General Successful Sent Rate"
-                        icon={<BarChart3 className="h-5 w-5"/>}
+                        icon={<BarChart3 className="h-5 w-5" />}
                         rate={generalRate}
                         total={successData.general.total}
                         sent={successData.general.sent}
@@ -106,72 +107,83 @@ export default function CampaignPerformanceCard({
 
                 <div className="mt-6 p-4 border rounded-md bg-gray-200 dark:bg-[#171717]">
                     <div className="flex items-center gap-2 mb-2">
-                        <PieChart className="h-5 w-5 text-muted-foreground"/>
+                        <PieChart className="h-5 w-5 text-muted-foreground" />
                         <h4 className="font-medium">Delivery Performance Insights</h4>
                     </div>
                     <ul className="space-y-2 text-sm">
                         <li className="flex items-start gap-2">
-                            <Check className="h-4 w-4 text-green-500 mt-0.5"/>
+                            <Check className="h-4 w-4 text-green-500 mt-0.5" />
                             <span>
-                                {generalRate > 90
-                                    ? "Excellent delivery success across channels"
-                                    : generalRate > 70
-                                        ? "Good delivery performance, with minor delivery losses"
-                                        : "Consider reviewing failed deliveries and improving your campaign setup"}
-                            </span>
+              {generalRate > 90
+                  ? "Excellent delivery success across channels"
+                  : generalRate > 70
+                      ? "Good delivery performance, with minor delivery losses"
+                      : "Consider reviewing failed deliveries and improving your campaign setup"}
+            </span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <Check className="h-4 w-4 text-green-500 mt-0.5"/>
+                            <Check className="h-4 w-4 text-green-500 mt-0.5" />
                             <span>
-                                {emailRate > telegramRate
-                                    ? "Email achieved higher delivery success than Telegram"
-                                    : "Telegram achieved higher delivery success than Email"}
-                            </span>
+              {emailRate > telegramRate
+                  ? "Email achieved higher delivery success than Telegram"
+                  : "Telegram achieved higher delivery success than Email"}
+            </span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <Check className="h-4 w-4 text-green-500 mt-0.5"/>
+                            <Check className="h-4 w-4 text-green-500 mt-0.5" />
                             <span>
-                                {successData?.general.total > 1000
-                                    ? "This campaign has reached a large audience with substantial message volume"
-                                    : "Consider increasing your audience size to expand campaign reach"}
-                            </span>
+              {successData?.general.total > 1000
+                  ? "This campaign has reached a large audience with substantial message volume"
+                  : "Consider increasing your audience size to expand campaign reach"}
+            </span>
                         </li>
                     </ul>
                 </div>
 
-                {/* 👥 Public Distribution */}
-                <div className="grid md:grid-cols-2 border rounded-md gap-6 p-10">
-                    <div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 border rounded-md p-4 sm:p-6 md:p-8 lg:p-10">
+                    <div className="min-h-[300px]">
                         <h4 className="font-medium mb-4 text-center">Age Distribution</h4>
-                        <Pie
-                            data={{
-                                labels: Object.keys(ageGroups),
-                                datasets: [{
-                                    data: Object.values(ageGroups),
-                                    backgroundColor: ['#f87171', '#facc15', '#34d399', '#60a5fa', '#a78bfa']
-                                }]
-                            }}
-                            options={{
-                                plugins: {legend: {position: 'bottom'}}
-                            }}
-                        />
+                        <div className="relative h-[250px]">
+                            <Pie
+                                data={{
+                                    labels: Object.keys(ageGroups),
+                                    datasets: [
+                                        {
+                                            data: Object.values(ageGroups),
+                                            backgroundColor: ['#f87171', '#facc15', '#34d399', '#60a5fa', '#a78bfa'],
+                                        },
+                                    ],
+                                }}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { position: 'bottom' } },
+                                }}
+                            />
+                        </div>
                     </div>
 
-                    <div>
+                    <div className="min-h-[300px]">
                         <h4 className="font-medium mb-4 text-center">Preferred Contact Method</h4>
-                        <Pie
-                            data={{
-                                labels: ['Email', 'Telegram'],
-                                datasets: [{
-                                    data: [contactPrefs.email, contactPrefs.telegram],
-                                    backgroundColor: ['#3b82f6', '#22c55e'],
-                                    borderRadius: 5,
-                                }]
-                            }}
-                            options={{
-                                plugins: {legend: {position: 'bottom'}}
-                            }}
-                        />
+                        <div className="relative h-[250px]">
+                            <Pie
+                                data={{
+                                    labels: ['Email', 'Telegram'],
+                                    datasets: [
+                                        {
+                                            data: [contactPrefs.email, contactPrefs.telegram],
+                                            backgroundColor: ['#3b82f6', '#22c55e'],
+                                            borderRadius: 5,
+                                        },
+                                    ],
+                                }}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { position: 'bottom' } },
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
                 <MessageSentLineChart campaignId={campaignId}/>

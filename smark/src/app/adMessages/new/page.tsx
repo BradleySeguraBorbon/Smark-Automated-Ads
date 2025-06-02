@@ -102,7 +102,6 @@ export default function NewAdMessagePage() {
   }, [_hasHydrated, token]);
 
   const handleCreate = async (data: AdMessageFormData) => {
-    console.log("🧪 Form Data:", data);
     try {
       data.status = 'programmed';
       const response = await fetch('/api/adMessages', {
@@ -137,7 +136,7 @@ export default function NewAdMessagePage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 px-24">
+        <div className="container mx-auto py-8 lg:px-36 md:px-20 px-4 transition-all duration-300 ease-in-out">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" asChild className="mr-2">
               <Link href="/adMessages">

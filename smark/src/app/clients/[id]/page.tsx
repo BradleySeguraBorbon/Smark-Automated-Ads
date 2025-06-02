@@ -80,7 +80,7 @@ export default function ClientViewPage() {
     }
 
     return (
-        <div className="container mx-auto py-10 space-y-6 max-w-3xl">
+        <div className="container mx-auto py-10 space-y-6 max-w-3xl lg:px-44 md:px-20 px-4 transition-all duration-300 ease-in-out">
             <BreadcrumbHeader backHref="/clients" title="Visualice Client"/>
             <Card>
                 <CardHeader>
