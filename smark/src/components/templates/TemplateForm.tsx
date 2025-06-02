@@ -91,7 +91,7 @@ export default function TemplateForm({form, onSubmitAction, buttonText}: Templat
                 />
 
                 <div className="flex justify-end">
-                    <Button variant="secondary" className="bg-purple-500 hover:bg-purple-800" type="submit">{buttonText}</Button>
+                    <Button variant="secondary" className="bg-purple-700 hover:bg-purple-900" type="submit">{buttonText}</Button>
                 </div>
             </form>
         </Form>

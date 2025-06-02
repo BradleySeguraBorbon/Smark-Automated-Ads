@@ -79,10 +79,13 @@ export default function NewCampaignPage() {
     };
 
     const token = useAuthStore((state) => state.token);
+    const _hasHydrated = useAuthStore((state)=>state._hasHydrated);;
 
     useEffect(() => {
+        if (!_hasHydrated) return;
         if (!token) {
-            return router.push('/auth/login');
+            setTimeout(() => router.push('/auth/login'), 100);
+            return;
         }
 
         fetchTags();

@@ -108,7 +108,7 @@ export default function AdMessagesPage() {
               <p className="text-muted-foreground">Manage your email and telegram messages</p>
             </div>
             <div className="flex gap-4">
-              <Button className="bg-purple-500 hover:bg-purple-800 text-white" asChild>
+              <Button className="bg-purple-700 hover:bg-purple-900 text-white" asChild>
                 {userInfo && userInfo?.role !== 'employee' && (
                   <Link href="/adMessages/new">
                     <PlusCircle className="h-4 w-4 mr-2" />

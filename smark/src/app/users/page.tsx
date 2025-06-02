@@ -89,7 +89,7 @@ export default function UsersPage() {
                 <BreadcrumbHeader backHref="/" title="User Management"/>
                 {(userInfo?.role === 'developer' || userInfo?.role === 'admin') && (
                     <Link href="/users/new">
-                        <Button className="w-full sm:w-auto bg-purple-500 hover:bg-purple-800" variant="secondary">
+                        <Button className="w-full sm:w-auto bg-purple-700 hover:bg-purple-900" variant="secondary">
                             <PlusCircle className="mr-2 h-4 w-4"/>
                             Add New User
                         </Button>

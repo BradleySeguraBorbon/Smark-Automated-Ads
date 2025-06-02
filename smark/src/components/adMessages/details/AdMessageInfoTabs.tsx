@@ -28,7 +28,7 @@ export default function AdMessageInfoTabs({ adMessage }: AdMessageInfoTabsProps)
 
             <TabsContent value="email" className="space-y-6">
                 <Card className="p-4">
-                    <h3 className="font-semibold text-lg mb-2">Email Preview</h3>
+                    <h2 className="font-semibold text-lg mb-2">Email Preview</h2>
                     {adMessage.content.email ? (
                         <EmailPreview
                             emailData={{

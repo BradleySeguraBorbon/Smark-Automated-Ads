@@ -11,7 +11,7 @@ export default function CampaignDetailsCard({ campaign }: { campaign: IMarketing
         <Card >
             <CardContent className="space-y-6">
                 <div>
-                    <h3 className="text-lg font-medium mb-2">Description</h3>
+                    <h2 className="text-lg font-medium mb-2">Description</h2>
                     <p className="text-muted-foreground">{campaign.description}</p>
                 </div>
 

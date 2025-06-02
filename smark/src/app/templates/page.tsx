@@ -100,7 +100,7 @@ export default function TemplatesPage() {
                     <BreadcrumbHeader backHref='/' title='Templates Management'/>
                     {['developer', 'admin'].includes(userInfo?.role || '') && (
                         <Link href="/templates/new">
-                            <Button variant="secondary" className="w-full sm:w-auto bg-purple-500 hover:bg-purple-800">
+                            <Button variant="secondary" className="w-full sm:w-auto bg-purple-700 hover:bg-purple-900">
                                 <PlusCircle className="mr-2 h-4 w-4"/>
                                 Add New Template
                             </Button>

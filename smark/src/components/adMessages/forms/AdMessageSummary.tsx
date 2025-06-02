@@ -29,7 +29,7 @@ export function AdMessageSummary({ onSubmitAction, mode }: AdMessageSummaryProps
   return (
     <Card>
       <CardContent className="pt-1">
-        <h3 className="font-semibold mb-4">Message Summary</h3>
+        <h2 className="font-semibold mb-4">Message Summary</h2>
         <div className="space-y-4">
           <div>
             <p className="text-sm text-muted-foreground">Name</p>
