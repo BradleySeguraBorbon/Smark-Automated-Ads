@@ -10,6 +10,9 @@ export interface SimplifiedClient {
   lastName: string;
   birthDate: string;
   preferences: string[];
+  gender: string;
+  country: string;
+  languages: string[];
   tags: string[];
   subscriptions: string[];
   preferredContactMethod: string;
@@ -71,7 +74,10 @@ export async function generateCampaignStrategy(custom?: CustomSegmentRequest): P
     telegram: 1
   }).lean();
 
-  const decryptedClients = rawClients.map(decryptClient);
+  const decryptedClients: IClient[] = rawClients.map((c: any) => decryptClient({
+    ...c,
+    _id: c._id.toString(),
+  }));
 
   const clients: SimplifiedClient[] = decryptedClients.map((c: any) => ({
     _id: c._id.toString(),
@@ -79,6 +85,9 @@ export async function generateCampaignStrategy(custom?: CustomSegmentRequest): P
     lastName: c.lastName,
     birthDate: c.birthDate,
     preferences: c.preferences,
+    gender: c.gender,
+    country: c.country,
+    languages: c.languages,
     tags: c.tags,
     subscriptions: c.subscriptions,
     preferredContactMethod: c.preferredContactMethod,
@@ -93,6 +102,9 @@ export async function generateCampaignStrategy(custom?: CustomSegmentRequest): P
     'firstName',
     'birthDate',
     'preferences',
+    'gender',
+    'country',
+    'languages',
     'tags',
     'subscriptions',
     'preferredContactMethod',

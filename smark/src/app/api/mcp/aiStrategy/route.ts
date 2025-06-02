@@ -23,10 +23,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'El campo "prompt" es obligatorio' }, { status: 400 });
         }
 
-        const systemPrompt = `Eres un asistente de campañas de marketing. Dado un mensaje en lenguaje natural,
-debes generar una solicitud JSON que pueda enviarse a /api/mcp/strategy para segmentar clientes.
+        const systemPrompt = `
+You are a marketing campaign assistant. Given a prompt in natural language,
+your task is to convert it into a valid JSON request for the /api/mcp/strategy endpoint.
 
-La estructura debe ser:
+The expected JSON structure is:
 {
   "filters": [
     { "field": "firstName", "match": "Luis" },
@@ -36,12 +37,30 @@ La estructura debe ser:
   "maxCriteriaUsed": 3
 }
 
-Importante:
-- Si el usuario quiere la mayor cobertura posible, genera un objeto vacío: {}
-- Si menciona condiciones específicas, tradúcelas a filtros.
-- Usa los campos permitidos: firstName, lastName, birthDate, preferences, tags, subscriptions, preferredContactMethod, telegramConfirmed
-- Usa "currentMonth": true si habla del mes actual en birthDate.
-- NO EXPLIQUES, devuelve solo el JSON sin texto adicional.`;
+Instructions:
+- If the prompt is general or requests maximum coverage, return: {}
+- If the prompt mentions specific characteristics, convert them to "filters".
+- Accepted filter fields are:
+  firstName, lastName, birthDate, preferences, tags, subscriptions, preferredContactMethod, telegramConfirmed,
+  gender, country, languages
+
+Advanced rules:
+1. If age is mentioned (e.g., “between 20 and 30”, “older than 50”), convert it to a birthDate range using current date.
+2. If generational groups are mentioned (e.g., “Gen Z”, “Millennials”), map them:
+   - Gen Z: born 1997–2012
+   - Millennials: born 1981–1996
+   - Generation X: 1965–1980
+   - Boomers: 1946–1964
+3. If birth months are mentioned (e.g., “March to June”), convert to a birthDate range.
+4. If "current month" or "this month" is mentioned, use { "field": "birthDate", "currentMonth": true }
+5. If preferences are listed (e.g., “likes sports and travel”), use { field: "preferences", match: "sports" }, etc.
+6. If country, gender, or language is mentioned, use the respective field with "match".
+
+Response format:
+- DO NOT add explanations or extra text.
+- Always return only the valid JSON request, ideally inside triple backticks if needed.
+`;
+
 
         const completion = await openai.chat.completions.create({
             model: 'deepseek/deepseek-prover-v2:free',
