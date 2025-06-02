@@ -50,6 +50,7 @@ export default function EditCampaignPage() {
             endDate: undefined,
             tags: [],
             users: [],
+            isAiGenerated: false,
             performance: {
                 totalEmailsSent: 0,
                 totalEmailsOpened: 0,
@@ -105,7 +106,7 @@ export default function EditCampaignPage() {
                     endDate: data.result.endDate ? new Date(data.result.endDate) : new Date(),
                 };
                 Object.entries(campaign).forEach(([key, value]) => {
-                    setValue(key as keyof MarketingCampaignFormData, value as string | Date | TagRef[] | UserRef[] | ObjectId | undefined);
+                    setValue(key as keyof MarketingCampaignFormData, value as string | boolean | Date | TagRef[] | UserRef[] | ObjectId | undefined);
                 });
             } else {
                 console.error('Failed to fetch campaign:', data);
@@ -143,14 +144,18 @@ export default function EditCampaignPage() {
     const handleUpdate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
         try {
-            const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
-            const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const clientData = await clientRes.json();
-            const allClientIds = clientData.results.map((c: IClient) => c._id);
+            let allClientIds: string[] = [];
+
+            if (!data.isAiGenerated) {
+                const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
+                const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const clientData = await clientRes.json();
+                allClientIds = clientData.results.map((c: IClient) => c._id);
+            }
 
             const response = await fetch(`/api/marketingCampaigns/${id}`, {
                 method: 'PUT',
@@ -169,18 +174,20 @@ export default function EditCampaignPage() {
 
             console.log('Campaign updated:', result.result);
 
-            await fetch(`/api/campaignAudiences/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    campaign: id,
-                    audience: allClientIds,
-                    status: 'approved',
-                }),
-            });
+            if (!data.isAiGenerated) {
+                await fetch(`/api/campaignAudiences/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        campaign: id,
+                        audience: allClientIds,
+                        status: 'approved',
+                    }),
+                });
+            }
 
             setSuccessOpen(true);
         } catch (error) {
@@ -218,6 +225,8 @@ export default function EditCampaignPage() {
                                     allTags={allTags}
                                     allUsers={allUsers}
                                     form={form}
+                                    campaignId={id as string}
+                                    isAiGenerated={form.watch('isAiGenerated')}
                                 />
                             </div>
                             <div className="lg:col-span-1">
