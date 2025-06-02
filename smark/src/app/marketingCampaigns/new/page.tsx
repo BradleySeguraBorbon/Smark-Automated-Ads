@@ -3,7 +3,7 @@
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
 import { usePathname, useRouter } from 'next/navigation';
-import { Navbar } from '@/components/Navbar';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -17,9 +17,13 @@ import CustomAlertDialog from '@/components/CustomAlertDialog'
 import { IClient, ClientRef } from '@/types/Client';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuthStore } from '@/lib/store';
-import { decodeToken } from "@/lib/utils/decodeToken"
 
 export default function NewCampaignPage() {
+    const searchParams = useSearchParams();
+    const isAiGenerated = searchParams.get('ai') === 'true';
+    const initialCriterion = searchParams.get('criterion') || '';
+    const initialValue = searchParams.get('value') || '';
+
     const currentPath = usePathname();
     const router = useRouter();
     const [mounted, setMounted] = useState(false)
@@ -44,6 +48,7 @@ export default function NewCampaignPage() {
             endDate: undefined,
             tags: [],
             users: [],
+            isAiGenerated,
             performance: {
                 totalEmailsSent: 0,
                 totalEmailsOpened: 0,
@@ -99,16 +104,34 @@ export default function NewCampaignPage() {
 
     const handleCreate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
-        console.log("Submitting payload:", payload);
+
         try {
-            const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
-            const clientRes = await fetch(`/api/clients?${tagQuery}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const clientData = await clientRes.json();
-            const allClientIds = clientData.results.map((c: IClient) => c._id);
+            let allClientIds: string[] = [];
+
+            if (isAiGenerated && initialCriterion && initialValue) {
+                const mcpRes = await fetch('/api/mcp/strategy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        filters: [{ field: initialCriterion, match: initialValue }],
+                    })
+                });
+
+                const mcpData = await mcpRes.json();
+                allClientIds = mcpData?.strategy?.selectedClients || [];
+            } else {
+                const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
+                const clientRes = await fetch(`/api/clients?${tagQuery}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const clientData = await clientRes.json();
+                allClientIds = clientData.results.map((c: IClient) => c._id);
+            }
 
             const response = await fetch('/api/marketingCampaigns', {
                 method: 'POST',
@@ -175,6 +198,9 @@ export default function NewCampaignPage() {
                                     allTags={allTags}
                                     allUsers={allUsers}
                                     form={form}
+                                    isAiGenerated={isAiGenerated}
+                                    aiCriterion={initialCriterion}
+                                    aiValue={initialValue}
                                 />
                             </div>
                             <div className="lg:col-span-1">
