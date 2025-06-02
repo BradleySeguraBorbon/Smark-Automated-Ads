@@ -2,8 +2,7 @@
 
 import { CampaignFormTabs } from '@/components/marketingCampaigns/form/CampaignFormTabs';
 import { CampaignSummary } from '@/components/marketingCampaigns/form/CampaignSummary';
-import { usePathname, useRouter } from 'next/navigation';
-import { Navbar } from '@/components/Navbar';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -14,25 +13,20 @@ import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
 import { transformMarketingCampaignForSave } from '@/lib/transformers';
 import { useForm, FormProvider } from 'react-hook-form';
 import CustomAlertDialog from '@/components/CustomAlertDialog'
-import { IClient, ClientRef } from '@/types/Client';
+import { IClient } from '@/types/Client';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuthStore } from '@/lib/store';
-import { decodeToken } from "@/lib/utils/decodeToken"
 
 export default function NewCampaignPage() {
-    const currentPath = usePathname();
     const router = useRouter();
     const [mounted, setMounted] = useState(false)
 
     const allTags = useTagStore((state) => state.tags);
     const setTags = useTagStore((state) => state.setTags);
-    const tagsHydrated = useTagStore((state) => state.hasHydrated);
 
     const allUsers = useUserListStore((state) => state.users);
     const setUsers = useUserListStore((state) => state.setUsers);
-    const usersHydrated = useUserListStore((state) => state.hasHydrated);
-    
-    const [audience, setAudience] = useState<ClientRef[]>([]);
+
     const [successOpen, setSuccessOpen] = useState(false);
 
     const form = useForm<MarketingCampaignFormData>({

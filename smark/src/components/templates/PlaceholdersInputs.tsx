@@ -9,7 +9,10 @@ import { ControllerRenderProps } from 'react-hook-form'
 import { ITemplate } from '@/types/Template'
 
 interface Props {
-    field: ControllerRenderProps<ITemplate, 'placeholders'>
+    field: {
+        value: string[]
+        onChange: (value: string[]) => void
+    }
 }
 
 export default function PlaceholdersInput({ field }: Props) {

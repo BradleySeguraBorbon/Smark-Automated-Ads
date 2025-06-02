@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button"
 import ClientInfoFields from "@/components/clients/ClientInfoFields"
 import TagsField from "@/components/clients/TagsField"
 import { ITag } from "@/types/Tag"
-import {ClientFormFields} from "@/types/forms/ClientForm";
+import {ClientFormData} from "@/types/forms";
 
 interface EditClientFormProps {
-    form: UseFormReturn<ClientFormFields>
-    onSubmitAction: (data: IClient) => void
+    form: UseFormReturn<ClientFormData>
+    onSubmitAction: (data: ClientFormData) => void
     tags: ITag[]
     router: any
 }
@@ -24,7 +24,10 @@ export default function EditClientForm({ form, onSubmitAction, tags, router }: E
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
                         <ClientInfoFields form={form} />
-                        <TagsField form={form} tagOptions={tags} />
+                        <TagsField form={form} tagOptions={tags.map((tag) => ({
+                            _id: tag._id as string,
+                            name: tag.name,
+                        }))} />
                         <div className="flex justify-end space-x-4">
                             <Button type="button" variant="outline" onClick={() => router.push("/clients")}>
                                 Cancel

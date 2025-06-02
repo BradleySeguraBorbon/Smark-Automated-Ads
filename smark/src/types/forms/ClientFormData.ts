@@ -1,4 +1,8 @@
-export interface ClientFormFields {
+import { TagRef } from "@/types/Tag";
+import { AdInteractions } from "@/types/Client";
+
+export interface ClientFormData {
+    _id?: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -7,11 +11,8 @@ export interface ClientFormFields {
     subscriptions: string[];
     birthDate: Date;
     preferences: string[];
-    tags: string[];
-    adInteractions: {
-        adMessage: string;
-        status: "opened" | "received";
-    }[];
+    tags: TagRef[];
+    adInteractions: AdInteractions[];
     tagsPending: boolean;
     telegram?: {
         tokenKey: string;

@@ -215,7 +215,7 @@ export function EmailContentTab({
                         <PlaceholderInputs
                             placeholders={selectedTemplate.placeholders}
                             values={placeholderValues}
-                            onChange={(key, val) =>
+                            onChangeAction={(key, val) =>
                                 setPlaceholderValuesAction((prev) => ({...prev, [key]: val}))
                             }
                         />

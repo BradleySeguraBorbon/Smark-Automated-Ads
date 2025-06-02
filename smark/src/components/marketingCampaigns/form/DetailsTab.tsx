@@ -65,7 +65,7 @@ export function DetailsTab({ form }: { form: ReturnType<typeof useFormContext<Ma
                 <SelectContent>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                    {/*<SelectItem value="completed">Completed</SelectItem>*/}
                 </SelectContent>
               </Select>
               <FormMessage />

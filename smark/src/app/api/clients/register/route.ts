@@ -24,19 +24,23 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
     return invalid.length === 0 ? null : {field: fieldName, invalidIds: invalid};
 }
 
-function convertResponseIntoArray(response: string) {
-    const cleaned = response
-        .replace(/```[\s\S]*?\n/, '')
-        .replace(/```/g, '')
-        .trim()
-        .replace(/^"+|"+$/g, '');
-
-    const ids = cleaned.split(',').map(id => id.trim());
-    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
-    if (validIds.length === 0) {
-        console.warn('No valid ObjectIds found in AI response:', response);
+function convertResponseIntoArray(response: string): string[] {
+    try {
+        const parsed = JSON.parse(response);
+        if (Array.isArray(parsed.tagIds)) {
+            const validIds = parsed.tagIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id));
+            if (validIds.length === 0) {
+                console.warn('No valid ObjectIds found in AI response:', response);
+            }
+            return validIds;
+        } else {
+            console.warn('AI response does not contain tagIds array:', response);
+            return [];
+        }
+    } catch (err) {
+        console.warn('Failed to parse AI response as JSON:', response);
+        return [];
     }
-    return validIds;
 }
 
 async function getTagsIdsBasedOnPreference(client: { name: string, preferences: string[] }, token: string) {
@@ -45,23 +49,31 @@ async function getTagsIdsBasedOnPreference(client: { name: string, preferences: 
         throw new Error("No tags found");
     }
     const tagsString = JSON.stringify(tags.map(tag => ({id: tag._id, keywords: tag.keywords})));
-    const prompt = fillPrompt(`Te proporciono la información de un cliente y una lista de tags (cada una con su ID, nombre y keywords).
+    const prompt = `
+You are an expert marketing assistant AI. Based on the client preferences and the available tags, your task is to identify the most relevant tags by matching the client preferences with the keywords of each tag.
 
-1. Analiza las preferencias del cliente.
-2. Relaciona esas preferencias con las keywords de las tags (busca coincidencias directas o sinónimos).
-3. Devuelve SOLO la lista de _id de las tags que mejor coincidan, separados por comas.
+--- Client Information (JSON) ---
+${JSON.stringify(client)}
 
-NO des explicaciones adicionales ni otro formato!!
+--- Available Tags (Array of objects with _id, name, and keywords) ---
+${tagsString}
 
-Si ninguna tag coincide, devuelve un string vacío.
+Instructions:
+- Match client preferences with the tags' keywords using direct matches or clear synonyms.
+- Return ONLY a valid JSON object with the following structure:
 
-Cliente:
-\${client}
+{
+  "tagIds": ["id1", "id2", "id3"]
+}
 
-Tags disponibles (array de objetos):
-\${tags}
-`
-        , {client: JSON.stringify(client), tags: tagsString});
+- If no tags match, return:
+{
+  "tagIds": []
+}
+
+⚠️ Do NOT include any explanation, markdown, commentary, or other text. Return only the JSON.
+`.trim();
+
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${apiUrl}/api/chat/`, {
             method: 'POST',

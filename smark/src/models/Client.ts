@@ -1,13 +1,13 @@
 import mongoose, { Schema, Types } from 'mongoose';
 import { Model } from 'mongoose';
-import { IClient } from '@/types/Client';
+import {IClientRaw} from '@/types/Client';
 
 const adInteractionsSchema = new Schema({
   adMessage: { type: Types.ObjectId, ref: "AdMessages", required: true },
   status: { type: String, enum: ["opened", "received"], required: true },
 });
 
-const clientSchema = new Schema<IClient>({
+const clientSchema = new Schema<IClientRaw>({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -52,5 +52,5 @@ const clientSchema = new Schema<IClient>({
   next();
 });*/
 
-const Clients = mongoose.models.Clients as Model<IClient> || mongoose.model<IClient>('Clients', clientSchema);
+const Clients = mongoose.models.Clients as Model<IClientRaw> || mongoose.model<IClientRaw>('Clients', clientSchema);
 export default Clients;

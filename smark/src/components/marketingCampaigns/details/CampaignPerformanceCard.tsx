@@ -6,15 +6,13 @@ import {Pie} from 'react-chartjs-2'
 import {Chart as ChartJS, ArcElement, Tooltip, Legend} from 'chart.js'
 import MessageSentLineChart from '@/components/marketingCampaigns/details/MessageSentLineChart'
 import {SuccessSentData} from '@/types/SuccessSentData'
+import {ClientRef} from "@/types/Client";
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 interface CampaignPerformanceCardProps {
     campaignId: string;
-    audience: {
-        birthDate: string
-        preferredContactMethod: string
-    }[];
+    audience: ClientRef[];
     successData: SuccessSentData | null;
 }
 
@@ -59,6 +57,17 @@ export default function CampaignPerformanceCard({
 
         return {ageGroups, contactPrefs}
     }, [audience])
+
+    if (!successData) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Performance Metrics</CardTitle>
+                    <CardDescription>No data available for this campaign yet.</CardDescription>
+                </CardHeader>
+            </Card>
+        )
+    }
 
     return (
         <Card>
@@ -165,7 +174,6 @@ export default function CampaignPerformanceCard({
                         />
                     </div>
                 </div>
-                {/* 📈 Time Data */}
                 <MessageSentLineChart campaignId={campaignId}/>
             </CardContent>
         </Card>

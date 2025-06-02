@@ -1,21 +1,18 @@
 import {AdMessageContentEmail, AdMessageContentTelegram} from "@/types/AdMessage";
+import {MarketingCampaignRef} from "@/types/MarketingCampaign";
 
 export interface AdMessageFormData {
+    _id?: string;
     name: string;
-    marketingCampaign: FormMarketingCampaign;
+    marketingCampaign: MarketingCampaignRef;
     type: ('email' | 'telegram')[];
     sendDate: Date;
-    status: string;
+    status?: "sent" | "programmed" | "draft";
     attachments: { name: string; path: string }[];
     content: {
         email?: AdMessageContentEmail;
         telegram?: AdMessageContentTelegram;
     };
+    createdAt?: Date;
+    updatedAt?: Date;
 }
-
-export type FormMarketingCampaign = {
-    _id: string;
-    name: string;
-    startDate: string | Date;
-    endDate: string | Date;
-};

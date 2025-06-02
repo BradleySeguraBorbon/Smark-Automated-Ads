@@ -123,7 +123,7 @@ export default function TagsPage() {
                             <PaginationControls
                                 currentPage={currentPage}
                                 totalPages={totalPages}
-                                onPageChange={setCurrentPage}
+                                onPageChangeAction={setCurrentPage}
                             />
                         )}
                     </>

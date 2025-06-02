@@ -14,6 +14,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
 import {isValidHtml, isValidMarkdown} from '@/lib/utils/validateHtml'
 import MarkdownIt from 'markdown-it'
+import {TemplateFormData} from "@/types/forms";
 
 export default function EditTemplatePage() {
     const router = useRouter()
@@ -27,7 +28,7 @@ export default function EditTemplatePage() {
     const [errorOpen, setErrorOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const form = useForm<ITemplate>({
+    const form = useForm<TemplateFormData>({
         defaultValues: {
             name: '',
             type: 'email',
@@ -74,7 +75,7 @@ export default function EditTemplatePage() {
         fetchTemplate()
     }, [_hasHydrated, token, id])
 
-    const onSubmit = async (data: ITemplate) => {
+    const onSubmit = async (data: TemplateFormData) => {
         if (!isValidHtml(data.html) && !isValidMarkdown(data.html)) {
             setErrorMessage("The content must be valid HTML or Markdown. Please check your input.");
             setErrorOpen(true);

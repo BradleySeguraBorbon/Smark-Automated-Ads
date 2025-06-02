@@ -54,7 +54,7 @@ export default function CampaignAudienceCard({ audience, currentPage, totalPages
                     <PaginationControls
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={(page) => onPageChangeAction(page)}
+                        onPageChangeAction={(page) => onPageChangeAction(page)}
                     />
                 )}
             </CardContent>

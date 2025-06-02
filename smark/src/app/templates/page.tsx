@@ -144,7 +144,7 @@ export default function TemplatesPage() {
                     <PaginationControls
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={(page) => setCurrentPage(page)}
+                        onPageChangeAction={(page) => setCurrentPage(page)}
                     />
                 )}
             </div>

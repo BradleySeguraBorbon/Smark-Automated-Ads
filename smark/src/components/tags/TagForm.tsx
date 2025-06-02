@@ -13,10 +13,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Trash2, PlusCircle } from 'lucide-react'
-import {ITag} from "@/types/Tag";
+import {TagFormData} from "@/types/forms";
 
 interface TagFormProps {
-    form: UseFormReturn<ITag>
+    form: UseFormReturn<TagFormData>
     onSubmitAction: (data: any) => void
 }
 
@@ -34,8 +34,8 @@ export default function TagForm({ form, onSubmitAction }: TagFormProps) {
     }
 
     const removeKeyword = (index: number) => {
-        const current = form.getValues('keywords') || []
-        form.setValue('keywords', current.filter((_, i) => i !== index))
+        const current: string[] = form.getValues('keywords') || [];
+        form.setValue('keywords', current.filter((_, i: number) => i !== index));
     }
 
     return (

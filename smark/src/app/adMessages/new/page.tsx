@@ -39,7 +39,7 @@ export default function NewAdMessagePage() {
         endDate: new Date(),
       },
       type: [],
-      status:"Draft",
+      status:"draft",
       sendDate: undefined,
       attachments: [],
       content: {

@@ -12,8 +12,8 @@ export default function GlobalAlert() {
             title={type === 'error' ? 'Error' : 'Successful Operation'}
             description={message}
             confirmLabel="Accept"
-            onConfirm={clearAlert}
-            onOpenChange={clearAlert}
+            onConfirmAction={clearAlert}
+            onOpenChangeAction={clearAlert}
         />
     );
 }

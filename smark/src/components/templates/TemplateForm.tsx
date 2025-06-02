@@ -1,17 +1,17 @@
 'use client'
 
 import {UseFormReturn} from 'react-hook-form'
-import {ITemplate} from '@/types/Template'
 import {Form, FormField, FormItem, FormLabel, FormControl, FormMessage} from '@/components/ui/form'
 import {Input} from '@/components/ui/input'
 import {Textarea} from '@/components/ui/textarea'
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group'
 import {Button} from '@/components/ui/button'
 import PlaceholdersInput from "@/components/templates/PlaceholdersInputs";
+import {TemplateFormData} from "@/types/forms";
 
 interface TemplateFormProps {
-    form: UseFormReturn<ITemplate>
-    onSubmitAction: (data: ITemplate) => void
+    form: UseFormReturn<TemplateFormData>
+    onSubmitAction: (data: TemplateFormData) => void
     buttonText: string
 }
 

@@ -37,6 +37,7 @@ export default function MarketingCampaignsPage() {
             })
             const data = await response.json();
             setCampaigns(data.results as IMarketingCampaign[]);
+            console.log("Campaigns received:", data.results);
             setTotalPages(data.totalPages);
         } catch (error) {
             console.error('Failed to fetch campaigns:', error);
@@ -114,7 +115,7 @@ export default function MarketingCampaignsPage() {
                                 <PaginationControls
                                     currentPage={currentPage}
                                     totalPages={totalPages}
-                                    onPageChange={(page) => setCurrentPage(page)}
+                                    onPageChangeAction={(page) => setCurrentPage(page)}
                                 />
                             )}
                         </>

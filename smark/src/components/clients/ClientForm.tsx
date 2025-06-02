@@ -12,15 +12,16 @@ import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import PreferenceManager from "@/components/clients/PreferenceManager"
 import SubscriptionsSelector from "@/components/clients/SubscriptionsSelector"
+import {ClientFormData} from "@/types/forms";
 
 interface ClientFormProps {
-    form: UseFormReturn<IClient>
-    onSubmitAction: (data: IClient) => void
+    form: UseFormReturn<ClientFormData>
+    onSubmitAction: (data: ClientFormData) => void
     newPreferenceAction: string
-    setNewPreference: (value: string) => void
+    setNewPreferenceAction: (value: string) => void
 }
 
-export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreference }: ClientFormProps) {
+export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreferenceAction }: ClientFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
@@ -221,12 +222,12 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             return true
                         },
                     }}
-                    render={({ field, fieldState }) => (
+                    render={() => (
                         <PreferenceManager
                             fieldName="preferences"
                             control={form.control}
                             newPreference={newPreferenceAction}
-                            setNewPreferenceAction={setNewPreference}
+                            setNewPreferenceAction={setNewPreferenceAction}
                         />
                     )}
                 />

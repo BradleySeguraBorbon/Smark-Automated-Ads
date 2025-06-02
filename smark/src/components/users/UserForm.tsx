@@ -7,17 +7,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
-
-interface CreateUserFormData {
-    username: string;
-    password: string;
-    email: string;
-    role?: string;
-}
+import {UserFormData} from "@/types/forms";
 
 interface UserFormProps {
-    form: UseFormReturn<CreateUserFormData>;
-    onSubmitAction: (data: CreateUserFormData) => void;
+    form: UseFormReturn<UserFormData>;
+    onSubmitAction: (data: UserFormData) => void;
     userRole: string;
     isSubmitting: boolean;
 }

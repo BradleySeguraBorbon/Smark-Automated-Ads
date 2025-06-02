@@ -11,12 +11,11 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { IAdMessage } from '@/types/AdMessage';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Mail, MessageSquare } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { IMarketingCampaign, MarketingCampaignRef } from '@/types/MarketingCampaign';
-import {AdMessageFormData, FormMarketingCampaign} from '@/types/forms/AdMessageFormData';
+import {AdMessageFormData} from '@/types/forms';
 
 interface DetailsTabProps {
     form: ReturnType<typeof useFormContext<AdMessageFormData>>
@@ -66,15 +65,15 @@ export function DetailsTab({ form, campaigns, messageTypes, setMessageTypesActio
                     control={form.control}
                     name="marketingCampaign"
                     rules={{ required: 'Campaign is required' }}
-                    render={({ field }) => (
+                    render={() => (
                         <FormItem className="w-full">
                             <FormLabel>Marketing Campaign</FormLabel>
                             <Select
-                                value={form.watch('marketingCampaign')?._id}
+                                value={form.watch('marketingCampaign')?._id.toString()}
                                 onValueChange={(selectedId) => {
                                     const selected = campaigns.find((c) => c._id === selectedId);
                                     if (selected) {
-                                        form.setValue('marketingCampaign', selected as FormMarketingCampaign);
+                                        form.setValue('marketingCampaign', selected as MarketingCampaignRef);
 
                                         const start = new Date(selected.startDate);
                                         const end = new Date(selected.endDate);

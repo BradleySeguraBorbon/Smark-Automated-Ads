@@ -12,7 +12,7 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
 import Link from "next/link"
 import {useAuthStore} from "@/lib/store";
 import {decodeToken} from "@/lib/utils/decodeToken";
-import {ClientFormFields} from "@/types/forms/ClientForm";
+import {ClientFormData} from "@/types/forms";
 
 export default function EditClientPage() {
     const params = useParams()
@@ -25,9 +25,9 @@ export default function EditClientPage() {
     const token = useAuthStore((state) => state.token);
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
-    const form = useForm<ClientFormFields>({
+    const form = useForm<ClientFormData>({
         defaultValues: {
-            _id: id,
+            _id: String(id),
             firstName: "",
             lastName: "",
             email: "",
@@ -127,7 +127,7 @@ export default function EditClientPage() {
         init();
     }, [_hasHydrated, token, params.id, form])
 
-    async function onSubmit(data: ClientFormFields) {
+    async function onSubmit(data: ClientFormData) {
         try {
             const response = await fetch(`/api/clients/${data._id}/`, {
                 method: "PUT",

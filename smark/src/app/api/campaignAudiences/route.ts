@@ -55,10 +55,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'No audience found' }, { status: 404 });
         }
 
-        console.log(campaignAudience.audience)
-        const decryptedAudience = campaignAudience.audience.map(decryptClient);
-        console.log("Decrypt: ",decryptedAudience)
-        const fullAudience = decryptedAudience;
+        const fullAudience = campaignAudience.audience.map(decryptClient);
         const total = fullAudience.length;
         const paginatedAudience = fullAudience.slice(skip, skip + limit);
 

@@ -92,12 +92,14 @@ export default function EditAdMessagePage() {
       const formData: AdMessageFormData = {
         name: raw.name,
         type: raw.type,
-        status: String(raw.status),
+        status: raw.status ?? "draft",
         sendDate: raw.sendDate ? new Date(raw.sendDate) : new Date(),
         attachments: raw.attachments || [],
         marketingCampaign: {
-          _id: raw.marketingCampaign._id.toString(),
+          _id: raw.marketingCampaign._id,
           name: raw.marketingCampaign.name,
+          description: raw.marketingCampaign.description,
+          status: raw.marketingCampaign.status,
           startDate: raw.marketingCampaign.startDate,
           endDate: raw.marketingCampaign.endDate,
         },

@@ -9,10 +9,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
-import {ClientFormFields} from "@/types/forms/ClientForm";
+import {ClientFormData} from "@/types/forms";
 
 interface ClientInfoFieldsProps {
-    form: UseFormReturn<ClientFormFields>
+    form: UseFormReturn<ClientFormData>
 }
 
 export default function ClientInfoFields({ form }: ClientInfoFieldsProps) {

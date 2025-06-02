@@ -158,7 +158,7 @@ export default function ClientsPage() {
                         <PaginationControls
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChange={(page) => setCurrentPage(page)}
+                            onPageChangeAction={(page) => setCurrentPage(page)}
                         />
                     )}
                 </>
@@ -182,7 +182,7 @@ export default function ClientsPage() {
                 onConfirmAction={() => setShowErrorDialog(false)}
                 onOpenChangeAction={setShowErrorDialog}
             />
-            <ClientImportModal open={showImportModal} onClose={() => setShowImportModal(false)} />
+            <ClientImportModal open={showImportModal} onCloseAction={() => setShowImportModal(false)} />
         </div>
     )
 }

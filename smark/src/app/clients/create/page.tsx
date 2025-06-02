@@ -3,12 +3,12 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
-import { IClient } from "@/types/Client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import CustomAlertDialog from "@/components/CustomAlertDialog"
 import {useRef} from "react";
+import {ClientFormData} from "@/types/forms";
 
 export default function CreateClientPage() {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -19,7 +19,7 @@ export default function CreateClientPage() {
     const [errorOpen, setErrorOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const form = useForm<IClient>({
+    const form = useForm<ClientFormData>({
         defaultValues: {
             firstName: "",
             lastName: "",
@@ -38,7 +38,7 @@ export default function CreateClientPage() {
         },
     })
 
-    async function onSubmit(data: IClient) {
+    async function onSubmit(data: ClientFormData) {
         data.tags = []
 
         try {
@@ -83,7 +83,7 @@ export default function CreateClientPage() {
                             form={form}
                             onSubmitAction={onSubmit}
                             newPreferenceAction={newPreference}
-                            setNewPreference={setNewPreference}
+                            setNewPreferenceAction={setNewPreference}
                         />
                     </CardContent>
                 </Card>
