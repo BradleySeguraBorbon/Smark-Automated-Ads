@@ -10,19 +10,16 @@ import {
     DropdownMenuTrigger,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import {
-    useEffect,
-    useState,
-} from "react";
-import {useRouter} from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {Button} from "@/components/ui/button";
-import {cn} from "@/lib/utils";
-import {Moon, Sun, MoreHorizontal, LogOut} from "lucide-react";
-import {useTheme} from "next-themes";
-import {useAuthStore} from "@/lib/store";
-import {decodeToken} from "@/lib/utils/decodeToken";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Moon, Sun, MoreHorizontal, LogOut } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useAuthStore } from "@/lib/store";
+import { decodeToken } from "@/lib/utils/decodeToken";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import CustomAlertDialog from '@/components/CustomAlertDialog';
 import Cookies from 'js-cookie';
 
@@ -32,26 +29,26 @@ interface NavbarProps {
     currentPath: string;
 }
 
-export function Navbar({currentPath}: NavbarProps) {
-    const fixedRoute = {href: "/", label: "Dashboard"};
+export function Navbar({ currentPath }: NavbarProps) {
     const allRoutes = [
-        {href: "/marketingCampaigns", label: "Campaigns"},
-        {href: "/adMessages", label: "Ad-Messages"},
-        {href: "/clients", label: "Clients"},
-        {href: "/users", label: "Users"},
-        {href: "/tags", label: "Tags"},
-        {href: "/templates", label: "Templates"},
+        { href: "/marketingCampaigns", label: "Campaigns" },
+        { href: "/adMessages", label: "Ad-Messages" },
+        { href: "/clients", label: "Clients" },
+        { href: "/users", label: "Users" },
+        { href: "/tags", label: "Tags" },
+        { href: "/templates", label: "Templates" },
     ];
 
-    const publicClientRoute = {href: "/clients/create", label: "Participate"};
+    const publicClientRoute = { href: "/clients/create", label: "Participate" };
 
-    const {theme, setTheme} = useTheme();
+    const { theme, setTheme } = useTheme();
     const router = useRouter();
     const token = useAuthStore((state) => state.token);
     const clearToken = useAuthStore((state) => state.clearAuth);
     const hasHydrated = useAuthStore((state) => state._hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(allRoutes.length);
 
     useEffect(() => {
         if (!hasHydrated) return;
@@ -62,30 +59,47 @@ export function Navbar({currentPath}: NavbarProps) {
         decodeToken(token).then(setUserInfo);
     }, [token, hasHydrated]);
 
+    useEffect(() => {
+        const updateVisibleRoutes = () => {
+            const width = window.innerWidth - 275;
+            const routeWidth = 90;
+            const baseWidth = 600;
+            const available = width - baseWidth;
+            const maxRoutes = Math.floor(available / routeWidth);
+            setVisibleCount(Math.max(1, Math.min(allRoutes.length, maxRoutes)));
+        };
+
+        updateVisibleRoutes();
+        window.addEventListener("resize", updateVisibleRoutes);
+        return () => window.removeEventListener("resize", updateVisibleRoutes);
+    }, []);
+
     const filteredRoutes = allRoutes.filter(
         (route) => route.href !== "/users" || (userInfo && userInfo.role !== "employee")
     );
 
+    const visibleRoutes = filteredRoutes.slice(0, visibleCount);
+    const hiddenRoutes = filteredRoutes.slice(visibleCount);
+
     return (
-        <div
-            className="flex items-center justify-between w-full px-4 py-4 min-h-[96px] border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
+        <div className="flex items-center justify-between w-full px-4 py-4 min-h-[96px] border-b overflow-x-auto bg-blue-500 dark:bg-[#0a0a0a]">
             <Link href="/" className="flex items-center gap-2 flex-shrink-0 mr-4">
-                <img src="/smark.svg" alt="S" className="h-8 w-8"/>
+                <img src="/smark.svg" alt="S" className="h-8 w-8" />
                 <span className="text-lg font-bold whitespace-nowrap hidden sm:inline">
-                AutoSmark
-            </span>
+                    AutoSmark
+                </span>
             </Link>
 
             <div className="flex flex-wrap items-center gap-2 max-h-[5.5rem] overflow-hidden">
                 <NavigationMenu className="hidden lg:flex">
                     <NavigationMenuList className="gap-2">
                         {userInfo ? (
-                            [fixedRoute, ...filteredRoutes].map((route) => (
+                            visibleRoutes.map((route) => (
                                 <NavigationMenuItem key={route.href}>
                                     <Link href={route.href} legacyBehavior passHref>
                                         <NavigationMenuLink
                                             className={cn(
-                                                'px-3 py-2 text-sm font-medium rounded-md hover:bg-blue-600 dark:hover:bg-gray-800 whitespace-nowrap',
+                                                'px-5 py-2 text-sm font-medium rounded-md hover:bg-blue-600 dark:hover:bg-gray-800 whitespace-nowrap',
                                                 currentPath === route.href &&
                                                 '!bg-blue-800 !dark:bg-gray-700 !font-bold !text-white'
                                             )}
@@ -113,37 +127,28 @@ export function Navbar({currentPath}: NavbarProps) {
                     </NavigationMenuList>
                 </NavigationMenu>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="default" className="lg:hidden">
-                            Menu<MoreHorizontal className="h-5 w-5"/>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem disabled className="opacity-60">
-                            Menu
-                        </DropdownMenuItem>
-                        {userInfo ? (
-                            [fixedRoute, ...filteredRoutes].map((route) => (
+                {userInfo && hiddenRoutes.length > 0 && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="default">
+                                Más <MoreHorizontal className="h-5 w-5 ml-1" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {hiddenRoutes.map((route) => (
                                 <DropdownMenuItem key={route.href} onClick={() => router.push(route.href)}>
                                     {route.label}
                                 </DropdownMenuItem>
-                            ))
-                        ) : (
-                            <DropdownMenuItem onClick={() => router.push(publicClientRoute.href)}>
-                                {publicClientRoute.label}
-                            </DropdownMenuItem>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                 <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                    <Sun
-                        className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"/>
-                    <Moon
-                        className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
+                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
 
@@ -154,23 +159,22 @@ export function Navbar({currentPath}: NavbarProps) {
                                 {userInfo?.username ? getInitials(userInfo.username) : ""}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="font-medium text-sm text-foreground truncate max-w-[160px] hidden sm:inline">
-                        {userInfo.username} ({userInfo.role})
-                    </span>
+                        <div className="hidden sm:flex flex-col max-w-[160px]">
+                            <span className="font-medium text-sm text-foreground truncate">{userInfo.username}</span>
+                            <span className="text-xs text-muted-foreground truncate">{userInfo.role}</span>
+                        </div>
                         <Button
                             onClick={() => setLogoutDialogOpen(true)}
                             variant="outline"
                             size="icon"
                             className="text-red-500 hover:text-red-600"
                         >
-                            <LogOut className="h-5 w-5"/>
+                            <LogOut className="h-5 w-5" />
                             <span className="sr-only">Log out</span>
                         </Button>
                     </div>
                 ) : (
-                    <Button variant="outline" onClick={() => router.push("/auth/login")}>
-                        Sign In
-                    </Button>
+                    <Button variant="outline" onClick={() => router.push("/auth/login")}>Sign In</Button>
                 )}
             </div>
 
