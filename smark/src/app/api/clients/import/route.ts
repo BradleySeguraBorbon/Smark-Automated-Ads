@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
             clients: inserted,
         });
     } catch (error) {
-        console.error("Error en importación masiva:", error);
-        return NextResponse.json({ message: "Error al importar datos." }, { status: 500 });
+        console.error("Error on Massive Import:", error);
+        return NextResponse.json({ message: "Error importing data" }, { status: 500 });
     }
 }
