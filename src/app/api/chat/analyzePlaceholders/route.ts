@@ -15,7 +15,7 @@ export async function POST(req: Request) {
                     Authorization: `Bearer ${token}`,
                 }
             }),
-            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/templates/${templateId}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/templates/${templateId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
@@ -68,7 +68,7 @@ Do NOT include any explanations, text outside the JSON, or invalid formatting. T
 
         console.log("Prompt sent to AI:\n", prompt)
 
-        const chatRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`, {
+        const chatRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt }),

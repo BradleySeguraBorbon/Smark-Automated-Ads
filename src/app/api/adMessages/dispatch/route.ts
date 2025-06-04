@@ -4,28 +4,24 @@ import connectDB from '@/config/db';
 
 export async function GET(req: Request) {
     try {
-        const auth = req.headers.get('Authorization');
-        const expected = `Bearer ${process.env.CRON_SECRET}`;
+        const url = new URL(req.url);
+        const token = url.searchParams.get('token');
+        const expected = process.env.CRON_SECRET;
 
-        if (auth !== expected) {
+        if (token !== expected) {
             return new Response('Unauthorized', { status: 401 });
         }
         await connectDB();
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
 
         const messages = await AdMessages.find({
             status: 'programmed',
-            sendDate: today,
+            sendDate: { $lte: endOfToday }
         });
 
         for (const msg of messages) {
-            if (msg.sendDate < new Date()) {
-                msg.status = 'draft';
-                await msg.save();
-                continue;
-            }
             try {
                 await fetch(`${process.env.APP_URL}/api/email/sendAds`, {
                     method: 'POST',
