@@ -61,6 +61,7 @@ export default function TagCard({ tag, refreshAction, onSuccessDelete, currentUs
                                     size="icon"
                                 >
                                     <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Edit</span>
                                 </Button>
                             </Link>
                         )}
@@ -72,6 +73,7 @@ export default function TagCard({ tag, refreshAction, onSuccessDelete, currentUs
                                 onClick={() => setAlertOpen(true)}
                             >
                                 <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
                             </Button>
                         )}
                     </div>

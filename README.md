@@ -1,36 +1,280 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# AutoSmark - Intelligent Marketing Platform
 
-First, run the development server:
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Vercel](https://img.shields.io/badge/deploy-vercel-black)
+![Coverage](https://img.shields.io/badge/coverage-90%25-yellowgreen)
+![AI-Powered](https://img.shields.io/badge/AI-GPT--4o-critical)
+![Telegram](https://img.shields.io/badge/Telegram-integrated-blue)
+![Email](https://img.shields.io/badge/Email-Supported-orange)
+
+---
+
+AutoSmark is an automated marketing platform that helps manage personalized campaigns with the assistance of artificial intelligence. It is designed for businesses aiming to maximize their reach through smart segmentation, scheduled announcements, and multi-channel communication such as **email** and **Telegram**.
+
+---
+
+## Installation
+
+### 1. Requirements
+- Node.js v18+
+- MongoDB Atlas (or local)
+- Vercel account (for deployment and cron jobs)
+- OpenAI or OpenRouter account (to use GPT-4o or compatible model)
+- Telegram bot and token available
+
+### 2. Clone the repository
+
+```bash
+git clone https://github.com/BradleySeguraBorbon/Smark-Automated-Ads.git
+cd AutoSmark
+```
+
+### 3. Environment setup
+
+Create a `.env` file based on the example:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your secrets:
+
+```env
+MONGODB_URI=mongodb+srv://...
+TELEGRAM_BOT_USERNAME=...
+TELEGRAM_BOT_TOKEN=...
+EMAIL_USER=...
+EMAIL_PASS=...
+NEXT_PUBLIC_API_BASE_URL=https://your-domain.vercel.app
+CRON_SECRET=...
+DEEPSEEK_OPENROUTER_API_KEY=...
+CORS_ALLOWED_ORIGIN=...
+JWT_SECRET...
+APP_URL=...
+```
+
+### 4. Install dependencies
+
+```bash
+npm install --legacy-peer-deps
+```
+
+### 5. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 👥 Client Management
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Access `/clients` to list, create, edit, or delete clients.
+- Each client includes encrypted information such as name, email, phone, preferences, subscriptions, preferred contact method, and Telegram chat ID (if available).
+- Preferences are managed via the `PreferenceManager` component.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🧠 Integrated Artificial Intelligence
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### ✅ Automatic tag assignment
+When a client is imported or edited, AI analyzes the client preferences and assigns relevant tags.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🪄 Placeholder auto-fill (email and Telegram)
+In the `AdMessages` creation/edit form, you can use the “Generate Placeholders” button to automatically complete placeholders using client name, campaign, and message type.
 
-## Deploy on Vercel
+### 🧠 MCP - AI-Powered Audience Segmentation
+In `/marketingCampaigns/aiHelper`, write prompts like:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> "Select females aged 25 to 35 who prefer Telegram and live in Costa Rica"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+AI interprets and uses the **Model Context Protocol (MCP)** to create a valid segmentation using:
+- `birthDate`
+- `gender`
+- `country`
+- `preferences`
+- `subscriptions`
+- `preferredContactMethod`
+- `languages`
+
+---
+
+## 📢 Marketing Campaign Management
+
+- Access `/marketingCampaigns` to create and manage campaigns.
+  - Regular ones use tags to define their audience.
+  - AI-powered campaigns rely on MCP segmentation and don't require tags.
+
+Each campaign includes:
+- Name
+- Description
+- Target audience
+- - Tags
+- Associated `AdMessages`
+
+---
+
+## ✉️ AdMessages Management
+
+- Access `/adMessages` to create and manage messages.
+- Messages can include:
+  - **Email content** (rich HTML)
+  - **Telegram content** (formatted Markdown)
+- Messages belong to a campaign and can include AI-generated placeholders.
+- Live previews are available before sending.
+
+---
+
+## ⏰ Automated Sending with Cron Jobs
+
+AutoSmark uses Vercel Cron Jobs to automatically send scheduled messages each day.
+
+### How it works:
+- Each `AdMessage` has a `sendDate`.
+- If the current date matches the `sendDate`, the message is sent.
+- The cron job hits the `/api/adMessages/dispatch` endpoint.
+
+### Configure on Vercel:
+1. Go to **Vercel > Project Settings > Cron Jobs**
+2. Add:
+   ```
+   Path: /api/adMessages/dispatch
+   Schedule: 0 4 * * * (every day at 4 AM)
+   ```
+
+---
+
+## 💬 Telegram & Email Integration
+
+### Telegram
+- Connects through a bot using `TELEGRAM_BOT_TOKEN`.
+- Clients receive their `chatId` by sending `/start` to the bot.
+- Messages are sent directly if the client is confirmed.
+
+### Email
+- Email Integration (Using Nodemailer)
+  Emails are sent using nodemailer via a Gmail account:
+
+```ts
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+```
+Bulk sending is throttled using p-limit to avoid Gmail rate limits:
+```ts
+const limit = pLimit(20);
+const tasks = recipients.map(email => limit(() => sendEmail(email, subject, html)));
+await Promise.all(tasks);
+```
+---
+
+## 📈 Visualizations
+
+Includes charts using Chart.js to display:
+- Client age distribution
+- Preferred contact methods
+- Audience segments generated by MCP
+
+Performance metrics for campaigns and messages.
+- Email Successful Sent Rate
+- Telegram Successful Sent Rate
+- General successful sent rate
+- Messages sent over time
+---
+
+## 🧪 Testing and Development
+
+To run locally:
+```bash
+npm run dev
+```
+
+To manually trigger the cron job in development is running manually the cron job on vercel:
+
+## 📂 Project Structure
+
+```
+src/
+│
+├── app/
+│   ├── clients/
+│   ├── adMessages/
+│   ├── marketingCampaigns/
+│   ├── api/
+│   │   └── adMessages/dispatch/route.ts
+│
+├── components/
+│   ├── clients/
+│   ├── marketingCampaigns/
+│   └── adMessages/
+│
+├── lib/
+│   ├── mcp/
+│   ├── ai/
+│   ├── telegram/
+│   └── email/
+```
+
+---
+
+## 🛡️ Security & Privacy
+
+- Client data is encrypted in the database.
+- Input is sanitized using functions like `deepSanitize`, `validateEmail`, etc.
+- Only authenticated users can access sensitive operations.
+- JWT tokens are used for secure API access.
+- CORS is configured to allow only specified origins.
+- Sensitive environment variables are stored in `.env` and not exposed in the codebase.
+
+---
+
+## 🧰 Tools & Documentation
+
+### 📜 Swagger API Docs
+- The REST API is documented using **Swagger**.
+- You can access the interactive API documentation at `/api-docs`.
+
+### 📚 Docusaurus
+- The project includes a Docusaurus-powered documentation site.
+- Access internal guides and developer documentation by navigating to `/docs`.
+
+### 🔦 Lighthouse Audits
+- The UI and performance are continuously tested with **Google Lighthouse** to ensure accessibility, responsiveness, and SEO compliance.
+
+---
+
+## 🧠 MCP (Model Context Protocol)
+
+AutoSmark integrates the **Model Context Protocol (MCP)** to enable natural language-driven audience segmentation.
+
+### Key Features:
+- Interprets prompts like “Find Spanish-speaking users aged 30+ who prefer Telegram”.
+- Delegates logic to a local MCP server handler implemented using `@modelcontextprotocol/sdk`.
+- Includes:
+  - `src/lib/mcp/mcp.ts` – strategy logic
+  - `src/app/[transport]/route.ts` – handler exposed over serverless route
+  - `src/lib/ai/ai.ts` – MCP client for invoking tools
+  - `src/app/marketingCampaigns/aiHelper/page.tsx` – AI prompt interface
+
+### AI Tools Available:
+- `segmentAudience` – used by the LLM to generate filtered audiences based on client metadata.
+
+> This design allows a powerful, real-time AI orchestration flow directly within the Next.js app, without requiring a separate MCP server.
+
+---
+
+## 📬 Support
+
+For questions or suggestions, open an Issue or contact the author.
+
+---
+
+## 📝 License
+
+MIT License – free to use under the provided terms.

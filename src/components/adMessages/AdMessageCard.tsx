@@ -45,6 +45,7 @@ export function AdMessageCard({ adMessage, onDelete, userRole }: AdMessageCardPr
                         </Badge>
                         <Button variant="secondary" className="bg-teal-600 hover:bg-teal-800" size="icon" onClick={() => setAlertOpen(true)}>
                             <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
                         </Button>
                     </div>
                 </CardHeader>

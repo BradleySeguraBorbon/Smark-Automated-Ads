@@ -66,8 +66,6 @@ Return ONLY a valid JSON object that maps each placeholder to a suggested value,
 Do NOT include any explanations, text outside the JSON, or invalid formatting. The response must be concise, appealing and directly usable in the given template.
         `.trim()
 
-        console.log("Prompt sent to AI:\n", prompt)
-
         const chatRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
