@@ -1,7 +1,0 @@
-{
-  "crons": [{
-    "path": "/api/adMessages/dispatch",
-    "schedule": "0 4 * * *",
-    "enabled": true
-  }]
-}

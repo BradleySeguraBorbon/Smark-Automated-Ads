@@ -30,15 +30,15 @@ function convertResponseIntoArray(response: string): string[] {
         if (Array.isArray(parsed.tagIds)) {
             const validIds = parsed.tagIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id));
             if (validIds.length === 0) {
-                console.warn('No valid ObjectIds found in AI response:', response);
+                console.warn('No valid ObjectIds found in ai response:', response);
             }
             return validIds;
         } else {
-            console.warn('AI response does not contain tagIds array:', response);
+            console.warn('ai response does not contain tagIds array:', response);
             return [];
         }
     } catch (err) {
-        console.warn('Failed to parse AI response as JSON:', response);
+        console.warn('Failed to parse ai response as JSON:', response);
         return [];
     }
 }
@@ -89,7 +89,7 @@ Instructions:
 
     if (!data.ok) {
         console.log("Data: ", data)
-        throw new Error('Error fetching tags from AI');
+        throw new Error('Error fetching tags from ai');
     }
 
     return convertResponseIntoArray(data.response);

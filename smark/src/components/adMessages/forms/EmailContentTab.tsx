@@ -117,7 +117,7 @@ export function EmailContentTab({
             setAlert({
                 open: true,
                 type: 'error',
-                title: 'AI Error',
+                title: 'ai Error',
                 description: err.message,
             })
         } finally {

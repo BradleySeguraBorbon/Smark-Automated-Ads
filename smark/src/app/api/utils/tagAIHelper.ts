@@ -11,7 +11,7 @@ function convertResponseIntoArray(response: string) {
     const ids = cleaned.split(',').map(id => id.trim());
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
     if (validIds.length === 0) {
-        console.warn('No valid ObjectIds found in AI response:', response);
+        console.warn('No valid ObjectIds found in ai response:', response);
     }
     return validIds;
 }
@@ -64,7 +64,7 @@ Tags disponibles (array de objetos):
 
     if (!data.ok) {
         console.log("Data: ", data)
-        throw new Error('Error fetching tags from AI');
+        throw new Error('Error fetching tags from ai');
     }
 
     return convertResponseIntoArray(data.response);
