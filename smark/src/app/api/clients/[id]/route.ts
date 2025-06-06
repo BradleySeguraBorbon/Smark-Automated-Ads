@@ -3,7 +3,7 @@ import connectDB from '@/config/db';
 import mongoose from 'mongoose';
 import { Clients, AdMessages, Tags } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
-import {decryptClient} from "@/lib/clientEncryption";
+import {decryptClient, encryptClient} from "@/lib/clientEncryption";
 
 function isValidObjectId(id: string) {
     return mongoose.Types.ObjectId.isValid(id);
@@ -125,9 +125,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             }
         }
 
+        const encryptedBody = encryptClient(body);
+
         const updatedClient = await Clients.findByIdAndUpdate(
             id,
-            body,
+            encryptedBody,
             { new: true, runValidators: true }
         )
             .populate('tags', '_id name')

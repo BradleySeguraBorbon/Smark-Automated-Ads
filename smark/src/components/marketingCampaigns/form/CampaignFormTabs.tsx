@@ -137,7 +137,7 @@ export function CampaignFormTabs({
             <AudiencePreviewTable
                 clients={audience}
                 isAiGenerated={form.watch('isAiGenerated')}
-                campaignId={form.watch('_id')}
+                campaignId={String(form.watch('_id'))}
             />
           ) : (
             <div className="container mx-auto py-10">
