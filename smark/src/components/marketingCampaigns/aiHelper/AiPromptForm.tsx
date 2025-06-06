@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { MCPStrategyResponse } from '@/types/MCP';
 import { Loader2 } from 'lucide-react';
+import { runMcpAi } from '@/lib/ai/ai';
 import { useAuthStore } from '@/lib/store';
 
 interface AiPromptFormProps {
@@ -33,24 +34,37 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/mcp/aiStrategy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ prompt }),
-            });
+            const responseStream = await runMcpAi({ prompt });
+            const reader = responseStream.body?.getReader();
+            if (!reader) throw new Error('No readable stream from MCP AI');
 
-            const data = await res.json();
-            console.log('MCP IA Response:', data);
+            const decoder = new TextDecoder();
+            let fullText = '';
 
-            if (!res.ok || !data.response?.strategy || data.response?.strategy?.coverage === undefined) {
-                throw new Error(data.response?.error || data.error || 'Failed to generate strategy');
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                fullText += decoder.decode(value, { stream: true });
             }
 
-            onStrategyLoaded(data.response.strategy);
+            const jsonMatch = fullText.match(/```json\s*([\s\S]*?)```/);
+            const jsonString = jsonMatch ? jsonMatch[1].trim() : fullText.trim();
+
+            const parsed = JSON.parse(jsonString);
+
+            if (
+                !parsed ||
+                typeof parsed !== 'object' ||
+                !Array.isArray(parsed.segmentGroups) ||
+                typeof parsed.coverage !== 'number' ||
+                typeof parsed.totalClients !== 'number'
+            ) {
+                throw new Error('Invalid response format from AI');
+            }
+
+            onStrategyLoaded(parsed);
         } catch (err: any) {
+            console.error('MCP AI error:', err);
             setError(err.message || 'Unexpected error');
         } finally {
             setLoading(false);
