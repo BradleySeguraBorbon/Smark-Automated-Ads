@@ -22,6 +22,7 @@ export function validateRequiredFields(obj: Record<string, any>, required: strin
         let current = obj;
         for (const key of keys) {
             if (current == null || typeof current !== 'object' || !(key in current)) {
+                console.log("Required Field: ", key)
                 return true;
             }
             current = current[key];

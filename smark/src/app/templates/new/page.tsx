@@ -3,7 +3,6 @@
 import {useState, useEffect} from 'react'
 import {useForm} from 'react-hook-form'
 import {useRouter} from 'next/navigation'
-import {ITemplate} from '@/types/Template'
 import {useAuthStore} from '@/lib/store'
 import BreadcrumbHeader from '@/components/BreadcrumbHeader'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
@@ -12,6 +11,7 @@ import TemplateForm from '@/components/templates/TemplateForm'
 import DOMPurify from 'dompurify'
 import {isValidHtml, isValidMarkdown} from '@/lib/utils/validateHtml'
 import MarkdownIt from 'markdown-it'
+import {TemplateFormData} from "@/types/forms";
 
 export default function CreateTemplatePage() {
     const router = useRouter()
@@ -23,7 +23,7 @@ export default function CreateTemplatePage() {
     const [errorOpen, setErrorOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const form = useForm<ITemplate>({
+    const form = useForm<TemplateFormData>({
         defaultValues: {
             name: '',
             type: 'email',
@@ -41,7 +41,7 @@ export default function CreateTemplatePage() {
         setMounted(true)
     }, [_hasHydrated, token])
 
-    const onSubmit = async (data: ITemplate) => {
+    const onSubmit = async (data: TemplateFormData) => {
         if (!isValidHtml(data.html) && !isValidMarkdown(data.html)) {
             setErrorMessage("The content must be valid HTML or Markdown. Please check your input.");
             setErrorOpen(true);
@@ -81,8 +81,8 @@ export default function CreateTemplatePage() {
     }
 
     const md = new MarkdownIt()
-    const rawContent = form.watch("html") || ""
-    const isHtml = isValidHtml(rawContent)
+    const rawContent = (form.watch("html") as string) || ""
+    const isHtml = rawContent && isValidHtml(rawContent)
     const renderedHtml = isHtml
         ? rawContent
         : md.render(rawContent)
@@ -95,7 +95,7 @@ export default function CreateTemplatePage() {
         ],
     })
     return (
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 lg:px-36 lx:px-44 md:px-28 sm:px-20 px-8 transition-all duration-300 ease-in-out">
             <BreadcrumbHeader backHref="/templates" title="Create New Template"/>
 
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 mt-6">

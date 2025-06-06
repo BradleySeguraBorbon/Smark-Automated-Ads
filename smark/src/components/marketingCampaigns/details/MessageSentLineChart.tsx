@@ -31,7 +31,7 @@ export default function MessageSentLineChart({ campaignId }: MessageSentLineChar
 
             const sorted = Object.entries(grouped)
                 .sort((a, b) => a[0].localeCompare(b[0]))
-                .map(([date, count]) => ({ date, count }))
+                .map(([date, count]) => ({ date, count: count as number }))
 
             setData(sorted)
         }

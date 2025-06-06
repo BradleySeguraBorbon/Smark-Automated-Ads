@@ -69,7 +69,6 @@ export const useAdMessageStore = create<AdMessageStore>()(
       name: 'ad-message-storage',
       onRehydrateStorage: () => (state, error) => {
         if (!error) {
-          console.log('✅ Zustand hydration complete');
           useMarketingCampaignStore.setState({ hasHydrated: true });
         }
       }
@@ -138,7 +137,6 @@ export const useMarketingCampaignStore = create<MarketingCampaignStore>()(
       }),
       onRehydrateStorage: () => (state, error) => {
         if (!error) {
-          console.log('✅ Zustand hydration complete');
           useMarketingCampaignStore.setState({ hasHydrated: true });
         }
       }
@@ -176,7 +174,6 @@ export const useTagStore = create<TagStore>()(
       name: 'tag-storage',
       onRehydrateStorage: () => (state, error) => {
         if (!error) {
-          console.log('✅ Tags store hydration complete');
           useTagStore.setState({ hasHydrated: true });
         }
       }
@@ -265,7 +262,6 @@ export const useUserListStore = create<UserListStore>()(
       name: 'user-list-storage',
       onRehydrateStorage: () => (state, error) => {
         if (!error) {
-          console.log('✅ UsersList store hydration complete');
           useUserListStore.setState({ hasHydrated: true });
         }
       }
@@ -309,7 +305,6 @@ export const useAuthStore = create<AuthStore>()(
       name: 'auth-storage',
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
-        //console.log('✅ Hydration complete in AuthStore, state:', state);
         state?.setHasHydrated(true);
       },
     }

@@ -1,4 +1,4 @@
-import { sendEmail } from "@/app/api/email/route";
+import { sendEmail } from "@/lib/utils/mailSender";
 
 export async function sendTelegramInvite(clientEmail: string, tokenKey: string) {
     const botUsername = process.env.TELEGRAM_BOT_USERNAME;

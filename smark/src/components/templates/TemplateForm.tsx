@@ -1,18 +1,18 @@
 'use client'
 
 import {UseFormReturn} from 'react-hook-form'
-import {ITemplate} from '@/types/Template'
 import {Form, FormField, FormItem, FormLabel, FormControl, FormMessage} from '@/components/ui/form'
 import {Input} from '@/components/ui/input'
 import {Textarea} from '@/components/ui/textarea'
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group'
 import {Button} from '@/components/ui/button'
 import PlaceholdersInput from "@/components/templates/PlaceholdersInputs";
+import {TemplateFormData} from "@/types/forms";
 
 interface TemplateFormProps {
-    form: UseFormReturn<ITemplate>
-    onSubmitAction: (data: ITemplate) => void
-    buttonText: boolean
+    form: UseFormReturn<TemplateFormData>
+    onSubmitAction: (data: TemplateFormData) => void
+    buttonText: string
 }
 
 export default function TemplateForm({form, onSubmitAction, buttonText}: TemplateFormProps) {
@@ -91,7 +91,7 @@ export default function TemplateForm({form, onSubmitAction, buttonText}: Templat
                 />
 
                 <div className="flex justify-end">
-                    <Button variant="secondary" className="bg-purple-500 hover:bg-purple-800" type="submit">{buttonText}</Button>
+                    <Button variant="secondary" className="bg-purple-700 hover:bg-purple-900" type="submit">{buttonText}</Button>
                 </div>
             </form>
         </Form>

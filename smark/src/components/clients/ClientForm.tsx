@@ -12,15 +12,25 @@ import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import PreferenceManager from "@/components/clients/PreferenceManager"
 import SubscriptionsSelector from "@/components/clients/SubscriptionsSelector"
+import {ClientFormData} from "@/types/forms";
+import { CLIENT_LANGUAGES } from "@/types/ClientLanguages"
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem
+} from "@/components/ui/select";
+import MultiSelectField from "@/components/MultiSelectField";
 
 interface ClientFormProps {
-    form: UseFormReturn<IClient>
-    onSubmitAction: (data: IClient) => void
+    form: UseFormReturn<ClientFormData>
+    onSubmitAction: (data: ClientFormData) => void
     newPreferenceAction: string
-    setNewPreference: (value: string) => void
+    setNewPreferenceAction: (value: string) => void
 }
 
-export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreference }: ClientFormProps) {
+export default function ClientForm({ form, onSubmitAction, newPreferenceAction, setNewPreferenceAction }: ClientFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitAction)} className="space-y-6">
@@ -92,7 +102,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                 message: "Invalid phone number format",
                             },
                         }}
-                        render={({ field }: ControllerRenderProps<IClient, 'phone'>) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Phone</FormLabel>
                                 <FormControl>
@@ -103,7 +113,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         )}
                     />
 
-                    <FormField
+                    {/*<FormField
                         control={form.control}
                         name="telegramChatId"
                         rules={{
@@ -124,7 +134,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    />*/}
 
                     <FormField
                         control={form.control}
@@ -134,9 +144,9 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             validate: (value: Date) =>
                                 value <= new Date() || "Birth date cannot be in the future",
                         }}
-                        render={({ field }: ControllerRenderProps<IClient, 'birthDate'>) => (
+                        render={({field}) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>Date of Birth</FormLabel>
+                                <FormLabel>Birth Date</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -162,6 +172,8 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                                                 !date || date > new Date() || date < new Date("1900-01-01")
                                             }
                                             initialFocus
+                                            captionLayout="dropdown"
+                                            defaultMonth={new Date(2005, 1)}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -169,6 +181,59 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             </FormItem>
                         )}
                     />
+
+                    <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Costa Rica" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Gender</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select gender" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="male">Male</SelectItem>
+                                        <SelectItem value="female">Female</SelectItem>
+                                        <SelectItem value="non-binary">Non-binary</SelectItem>
+                                        <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="languages"
+                        render={({ field }) => (
+                            <MultiSelectField
+                                field={field}
+                                label="Languages"
+                                options={CLIENT_LANGUAGES}
+                                placeholder="Select languages"
+                                capitalizeOptions={false}
+                            />
+                        )}
+                    />
+
                 </div>
 
                 <FormField
@@ -179,7 +244,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                         validate: (value: string) =>
                             ["email", "telegram"].includes(value) || "Invalid contact method",
                     }}
-                    render={({ field }: ControllerRenderProps<IClient, 'preferredContactMethod'>) => (
+                    render={({field}) => (
                         <FormItem className="space-y-3">
                             <FormLabel>Preferred Contact Method</FormLabel>
                             <FormControl>
@@ -219,14 +284,12 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                             return true
                         },
                     }}
-                    render={({ field, fieldState }) => (
+                    render={() => (
                         <PreferenceManager
                             fieldName="preferences"
                             control={form.control}
                             newPreference={newPreferenceAction}
-                            setNewPreferenceAction={setNewPreference}
-                            field={field}
-                            error={fieldState.error?.message}
+                            setNewPreferenceAction={setNewPreferenceAction}
                         />
                     )}
                 />
@@ -234,7 +297,7 @@ export default function ClientForm({ form, onSubmitAction, newPreferenceAction, 
                 <SubscriptionsSelector control={form.control} />
 
                 <div className="flex justify-end">
-                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Create Client</Button>
+                    <Button type="submit" className="bg-purple-600 hover:bg-purple-800" variant="secondary">Register</Button>
                 </div>
             </form>
         </Form>

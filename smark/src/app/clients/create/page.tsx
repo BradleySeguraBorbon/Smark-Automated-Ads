@@ -3,12 +3,12 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
-import { IClient } from "@/types/Client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import CustomAlertDialog from "@/components/CustomAlertDialog"
 import {useRef} from "react";
+import {ClientFormData} from "@/types/forms";
 
 export default function CreateClientPage() {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -19,22 +19,26 @@ export default function CreateClientPage() {
     const [errorOpen, setErrorOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-    const form = useForm<IClient>({
+    const form = useForm<ClientFormData>({
         defaultValues: {
             firstName: "",
             lastName: "",
             email: "",
             phone: "",
-            telegramChatId: "",
+            telegram: {
+                chatId: "",
+                tokenKey: "",
+                isConfirmed: false
+            },
             preferredContactMethod: "email",
-            birthDate: new Date(),
+            birthDate: new Date(2005, 1,1),
             preferences: [],
             tags: [],
             subscriptions: [],
         },
     })
 
-    async function onSubmit(data: IClient) {
+    async function onSubmit(data: ClientFormData) {
         data.tags = []
 
         try {
@@ -68,7 +72,7 @@ export default function CreateClientPage() {
         <div className="container mx-auto py-2 mb-4">
             <div className="lg:max-w-3xl mx-auto px-4 mt-4">
                 <div className="mb-4">
-                    <BreadcrumbHeader backHref="/clients" title="Create New Client"/>
+                    <BreadcrumbHeader backHref="/clients" title="Register"/>
                 </div>
                 <Card>
                     <CardHeader>
@@ -79,7 +83,7 @@ export default function CreateClientPage() {
                             form={form}
                             onSubmitAction={onSubmit}
                             newPreferenceAction={newPreference}
-                            setNewPreference={setNewPreference}
+                            setNewPreferenceAction={setNewPreference}
                         />
                     </CardContent>
                 </Card>
@@ -88,8 +92,8 @@ export default function CreateClientPage() {
             <CustomAlertDialog
                 open={successOpen}
                 type="success"
-                title="¡Client created successfully!"
-                description="The new client has been added to the database."
+                title="¡You have been register successfully!"
+                description="Please Check your email, we have sent you an email."
                 confirmLabel="Accept"
                 onConfirmAction={() => {
                     setSuccessOpen(false)

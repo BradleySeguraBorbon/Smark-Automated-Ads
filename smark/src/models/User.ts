@@ -1,4 +1,4 @@
-import mongoose, {Schema, Document, Types, Model} from "mongoose";
+import mongoose, {Schema, Model} from "mongoose";
 import {IUser} from "@/types/User";
 
 const userSchema = new Schema<IUser>(

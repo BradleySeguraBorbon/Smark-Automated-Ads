@@ -20,6 +20,10 @@ interface CampaignFormTabsProps {
   allTags: ITag[];
   allUsers: IUser[];
   form: ReturnType<typeof useForm<MarketingCampaignFormData>>;
+  campaignId?: string;
+  isAiGenerated?: boolean;
+  aiCriterion?: string;
+  aiValue?: string;
 }
 
 export function CampaignFormTabs({
@@ -28,6 +32,9 @@ export function CampaignFormTabs({
   allTags,
   allUsers,
   form,
+  isAiGenerated = false,
+  aiCriterion,
+  aiValue
 }: CampaignFormTabsProps) {
   const [audience, setAudience] = useState<ClientRef[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,41 +44,75 @@ export function CampaignFormTabs({
   const formData = form.watch();
 
   useEffect(() => {
-    if (activeTab === 'audience') {
-      const fetchAudience = async () => {
-        try {
-          setIsLoading(true);
-          if (formData.tags.length > 0) {
-            const tagQueryParams = formData.tags
+    const fetchAudience = async () => {
+      try {
+        setIsLoading(true);
+
+        if (isAiGenerated && aiCriterion && aiValue) {
+          const mcpRes = await fetch('/api/mcp/strategy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              filters: [{ field: aiCriterion, match: aiValue }],
+            }),
+          });
+          const mcpData = await mcpRes.json();
+
+          const ids = mcpData.strategy?.selectedClients || [];
+
+          const fullClientRes = await fetch('/api/clients/bulk', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ ids }),
+          });
+          const fullClientData = await fullClientRes.json();
+          setAudience(fullClientData.results || []);
+        }
+
+        if (!formData.isAiGenerated && formData.tags.length > 0) {
+          const tagQueryParams = formData.tags
               .map((tag) => `tagIds[]=${tag._id}`)
               .join('&');
 
-            const res = await fetch(`/api/clients?${tagQueryParams}&limit=10&page=1`, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-              },
-            });
-            const data = await res.json();
-            if (data.results) {
-              setAudience(data.results as ClientRef[]);
-            } else {
-              setAudience([]);
-            }
-          }
-        } catch (err) {
-          console.error('Failed to fetch audience:', err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+          const res = await fetch(`/api/clients?${tagQueryParams}&limit=10&page=1`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
+          const data = await res.json();
+          setAudience(data.results || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch audience:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (activeTab === 'audience') {
       fetchAudience();
     }
-  }, [activeTab, formData.tags, formData._id, mode]);
+  }, [
+    activeTab,
+    formData.tags,
+    formData._id,
+    mode,
+    isAiGenerated,
+    aiCriterion,
+    aiValue
+  ]);
+
 
   return (
     <form onSubmit={form.handleSubmit(onSubmitAction)}>
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'details' | 'connections' | 'audience')} className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-6 rounded-lg border">
           <TabsTrigger value="details">Campaign Details</TabsTrigger>
           <TabsTrigger value="connections">Connections</TabsTrigger>
@@ -93,7 +134,11 @@ export function CampaignFormTabs({
               <p>Loading audience preview...</p>
             </div>
           ) : audience ? (
-            <AudiencePreviewTable clients={audience} />
+            <AudiencePreviewTable
+                clients={audience}
+                isAiGenerated={form.watch('isAiGenerated')}
+                campaignId={String(form.watch('_id'))}
+            />
           ) : (
             <div className="container mx-auto py-10">
               <LoadingSpinner />

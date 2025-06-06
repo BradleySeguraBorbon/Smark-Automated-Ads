@@ -1,4 +1,4 @@
-import { Types, Document } from "mongoose";
+import { Document } from "mongoose";
 import { MarketingCampaignRef } from "./MarketingCampaign";
 import { ClientRef } from "./Client";
 

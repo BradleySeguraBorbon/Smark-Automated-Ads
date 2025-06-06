@@ -17,24 +17,51 @@ export interface ClientRef {
     birthDate: Date;
 }
 
-export interface IClient extends Document {
+export interface IClientRaw extends Document {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
     preferredContactMethod: string;
     subscriptions: string[];
-    birthDate: Date;
+    birthDate: string;
     preferences: string[];
+    gender?: 'male' | 'female' | 'non-binary' | 'prefer_not_to_say';
+    country?: string;
+    languages?: string[];
     tags: TagRef[];
     adInteractions: AdInteractions[];
     tagsPending: boolean;
-    telegram: {
+    telegram?: {
         tokenKey: string;
-        chatId: string;
+        chatId?: string;
         isConfirmed: boolean;
     };
     createdAt?: Date;
     updatedAt?: Date;
 }
 
+export interface IClient {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    preferredContactMethod: "email" | "telegram";
+    subscriptions: string[];
+    birthDate: Date;
+    preferences: string[];
+    gender?: 'male' | 'female' | 'non-binary' | 'prefer_not_to_say';
+    country?: string;
+    languages?: string[];
+    tags: TagRef[];
+    adInteractions: AdInteractions[];
+    tagsPending: boolean;
+    telegram?: {
+        tokenKey: string;
+        chatId?: string;
+        isConfirmed: boolean;
+    };
+    createdAt?: Date;
+    updatedAt?: Date;
+}

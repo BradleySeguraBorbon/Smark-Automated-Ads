@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { UseFormReturn } from 'react-hook-form'
 import {
     Form,
     FormControl,
@@ -13,9 +13,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Trash2, PlusCircle } from 'lucide-react'
+import {TagFormData} from "@/types/forms";
 
 interface TagFormProps {
-    form: ReturnType<typeof useFormContext>
+    form: UseFormReturn<TagFormData>
     onSubmitAction: (data: any) => void
 }
 
@@ -33,8 +34,8 @@ export default function TagForm({ form, onSubmitAction }: TagFormProps) {
     }
 
     const removeKeyword = (index: number) => {
-        const current = form.getValues('keywords') || []
-        form.setValue('keywords', current.filter((_, i) => i !== index))
+        const current: string[] = form.getValues('keywords') || [];
+        form.setValue('keywords', current.filter((_, i: number) => i !== index));
     }
 
     return (

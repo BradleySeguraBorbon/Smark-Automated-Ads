@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/lib/store'
 import { decodeToken } from '@/lib/utils/decodeToken'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useAdMessageStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
-import { PlusCircle, Filter } from 'lucide-react'
+import { PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { IAdMessage } from '@/types/AdMessage'
 import PaginationControls from '@/components/PaginationControls'
@@ -101,14 +101,14 @@ export default function AdMessagesPage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 lg:px-50 md:px-24">
+        <div className="container mx-auto py-8 lg:px-44 md:px-20 px-10 transition-all duration-300 ease-in-out">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h1 className="text-3xl font-bold">Ad Messages</h1>
               <p className="text-muted-foreground">Manage your email and telegram messages</p>
             </div>
             <div className="flex gap-4">
-              <Button className="bg-purple-500 hover:bg-purple-800 text-white" asChild>
+              <Button className="bg-purple-700 hover:bg-purple-900 text-white" asChild>
                 {userInfo && userInfo?.role !== 'employee' && (
                   <Link href="/adMessages/new">
                     <PlusCircle className="h-4 w-4 mr-2" />
@@ -138,7 +138,7 @@ export default function AdMessagesPage() {
                 <PaginationControls
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={(page) => setCurrentPage(page)}
+                  onPageChangeAction={(page) => setCurrentPage(page)}
                 />
               )}
             </>

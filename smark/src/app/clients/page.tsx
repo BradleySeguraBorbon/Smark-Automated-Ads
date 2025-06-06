@@ -44,7 +44,6 @@ export default function ClientsPage() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log("Token current: ", token)
 
             const result = await response.json()
 
@@ -57,7 +56,6 @@ export default function ClientsPage() {
             setFetchedClients(result.results)
             setTotalPages(result.totalPages)
             setApiError(null)
-            console.log('Fetched clients:', result.results)
         } catch (error) {
             console.error('Fetch error:', error)
             setApiError('Unexpected error occurred.')
@@ -123,7 +121,7 @@ export default function ClientsPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto mt-8">
+        <div className="container mx-auto mt-8 px-10 transition-all duration-300 ease-in-out">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
                 <BreadcrumbHeader backHref={'/'} title={"Client Management"}/>
                 {userInfo && userInfo?.role !== 'employee' && (
@@ -158,7 +156,7 @@ export default function ClientsPage() {
                         <PaginationControls
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChange={(page) => setCurrentPage(page)}
+                            onPageChangeAction={(page) => setCurrentPage(page)}
                         />
                     )}
                 </>
@@ -182,7 +180,7 @@ export default function ClientsPage() {
                 onConfirmAction={() => setShowErrorDialog(false)}
                 onOpenChangeAction={setShowErrorDialog}
             />
-            <ClientImportModal open={showImportModal} onClose={() => setShowImportModal(false)} />
+            <ClientImportModal open={showImportModal} onCloseAction={() => setShowImportModal(false)} />
         </div>
     )
 }

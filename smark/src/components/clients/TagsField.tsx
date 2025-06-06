@@ -5,10 +5,16 @@ import { IClient } from "@/types/Client"
 import { ITag } from "@/types/Tag"
 import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
 import { TagSelector } from "@/components/clients/TagSelector"
+import {ClientFormData} from "@/types/forms";
+
+interface Tag {
+    _id: string
+    name: string
+}
 
 interface TagsFieldProps {
-    form: UseFormReturn<IClient>
-    tagOptions: ITag[]
+    form: UseFormReturn<ClientFormData>
+    tagOptions: Tag[]
 }
 
 export default function TagsField({ form, tagOptions }: TagsFieldProps) {
@@ -22,7 +28,7 @@ export default function TagsField({ form, tagOptions }: TagsFieldProps) {
                     <FormControl>
                         <TagSelector
                             tags={tagOptions}
-                            selected={field.value || []}
+                            selected={(field.value || []).map((tag) => typeof tag === "string" ? tag : tag._id)}
                             onChangeAction={(newSelected) => field.onChange(newSelected)}
                         />
                     </FormControl>

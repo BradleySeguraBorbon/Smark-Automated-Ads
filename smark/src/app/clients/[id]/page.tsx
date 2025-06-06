@@ -80,7 +80,7 @@ export default function ClientViewPage() {
     }
 
     return (
-        <div className="container mx-auto py-10 space-y-6 max-w-3xl">
+        <div className="container mx-auto py-10 space-y-6 max-w-3xl lg:px-44 md:px-20 px-4 transition-all duration-300 ease-in-out">
             <BreadcrumbHeader backHref="/clients" title="Visualice Client"/>
             <Card>
                 <CardHeader>
@@ -89,7 +89,7 @@ export default function ClientViewPage() {
                 <CardContent className="space-y-3">
                     <p><span className="font-medium">Email:</span> {client.email}</p>
                     <p><span className="font-medium">Phone:</span> {client.phone}</p>
-                    <p><span className="font-medium">Telegram ID:</span> {client.telegramChatId || "—"}</p>
+                    <p><span className="font-medium">Telegram ID:</span> {client.telegram?.chatId || "—"}</p>
                     <p><span className="font-medium">Preferred Contact:</span> {client.preferredContactMethod}</p>
                     <p><span className="font-medium">Subscriptions:</span> {client.subscriptions.join(", ")}</p>
                     <p><span className="font-medium">Birth Date:</span> {new Date(client.birthDate).toLocaleDateString()}</p>

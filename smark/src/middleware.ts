@@ -8,11 +8,7 @@ const allowedOrigin = process.env.CORS_ALLOWED_ORIGIN || '*';
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    const isAuthPage = [
-        '/auth/login',
-        '/auth/email-login',
-        '/auth/reset-password'
-    ].includes(pathname);
+    const isAuthPage = pathname.startsWith('/auth');
 
     const cookieToken = request.cookies.get('token')?.value;
     const authHeader = request.headers.get('authorization');

@@ -1,6 +1,5 @@
 import { Types, Document } from 'mongoose';
 import { TagRef } from './Tag';
-import { ClientRef } from './Client';
 import { UserRef } from './User';
 
 interface Performance {
@@ -29,6 +28,7 @@ export interface IMarketingCampaign extends Document {
     users: UserRef[]; 
     performance: Performance;
     audienceCount?: number;
+    isAiGenerated?: boolean;
     createdAt?: Date;
     updatedAt?: Date; 
 }
@@ -43,4 +43,5 @@ export interface MarketingCampaignFormData {
     tags: TagRef[];
     users: UserRef[]; 
     performance: Performance;
+    isAiGenerated: boolean,
 }

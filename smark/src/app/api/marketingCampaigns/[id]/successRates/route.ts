@@ -4,7 +4,7 @@ import { AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 import mongoose from 'mongoose';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
 
@@ -16,7 +16,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
-        const campaignId = params.id;
+        const { id } = await params;
+        const campaignId =  id;
         if (!mongoose.Types.ObjectId.isValid(campaignId)) {
             return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 });
         }

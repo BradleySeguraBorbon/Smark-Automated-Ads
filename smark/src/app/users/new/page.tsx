@@ -10,7 +10,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import {decodeToken} from "@/lib/utils/decodeToken";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 import CustomAlertDialog from "@/components/CustomAlertDialog";
-import {IUser} from "@/types/User";
+import {UserFormData} from "@/types/forms/UserFormData"
 
 interface CreateUserFormData {
     username: string;
@@ -30,7 +30,7 @@ export default function CreateUserPage() {
     const [alertType, setAlertType] = useState<"success" | "error">("success");
     const [alertMessage, setAlertMessage] = useState("");
 
-    const form = useForm<IUser>({
+    const form = useForm<UserFormData>({
         defaultValues: {
             username: '',
             password: '',

@@ -11,6 +11,7 @@ import BreadcrumbHeader from '@/components/BreadcrumbHeader'
 import CustomAlertDialog from '@/components/CustomAlertDialog'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import TagForm from '@/components/tags/TagForm'
+import {TagFormData} from "@/types/forms";
 
 export default function CreateTagPage() {
     const router = useRouter()
@@ -23,7 +24,7 @@ export default function CreateTagPage() {
     const [errorMessage, setErrorMessage] = useState("")
     const [infoMessage, setInfoMessage] = useState("")
 
-    const form = useForm<ITag>({
+    const form = useForm<TagFormData>({
         defaultValues: {
             name: '',
             keywords: []

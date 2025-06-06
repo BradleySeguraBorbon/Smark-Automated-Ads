@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import * as XLSX from 'xlsx';
 import { commaSeparatedToArray } from '@/lib/utils/stringHelper';
 import CustomAlertDialog from '@/components/CustomAlertDialog';
@@ -74,7 +74,7 @@ export default function ClientImportForm() {
                 throw new Error(result.message || 'Failed to import clients');
             }
 
-            setSuccessMessage(result.message + " La asignación de tags se realizará en segundo plano.");
+            setSuccessMessage(result.message + " Tag assignment will be done in the background.");
             setSuccessOpen(true);
             setLoading(false);
 

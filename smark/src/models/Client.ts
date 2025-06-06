@@ -1,18 +1,17 @@
 import mongoose, { Schema, Types } from 'mongoose';
 import { Model } from 'mongoose';
-import { IClient } from '@/types/Client';
+import {IClientRaw} from '@/types/Client';
 
 const adInteractionsSchema = new Schema({
   adMessage: { type: Types.ObjectId, ref: "AdMessages", required: true },
   status: { type: String, enum: ["opened", "received"], required: true },
 });
 
-const clientSchema = new Schema<IClient>({
+const clientSchema = new Schema<IClientRaw>({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  telegramChatId: { type: String, unique: true },
   preferredContactMethod: { type: String, required: true },
   subscriptions: [{ type: String, required: true }],
   birthDate: { type: String, required: true },
@@ -24,7 +23,20 @@ const clientSchema = new Schema<IClient>({
     tokenKey: { type: String },
     chatId: { type: String },
     isConfirmed: { type: Boolean, default: false },
-  }
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'non-binary', 'prefer_not_to_say'],
+    required: false,
+  },
+  country: {
+    type: String,
+    required: false,
+  },
+  languages: {
+    type: [String],
+    required: false,
+  },
 }, {
   timestamps: true,
   validateBeforeSave: true,
@@ -53,5 +65,5 @@ const clientSchema = new Schema<IClient>({
   next();
 });*/
 
-const Clients = mongoose.models.Clients as Model<IClient> || mongoose.model<IClient>('Clients', clientSchema);
+const Clients = mongoose.models.Clients as Model<IClientRaw> || mongoose.model<IClientRaw>('Clients', clientSchema);
 export default Clients;

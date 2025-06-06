@@ -1,36 +1,31 @@
-import nodemailer from 'nodemailer';
-import pLimit from 'p-limit';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAudience } from '@/app/api/utils/getAudience';
+import { sendEmailMessages } from '@/lib/utils/mailSender';
+import { AdMessages } from '@/models/models';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+export async function POST(req: NextRequest) {
+  const { adMessageId } = await req.json();
+  try {
+    const { adMessage, contacts } = await getAudience(adMessageId, 'email');
 
-export async function sendEmail(to: string, subject: string, html: string) {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    html,
-  };
+    if (!adMessage.content?.email) {
+      return NextResponse.json(
+          { error: 'Missing email content in adMessage' },
+          { status: 400 }
+      );
+    }
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log(`Email sent to ${to}: ${info.messageId}`);
-}
+    const subject = adMessage.content.email.subject || 'Marketing Campaign';
+    const html = adMessage.content.email.body;
 
-export async function sendEmailMessages(
-  recipients: string[],
-  subject: string,
-  html: string
-) {
-  const limit = pLimit(20);
+    await sendEmailMessages(contacts, subject, html);
 
-  const tasks = recipients.map((email) =>
-    limit(() => sendEmail(email, subject, html))
-  );
-
-  await Promise.all(tasks);
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error(err);
+    if (adMessageId) {
+      await AdMessages.findByIdAndUpdate(adMessageId, { status: 'draft' });
+    }
+    return NextResponse.json({ error: err.message }, { status: 400 });
+  }
 }

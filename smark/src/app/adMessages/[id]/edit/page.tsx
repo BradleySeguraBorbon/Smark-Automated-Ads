@@ -16,6 +16,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { transformAdMessageForSave } from '@/lib/transformers';
 import { IMarketingCampaign } from "@/types/MarketingCampaign";
 import { ITemplate } from "@/types/Template";
+import {AdMessageFormData} from "@/types/forms/AdMessageFormData";
 
 export default function EditAdMessagePage() {
   const router = useRouter();
@@ -29,21 +30,21 @@ export default function EditAdMessagePage() {
   const [templates, setTemplates] = useState<ITemplate[]>([]);
   const [successOpen, setSuccessOpen] = useState(false);
 
-  const form = useForm<IAdMessage>({
+  const form = useForm<AdMessageFormData>({
     defaultValues: {
       name: '',
       type: [],
-      sendDate: undefined,
+      sendDate: new Date(),
       attachments: [],
+      marketingCampaign: {
+        _id: '',
+        name: '',
+        startDate: new Date(),
+        endDate: new Date(),
+      },
       content: {
-        email: {
-          subject: '',
-          body: '',
-        },
-        telegram: {
-          message: '',
-          buttons: [],
-        },
+        email: { subject: '', body: '' },
+        telegram: { message: '', buttons: [] },
       },
     },
   });
@@ -79,25 +80,53 @@ export default function EditAdMessagePage() {
       const response = await fetch(`/api/adMessages/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await response.json();
 
+      const data = await response.json();
       if (!response.ok) {
         console.error('Fetch failed:', data);
         return;
       }
 
-      const adMessage = {
-        ...data.result,
-        sendDate: data.result.sendDate ? new Date(data.result.sendDate) : undefined,
+      const raw: IAdMessage = data.result;
+
+      const formData: AdMessageFormData = {
+        name: raw.name,
+        type: raw.type,
+        status: raw.status ?? "draft",
+        sendDate: raw.sendDate ? new Date(raw.sendDate) : new Date(),
+        attachments: raw.attachments || [],
+        marketingCampaign: {
+          _id: raw.marketingCampaign._id,
+          name: raw.marketingCampaign.name,
+          description: raw.marketingCampaign.description,
+          status: raw.marketingCampaign.status,
+          startDate: raw.marketingCampaign.startDate,
+          endDate: raw.marketingCampaign.endDate,
+        },
+        content: {
+          email: raw.content.email
+              ? {
+                subject: raw.content.email.subject,
+                body: raw.content.email.body,
+                template: raw.content.email.template,
+              }
+              : undefined,
+          telegram: raw.content.telegram
+              ? {
+                message: raw.content.telegram.message,
+                buttons: raw.content.telegram.buttons,
+                template: raw.content.telegram.template,
+              }
+              : undefined,
+        },
       };
 
-      Object.entries(adMessage).forEach(([key, value]) => {
-        setValue(key as keyof IAdMessage, value);
-      });
+      form.reset(formData);
     } catch (error) {
       console.error('Error fetching ad message:', error);
     }
   };
+
 
   useEffect(() => {
     if (!_hasHydrated) return;
@@ -122,7 +151,7 @@ export default function EditAdMessagePage() {
     init();
   }, [_hasHydrated, token, id]);
 
-  const handleUpdate = async (data: IAdMessage) => {
+  const handleUpdate = async (data: AdMessageFormData) => {
     try {
       const response = await fetch(`/api/adMessages/${id}`, {
         method: 'PUT',
@@ -156,7 +185,7 @@ export default function EditAdMessagePage() {
   return (
     <div>
       <main>
-        <div className="container mx-auto py-8 px-50">
+        <div className="container mx-auto py-8 lg:px-36 md:px-20 px-4 transition-all duration-300 ease-in-out">
           <div className="flex items-center mb-6">
             <Button variant="ghost" size="sm" asChild className="mr-2">
               <Link href="/adMessages">
@@ -174,7 +203,7 @@ export default function EditAdMessagePage() {
                   mode="edit"
                   onSubmit={handleUpdate}
                   form={form}
-                  token={token}
+                  token={token!}
                   allMarketingCampaigns={campaigns}
                   allTemplates={templates}
                 />

@@ -4,8 +4,9 @@ import mongoose from 'mongoose';
 import { Clients, Tags, AdMessages } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 import crypto from 'crypto';
-import {encryptClient, decryptClient} from "@/lib/clientEncryption";
-import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import { encryptClient, decryptClient } from "@/lib/clientEncryption";
+import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
+import { CLIENT_LANGUAGES } from "@/types/ClientLanguages";
 
 async function validateObjectIdsExist(ids: string[], model: any, fieldName: string) {
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
@@ -107,7 +108,7 @@ function convertResponseIntoArray(response: string) {
     const ids = cleaned.split(',').map(id => id.trim());
     const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
     if (validIds.length === 0) {
-        console.warn('No valid ObjectIds found in AI response:', response);
+        console.warn('No valid ObjectIds found in ai response:', response);
     }
     return validIds;
 }
@@ -149,7 +150,7 @@ Tags disponibles (array de objetos):
     const data = await response.json();
 
     if (!data.ok) {
-        throw new Error('Error fetching tags from AI');
+        throw new Error('Error fetching tags from ai');
     }
 
     return convertResponseIntoArray(data.response);
@@ -161,12 +162,14 @@ export async function POST(request: Request) {
     const result = await sanitizeRequest(request, {
         requiredFields: [
             'firstName', 'lastName', 'email', 'phone', 'preferredContactMethod',
-            'subscriptions', 'birthDate', 'telegramChatId'
+            'subscriptions', 'birthDate'
         ],
         dates: ['birthDate'],
         emails: ['email'],
-        enums: [{ field: 'preferredContactMethod', allowed: ['email', 'telegram'] }],
-        enumArrays: [{ field: 'subscriptions', allowed: ['email', 'telegram'] }]
+        enums: [{ field: 'preferredContactMethod', allowed: ['email', 'telegram'] },
+                { field: 'gender', allowed: ['male', 'female', 'non-binary', 'prefer_not_to_say'] }],
+        enumArrays: [{ field: 'subscriptions', allowed: ['email', 'telegram'] },
+                    { field: 'languages', allowed: CLIENT_LANGUAGES }],
     });
 
     if (!result.ok) return result.response;
@@ -235,7 +238,7 @@ export async function POST(request: Request) {
                 preferences: body.preferences,
             }, token);
         } catch (err) {
-            console.error("AI error:", err);
+            console.error("ai error:", err);
             return NextResponse.json({error: "Error generating tags"}, {status: 500});
         }
 
@@ -257,6 +260,9 @@ export async function POST(request: Request) {
             subscriptions: body.subscriptions,
             birthDate: new Date(body.birthDate),
             preferences: body.preferences || [],
+            gender: body.gender,
+            country: body.country,
+            languages: body.languages || [],
             tags: clientTags || [],
             adInteractions: body.adInteractions || [],
             ...(telegram && { telegram })
@@ -279,7 +285,7 @@ export async function POST(request: Request) {
                     await Clients.findByIdAndUpdate(newClient._id, { tags });
                 }
             } catch (err) {
-                console.error("Background AI tagging error:", err);
+                console.error("Background ai tagging error:", err);
             }
         })();
         const client = await Clients.findById(newClient._id)

@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AdMessages } from '@/models/models';
 import connectDB from '@/config/db';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
     try {
+        const auth = req.headers.get('Authorization');
+        const expected = `Bearer ${process.env.CRON_SECRET}`;
+
+        if (auth !== expected) {
+            return new Response('Unauthorized', { status: 401 });
+        }
         await connectDB();
 
         const today = new Date();
@@ -15,7 +21,7 @@ export async function GET(req: NextRequest) {
         });
 
         for (const msg of messages) {
-            if (msg.sendDate < now) {
+            if (msg.sendDate < new Date()) {
                 msg.status = 'draft';
                 await msg.save();
                 continue;

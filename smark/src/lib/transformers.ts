@@ -20,10 +20,10 @@ export function transformClientForSave(data: IClient) {
     };
 }
 
-export function transformAdMessageForSave(data: IAdMessage) {
+export function transformAdMessageForSave(data: IAdMessage | any) {
     const base: any = {
         ...data,
-        marketingCampaign: (data.marketingCampaign as any)._id,
+        marketingCampaign: (data.marketingCampaign as any)._id || data.marketingCampaign,
         content: {},
     };
 
@@ -32,7 +32,9 @@ export function transformAdMessageForSave(data: IAdMessage) {
     if (data.type.includes('email') && data.content.email) {
         base.content.email = {
             ...data.content.email,
-            template: (data.content.email.template as any)._id,
+            template: typeof data.content.email.template === 'object'
+                ? data.content.email.template._id
+                : data.content.email.template,
         };
         hasContent = true;
     }
@@ -40,7 +42,9 @@ export function transformAdMessageForSave(data: IAdMessage) {
     if (data.type.includes('telegram') && data.content.telegram) {
         base.content.telegram = {
             ...data.content.telegram,
-            template: (data.content.telegram.template as any)._id,
+            template: typeof data.content.telegram.template === 'object'
+                ? data.content.telegram.template._id
+                : data.content.telegram.template,
         };
         hasContent = true;
     }
