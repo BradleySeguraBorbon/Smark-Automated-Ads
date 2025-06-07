@@ -15,7 +15,7 @@ export async function POST(req: Request) {
                     Authorization: `Bearer ${token}`,
                 }
             }),
-            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/templates/${templateId}`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/templates/${templateId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
@@ -66,9 +66,7 @@ Return ONLY a valid JSON object that maps each placeholder to a suggested value,
 Do NOT include any explanations, text outside the JSON, or invalid formatting. The response must be concise, appealing and directly usable in the given template.
         `.trim()
 
-        console.log("Prompt sent to ai:\n", prompt)
-
-        const chatRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat`, {
+        const chatRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt }),
@@ -76,7 +74,7 @@ Do NOT include any explanations, text outside the JSON, or invalid formatting. T
 
         const chatJson = await chatRes.json()
         if (!chatRes.ok || !chatJson.response) {
-            throw new Error(chatJson.error || 'ai failed to respond properly')
+            throw new Error(chatJson.error || 'AI failed to respond properly')
         }
 
         let raw = chatJson.response.trim()
@@ -86,7 +84,7 @@ Do NOT include any explanations, text outside the JSON, or invalid formatting. T
 
         const parsed = JSON.parse(raw)
         if (!parsed.placeholders) {
-            return NextResponse.json({ error: 'No placeholders found in ai response' }, { status: 500 })
+            return NextResponse.json({ error: 'No placeholders found in AI response' }, { status: 500 })
         }
 
         return NextResponse.json(parsed)
