@@ -71,6 +71,8 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     fullText += decoder.decode(value, { stream: true });
   }
 
+  console.log('Full stream response from AI:', fullText);
+
   const parsed = parseAIResponse(fullText);
 
   console.log('Parsed AI response:', parsed);
