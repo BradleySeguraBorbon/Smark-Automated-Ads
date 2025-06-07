@@ -84,5 +84,6 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     throw new Error('Invalid response format from AI');
   }
 
-  return parsed;
+  client.close();
+  return JSON.parse(JSON.stringify(parsed));
 }
