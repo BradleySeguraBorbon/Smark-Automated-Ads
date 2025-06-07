@@ -4,6 +4,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
+import { parseAIResponse } from '@/lib/ai/parseAiResponse';
 
 const SYSTEM_PROMPT = `
 You are a segmentation assistant for marketing campaigns.
@@ -70,19 +71,9 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     fullText += decoder.decode(value, { stream: true });
   }
 
-  const jsonMatch = fullText.match(/```json\s*([\s\S]*?)```/);
-  const jsonString = jsonMatch ? jsonMatch[1].trim() : fullText.trim();
-  const parsed = JSON.parse(jsonString);
+  const parsed = parseAIResponse(fullText);
 
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    !Array.isArray(parsed.segmentGroups) ||
-    typeof parsed.coverage !== 'number' ||
-    typeof parsed.totalClients !== 'number'
-  ) {
-    throw new Error('Invalid response format from AI');
-  }
+  console.log('Parsed AI response:', parsed);
 
   client.close();
   return JSON.parse(JSON.stringify(parsed));
