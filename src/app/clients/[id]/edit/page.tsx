@@ -141,10 +141,10 @@ export default function EditClientPage() {
 
             if (response.ok) {
                 router.push("/clients")
-            } else {
-                console.error("Failed updating client", result)
-                setApiError(result.message || result.error || "Failed to update client.")
+                return;
             }
+            console.error("Failed updating client", result)
+            setApiError(result.message || result.error || "Failed to update client.")
         } catch (error) {
             console.error("Error updating client:", error)
             setApiError("Unexpected error occurred during update.")

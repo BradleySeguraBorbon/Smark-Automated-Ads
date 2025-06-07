@@ -1,11 +1,8 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import * as XLSX from 'xlsx';
-import { commaSeparatedToArray } from '@/lib/utils/stringHelper';
+import { useState } from 'react';
+import { handleExcelUpload } from './import/handleExcelUpload';
 import CustomAlertDialog from '@/components/CustomAlertDialog';
-import { useAuthStore } from '@/lib/store';
-import { useNotificationStore } from '@/lib/store';
 
 export default function ClientImportForm() {
     const [loading, setLoading] = useState(false);
@@ -14,99 +11,18 @@ export default function ClientImportForm() {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const token = useAuthStore.getState().token;
-    const notifyGlobal = useNotificationStore.getState().showAlert;
-
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setLoading(true);
-        try {
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data, {type: 'array'});
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const result = await handleExcelUpload(file);
+        setLoading(result.loading);
 
-            const cleanedClients = jsonData.map((client: any) => {
-                const rawBirthDate = client.birthDate;
-                let parsedBirthDate: string | undefined = undefined;
-
-                if (typeof rawBirthDate === 'number') {
-                    const excelDate = XLSX.SSF.parse_date_code(rawBirthDate);
-                    if (excelDate) {
-                        const jsDate = new Date(
-                            excelDate.y,
-                            excelDate.m - 1,
-                            excelDate.d
-                        );
-                        parsedBirthDate = jsDate.toISOString();
-                    }
-                } else if (typeof rawBirthDate === 'string') {
-                    const date = new Date(rawBirthDate);
-                    if (!isNaN(date.getTime())) {
-                        parsedBirthDate = date.toISOString();
-                    }
-                }
-
-                const cleaned = {
-                    ...client,
-                    subscriptions: commaSeparatedToArray(client.subscriptions),
-                    preferences: commaSeparatedToArray(client.preferences),
-                    birthDate: parsedBirthDate
-                };
-                return cleaned;
-            });
-
-            const response = await fetch('/api/clients/import', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({clients: cleanedClients }),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                setLoading(false);
-                throw new Error(result.message || 'Failed to import clients');
-            }
-
-            setSuccessMessage(result.message + " Tag assignment will be done in the background.");
+        if (result.success) {
+            setSuccessMessage(result.message);
             setSuccessOpen(true);
-            setLoading(false);
-
-            try {
-                const assignResponse = await fetch('/api/clients/assignTags', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ token }),
-                });
-
-                let assignResult: any;
-                try {
-                    assignResult = await assignResponse.json();
-                } catch {
-                    assignResult = {};
-                }
-
-                if (!assignResponse.ok) {
-                    console.error('Tag assignment failed:', assignResult.message);
-                    notifyGlobal('error', 'Tags could not be assigned automatically');
-                } else {
-                    notifyGlobal('success', `Tags assigned to ${assignResult.updatedClientIds.length} clients.`);
-                }
-            } catch (tagError) {
-                console.error('Error in background tag assignment:', tagError);
-                notifyGlobal('error', 'Unexpected error during Tags Assignation');
-            }
-        } catch (err: any) {
-            setErrorMessage(err.message || 'There was a problem with the clients import');
+        } else {
+            setErrorMessage(result.message);
             setErrorOpen(true);
         }
     };
@@ -126,9 +42,9 @@ export default function ClientImportForm() {
             <CustomAlertDialog
                 open={successOpen}
                 type="success"
-                title="Importación exitosa"
+                title="Import successful"
                 description={successMessage}
-                confirmLabel="Aceptar"
+                confirmLabel="Accept"
                 onConfirmAction={() => setSuccessOpen(false)}
                 onOpenChangeAction={setSuccessOpen}
             />
@@ -136,9 +52,9 @@ export default function ClientImportForm() {
             <CustomAlertDialog
                 open={errorOpen}
                 type="error"
-                title="Error al importar"
+                title="Import failed"
                 description={errorMessage}
-                confirmLabel="Cerrar"
+                confirmLabel="Close"
                 onConfirmAction={() => setErrorOpen(false)}
                 onOpenChangeAction={setErrorOpen}
             />

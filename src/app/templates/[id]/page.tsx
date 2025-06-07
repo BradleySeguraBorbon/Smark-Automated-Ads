@@ -1,15 +1,16 @@
+// components/templates/ViewTemplatePageContent.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ITemplate } from '@/types/Template'
 import { useAuthStore } from '@/lib/store'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { ITemplate } from '@/types/Template'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import BreadcrumbHeader from '@/components/BreadcrumbHeader'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import TemplateHtmlView from '@/components/templates/TemplateHtmlView'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
-import DOMPurify from 'dompurify'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 
 export default function ViewTemplatePage() {
     const { id } = useParams()
@@ -42,8 +43,7 @@ export default function ViewTemplatePage() {
                 }
 
                 setTemplate(result.result)
-            } catch (err) {
-                console.error('Fetch error:', err)
+            } catch {
                 setApiError('Unexpected error occurred.')
             } finally {
                 setLoading(false)
@@ -71,39 +71,17 @@ export default function ViewTemplatePage() {
     return (
         <div className="container mx-auto py-8 max-w-4xl space-y-6">
             <BreadcrumbHeader backHref="/templates" title={template.name} />
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Rendered Template</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div
-                        style={{
-                            backgroundColor: '#fff',
-                            color: '#000',
-                            padding: '20px',
-                            fontFamily: 'Arial, sans-serif',
-                            borderRadius: '8px',
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                            overflowX: 'auto'
-                        }}
-                        dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(template.html, {
-                                ALLOWED_ATTR: ['style', 'href', 'target'],
-                                ALLOWED_TAGS: ['a', 'p', 'h1', 'h2', 'h3', 'ul', 'li', 'strong', 'em', 'div', 'span', 'br', 'hr', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'b', 'i']
-                            })
-                        }}
-                    />
-                </CardContent>
-            </Card>
-
+            <TemplateHtmlView html={template.html} />
             <Card>
                 <CardHeader>
                     <CardTitle>Metadata</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <p><span className="font-medium">Type:</span> {template.type}</p>
-                    <p><span className="font-medium">Placeholders:</span> {template.placeholders.join(', ') || 'None'}</p>
+                    <p>
+                        <span className="font-medium">Placeholders:</span>{' '}
+                        {template.placeholders.length > 0 ? template.placeholders.join(', ') : 'None'}
+                    </p>
                     <p><span className="font-medium">Created At:</span> {new Date(template.createdAt || '').toLocaleString()}</p>
                     <p><span className="font-medium">Updated At:</span> {new Date(template.updatedAt || '').toLocaleString()}</p>
                 </CardContent>

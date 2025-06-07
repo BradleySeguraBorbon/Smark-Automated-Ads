@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import ClientForm from "@/components/clients/ClientForm"
+import ClientForm from "@/components/clients/clientForm/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import CustomAlertDialog from "@/components/CustomAlertDialog"
 import {useRef} from "react";
@@ -59,7 +59,6 @@ export default function CreateClientPage() {
                 return
             }
 
-            console.log("Client created:", result)
             setSuccessOpen(true)
         } catch (error: unknown) {
             console.error("Network or unexpected error:", error)
