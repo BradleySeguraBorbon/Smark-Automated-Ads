@@ -1,0 +1,6 @@
+{
+  "crons": [{
+    "path": "/api/adMessages/dispatch?token=dhaue3umrf82nds0cc::SOasWNXsW3391nndaks93h21X!32ZS!3!12",
+    "schedule": "0 4 * * *"
+  }]
+}

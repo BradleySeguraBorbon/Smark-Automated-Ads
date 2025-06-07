@@ -35,15 +35,22 @@ export default function TemplateRow({ template, userRole, onDeleteAction }: Prop
             <td className="py-4 px-2">
                 <div className="flex gap-2">
                     <Link href={`/templates/${template._id}`}>
-                        <Button variant="default" size="icon"><Eye className="h-4 w-4" /></Button>
+                        <Button variant="default" size="icon">
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">view</span>
+                        </Button>
                     </Link>
                     {canEdit && (
                         <>
                             <Link href={`/templates/${template._id}/edit`}>
-                                <Button variant="secondary" className="bg-blue-500 hover:bg-blue-800" size="icon"><Pencil className="h-4 w-4" /></Button>
+                                <Button variant="secondary" className="bg-blue-500 hover:bg-blue-800" size="icon">
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Edit</span>
+                                </Button>
                             </Link>
                             <Button onClick={() => onDeleteAction(template._id! as string)} variant="secondary" className={"bg-teal-600 hover:bg-teal-800"} size="icon">
                                 <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
                             </Button>
                         </>
                     )}
