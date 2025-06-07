@@ -34,35 +34,8 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
         setLoading(true);
 
         try {
-            const responseStream = await runMcpAi({ prompt });
-            const reader = responseStream.body?.getReader();
-            if (!reader) throw new Error('No readable stream from MCP AI');
-
-            const decoder = new TextDecoder();
-            let fullText = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                fullText += decoder.decode(value, { stream: true });
-            }
-
-            const jsonMatch = fullText.match(/```json\s*([\s\S]*?)```/);
-            const jsonString = jsonMatch ? jsonMatch[1].trim() : fullText.trim();
-
-            const parsed = JSON.parse(jsonString);
-
-            if (
-                !parsed ||
-                typeof parsed !== 'object' ||
-                !Array.isArray(parsed.segmentGroups) ||
-                typeof parsed.coverage !== 'number' ||
-                typeof parsed.totalClients !== 'number'
-            ) {
-                throw new Error('Invalid response format from AI');
-            }
-
-            onStrategyLoaded(parsed);
+            const response = await runMcpAi({ prompt });
+            onStrategyLoaded(response);
         } catch (err: any) {
             console.error('MCP AI error:', err);
             setError(err.message || 'Unexpected error');

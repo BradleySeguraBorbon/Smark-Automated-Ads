@@ -56,5 +56,33 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     temperature: 0.4,
   });
 
-  return result.toDataStreamResponse();
+  const response = result.toDataStreamResponse();
+  if (!response.body) {
+    throw new Error('No response body from data stream');
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    fullText += decoder.decode(value, { stream: true });
+  }
+
+  const jsonMatch = fullText.match(/```json\s*([\s\S]*?)```/);
+  const jsonString = jsonMatch ? jsonMatch[1].trim() : fullText.trim();
+  const parsed = JSON.parse(jsonString);
+
+  if (
+    !parsed ||
+    typeof parsed !== 'object' ||
+    !Array.isArray(parsed.segmentGroups) ||
+    typeof parsed.coverage !== 'number' ||
+    typeof parsed.totalClients !== 'number'
+  ) {
+    throw new Error('Invalid response format from AI');
+  }
+
+  return parsed;
 }
