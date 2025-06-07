@@ -61,22 +61,8 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       temperature: 0.4,
     });
 
-    console.log('AI Result', result);
-    const response = result.toDataStreamResponse();
-    console.log('AI Stream Reponse', response);
-    if (!response.body) throw new Error('No response body from data stream');
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      fullText += decoder.decode(value, { stream: true });
-    }
-
-    console.log('Full stream response from AI:\n', fullText);
+    const fullText = await result.text;
+    console.log('Full AI response:\n', fullText);
 
     const parsed = parseJsonFromAiText(fullText);
 
