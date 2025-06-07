@@ -38,7 +38,9 @@ const segmentAudienceTool = tool({
     maxCriteriaUsed: z.number().optional(),
   }),
   execute: async (args) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_MCP_URL}/sse`, {
+    console.log('[TOOL] Executing segmentAudience with args:', args);
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_MCP_URL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -48,7 +50,12 @@ const segmentAudienceTool = tool({
     });
 
     const json = await response.json();
+
+    console.log('[TOOL] Raw response from MCP:', json);
+
     const text = json?.content?.[0]?.text ?? '';
+
+    console.log('[TOOL] Extracted text to return to model:', text);
 
     return JSON.parse(text);
   },
@@ -68,7 +75,12 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       maxTokens: 1000,
     });
 
+    console.log('[AI] Raw text from AI response:', text);
+
     const parsed = parseJsonFromAiText(text);
+
+    console.log('[AI] Parsed JSON result:', parsed);
+
     return parsed;
   } catch (error: any) {
     console.error('AI response error:', error);

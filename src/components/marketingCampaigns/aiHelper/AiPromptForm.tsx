@@ -35,22 +35,10 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
 
         try {
             const response = await runMcpAi({ prompt });
-
-            if (!response || typeof response !== 'object') {
-                throw new Error('Invalid AI response');
-            }
-
-            onStrategyLoaded(response as MCPStrategyResponse);
+            onStrategyLoaded(response);
         } catch (err: any) {
             console.error('MCP AI error:', err);
-
-            if (err?.message?.includes('timeout')) {
-                setError('The AI took too long to respond. Please try again.');
-            } else if (err?.message?.includes('AI response error')) {
-                setError('There was an error while generating the strategy. Check your prompt and try again.');
-            } else {
-                setError(err.message || 'Unexpected error occurred.');
-            }
+            setError(err.message || 'Unexpected error');
         } finally {
             setLoading(false);
         }
