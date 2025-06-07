@@ -53,7 +53,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     const toolSet = tools as ToolSet;
     console.log('Tools available to AI:', toolSet);
 
-    const result = await generateText({
+    const result = await streamText({
       model: openai('gpt-4o-mini'),
       messages: [{ role: 'user', content: prompt }],
       system: SYSTEM_PROMPT,
@@ -61,8 +61,8 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       maxTokens: 1000,
       temperature: 0.4,
     });
-    console.log('AI response received:', result);
-    const fullText = result.text;
+    console.log('AI response full stream:', result.fullStream);
+    const fullText = await result.text;
     console.log('Full AI response:\n', fullText);
 
     const parsed = parseJsonFromAiText(fullText);
