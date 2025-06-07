@@ -31,6 +31,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
   const transport = new SSEClientTransport(
     new URL(`${process.env.NEXT_PUBLIC_MCP_URL}/sse`)
   );
+  console.log(`[MCP] SSE URL: ${process.env.NEXT_PUBLIC_MCP_URL}/sse`);
 
   const client = new Client(
     {
