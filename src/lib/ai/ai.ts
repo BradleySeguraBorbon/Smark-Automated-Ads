@@ -3,6 +3,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { streamText } from 'ai';
+import { ToolSet } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { parseJsonFromAiText } from '@/lib/ai/parseAiResponse';
 
@@ -49,10 +50,10 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     await client.connect(transport);
 
     const tools = await client.listTools();
-    const toolSet = tools as unknown as import('ai').ToolSet;
+    const toolSet = tools as ToolSet;
     console.log('Tools available to AI:', toolSet);
 
-    const result = await streamText({
+    const result = streamText({
       model: openai('gpt-4o-mini'),
       messages: [{ role: 'user', content: prompt }],
       system: SYSTEM_PROMPT,
