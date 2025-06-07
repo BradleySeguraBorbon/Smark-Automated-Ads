@@ -1,8 +1,9 @@
 'use server';
 
-import { experimental_createMCPClient } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 
 const SYSTEM_PROMPT = `
 You are a segmentation assistant for marketing campaigns.
@@ -22,26 +23,38 @@ Always respond by calling a tool with correct parameters. Do not explain or gues
 `.trim();
 
 export async function runMcpAi({ prompt }: { prompt: string }) {
-    const mcpClient = await experimental_createMCPClient({
-        transport: {
-            type: 'sse',
-            url: `${process.env.NEXT_PUBLIC_MCP_URL}/sse`,
-        },
-        name: 'AutoSmark MCP Client',
-    });
+  const transport = new SSEClientTransport(
+    new URL(`${process.env.NEXT_PUBLIC_MCP_URL}/sse`)
+  );
 
-    const tools = await mcpClient.tools();
+  const client = new Client(
+    {
+      name: 'AutoSmark MCP Client',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+        prompts: {},
+        resources: {},
+      },
+    }
+  );
 
-    const result = await streamText({
-        model: openai('gpt-4o-mini'),
-        messages: [{ role: 'user', content: prompt }],
-        system: SYSTEM_PROMPT,
-        tools,
-        maxTokens: 1000,
-        temperature: 0.4,
-    });
+  await client.connect(transport);
 
-    const response = result.toDataStreamResponse();
+  const tools = await client.listTools();
 
-    return response;
+  const toolSet = tools as unknown as import('ai').ToolSet;
+
+  const result = await streamText({
+    model: openai('gpt-4o-mini'),
+    messages: [{ role: 'user', content: prompt }],
+    system: SYSTEM_PROMPT,
+    tools: toolSet,
+    maxTokens: 1000,
+    temperature: 0.4,
+  });
+
+  return result.toDataStreamResponse();
 }
