@@ -47,6 +47,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
 
     const tools = await client.listTools();
     const toolSet = tools as unknown as import('ai').ToolSet;
+    console.log('Tools available to AI:', toolSet);
 
     const result = await streamText({
       model: openai('gpt-4o-mini'),
