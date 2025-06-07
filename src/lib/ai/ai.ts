@@ -42,41 +42,45 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     }
   );
 
-  await client.connect(transport);
+  try {
+    await client.connect(transport);
 
-  const tools = await client.listTools();
+    const tools = await client.listTools();
+    const toolSet = tools as unknown as import('ai').ToolSet;
 
-  const toolSet = tools as unknown as import('ai').ToolSet;
+    const result = await streamText({
+      model: openai('gpt-4o-mini'),
+      messages: [{ role: 'user', content: prompt }],
+      system: SYSTEM_PROMPT,
+      tools: toolSet,
+      maxTokens: 1000,
+      temperature: 0.4,
+    });
 
-  const result = await streamText({
-    model: openai('gpt-4o-mini'),
-    messages: [{ role: 'user', content: prompt }],
-    system: SYSTEM_PROMPT,
-    tools: toolSet,
-    maxTokens: 1000,
-    temperature: 0.4,
-  });
+    const response = result.toDataStreamResponse();
+    if (!response.body) throw new Error('No response body from data stream');
 
-  const response = result.toDataStreamResponse();
-  if (!response.body) {
-    throw new Error('No response body from data stream');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      fullText += decoder.decode(value, { stream: true });
+    }
+
+    console.log('Full stream response from AI:\n', fullText);
+
+    const parsed = parseJsonFromAiText(fullText);
+
+    console.log('Parsed AI response:\n', parsed);
+
+    return JSON.parse(JSON.stringify(parsed));
+  } catch (error: any) {
+    console.error('AI stream or parsing error:', error);
+    throw new Error(`AI response error:\n\n${error.message}`);
+  } finally {
+    client.close();
   }
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    fullText += decoder.decode(value, { stream: true });
-  }
-
-  console.log('Full stream response from AI:', fullText);
-
-  const parsed = parseJsonFromAiText(fullText);
-
-  console.log('Parsed AI response:', parsed);
-
-  client.close();
-  return JSON.parse(JSON.stringify(parsed));
 }
