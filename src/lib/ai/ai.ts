@@ -61,8 +61,25 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       maxTokens: 1000,
       temperature: 0.4,
     });
-    console.log('AI response full stream:', result.fullStream);
-    const fullText = await result.text;
+
+    const reader = result.textStream.getReader();
+    let fullText = '';
+    const timeoutMs = 58000;
+
+    const timeout = setTimeout(() => {
+      reader.cancel('Stream timeout');
+      console.warn('AI stream manually cancelled due to timeout.');
+    }, timeoutMs);
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += value;
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
     console.log('Full AI response:\n', fullText);
 
     const parsed = parseJsonFromAiText(fullText);
