@@ -31,6 +31,7 @@ interface NavbarProps {
 
 export function Navbar({ currentPath }: NavbarProps) {
     const allRoutes = [
+        { href: "/", label: "Dashboard" },
         { href: "/marketingCampaigns", label: "Campaigns" },
         { href: "/adMessages", label: "Ad-Messages" },
         { href: "/clients", label: "Clients" },
@@ -59,24 +60,28 @@ export function Navbar({ currentPath }: NavbarProps) {
         decodeToken(token).then(setUserInfo);
     }, [token, hasHydrated]);
 
-    useEffect(() => {
-        const updateVisibleRoutes = () => {
-            const width = window.innerWidth - 275;
-            const routeWidth = 90;
-            const baseWidth = 600;
-            const available = width - baseWidth;
-            const maxRoutes = Math.floor(available / routeWidth);
-            setVisibleCount(Math.max(1, Math.min(allRoutes.length, maxRoutes)));
-        };
-
-        updateVisibleRoutes();
-        window.addEventListener("resize", updateVisibleRoutes);
-        return () => window.removeEventListener("resize", updateVisibleRoutes);
-    }, []);
-
     const filteredRoutes = allRoutes.filter(
         (route) => route.href !== "/users" || (userInfo && userInfo.role !== "employee")
     );
+
+    useEffect(() => {
+        const updateVisibleRoutes = () => {
+            const width = window.innerWidth - 200;
+            const routeWidth = 65;
+            const baseWidth = 500;
+            const available = width - baseWidth;
+            const maxRoutes = Math.floor(available / routeWidth);
+
+            const count = Math.max(0, Math.min(filteredRoutes.length, maxRoutes));
+            setVisibleCount(count);
+        };
+
+        if (userInfo) {
+            updateVisibleRoutes();
+            window.addEventListener("resize", updateVisibleRoutes);
+            return () => window.removeEventListener("resize", updateVisibleRoutes);
+        }
+    }, [userInfo, filteredRoutes.length]);
 
     const visibleRoutes = filteredRoutes.slice(0, visibleCount);
     const hiddenRoutes = filteredRoutes.slice(visibleCount);
@@ -91,7 +96,7 @@ export function Navbar({ currentPath }: NavbarProps) {
             </Link>
 
             <div className="flex flex-wrap items-center gap-2 max-h-[5.5rem] overflow-hidden">
-                <NavigationMenu className="hidden lg:flex">
+                <NavigationMenu className="hidden md:flex lg:flex">
                     <NavigationMenuList className="gap-2">
                         {userInfo ? (
                             visibleRoutes.map((route) => (
@@ -131,7 +136,8 @@ export function Navbar({ currentPath }: NavbarProps) {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="default">
-                                Más <MoreHorizontal className="h-5 w-5 ml-1" />
+                                <MoreHorizontal className="h-5 w-5 ml-1" />
+                                <span className="sr-only">Menu</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
