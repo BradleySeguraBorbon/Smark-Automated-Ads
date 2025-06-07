@@ -20,7 +20,10 @@ Use it to group clients by fields like:
 - subscriptions
 - preferredContactMethod
 
+If the user asks to maximize total audience coverage or to group clients by shared characteristics, call segmentAudience with an empty object {} (no filters) so the system can compute the optimal strategy automatically.
+
 Always respond by calling a tool with correct parameters. Do not explain or guess.
+
 `.trim();
 
 export async function runMcpAi({ prompt }: { prompt: string }) {
@@ -59,6 +62,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     });
 
     const response = result.toDataStreamResponse();
+    console.log('AI Stream Reponse', response);
     if (!response.body) throw new Error('No response body from data stream');
 
     const reader = response.body.getReader();
