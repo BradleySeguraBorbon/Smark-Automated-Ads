@@ -1,11 +1,9 @@
 'use server';
 
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-import { ToolSet } from 'ai';
-import {generateText, streamText} from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { generateText, tool } from 'ai';
+import { z } from 'zod';
 import { parseJsonFromAiText } from '@/lib/ai/parseAiResponse';
+import { openai } from '@ai-sdk/openai';
 
 const SYSTEM_PROMPT = `
 You are a segmentation assistant for marketing campaigns.
@@ -24,56 +22,56 @@ Use it to group clients by fields like:
 If the user asks to maximize total audience coverage or to group clients by shared characteristics, call segmentAudience with an empty object {} (no filters) so the system can compute the optimal strategy automatically.
 
 Always respond by calling a tool with correct parameters. Do not explain or guess.
-
 `.trim();
 
-export async function runMcpAi({ prompt }: { prompt: string }) {
-  const transport = new SSEClientTransport(
-    new URL(`${process.env.NEXT_PUBLIC_MCP_URL}/sse`)
-  );
-
-  const client = new Client(
-    {
-      name: 'AutoSmark MCP Client',
-      version: '1.0.0',
-    },
-    {
-      capabilities: {
-        tools: {},
-        prompts: {},
-        resources: {},
-      },
-    }
-  );
-
-  try {
-    await client.connect(transport);
-
-    const tools = await client.listTools();
-    const toolSet = tools as ToolSet;
-    console.log('Tools available to AI:', toolSet);
-
-    const result = await generateText({
-      model: openai('gpt-4o-mini'),
-      messages: [{ role: 'user', content: prompt }],
-      system: SYSTEM_PROMPT,
-      tools: toolSet,
-      maxTokens: 1000,
-      temperature: 0.4,
+const segmentAudienceTool = tool({
+  description: 'Segment clients using audience criteria',
+  parameters: z.object({
+    filters: z.array(z.object({
+      field: z.string(),
+      match: z.string().optional(),
+      currentMonth: z.boolean().optional(),
+      min: z.string().optional(),
+      max: z.string().optional(),
+    })).optional(),
+    minGroupSize: z.number().optional(),
+    maxCriteriaUsed: z.number().optional(),
+  }),
+  execute: async (args) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_MCP_URL}/sse`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tool: 'segmentAudience',
+        args,
+      }),
     });
-    console.log('AI response received:', result);
-    const fullText = result.text;
-    console.log('Full AI response:\n', fullText);
 
-    const parsed = parseJsonFromAiText(fullText);
+    const json = await response.json();
+    const text = json?.content?.[0]?.text ?? '';
 
-    console.log('Parsed AI response:\n', parsed);
+    return JSON.parse(text);
+  },
+});
 
-    return JSON.parse(JSON.stringify(parsed));
+export async function runMcpAi({ prompt }: { prompt: string }) {
+  try {
+    const { text } = await generateText({
+      model: openai('gpt-4o-mini'),
+      prompt,
+      system: SYSTEM_PROMPT,
+      tools: {
+        segmentAudience: segmentAudienceTool,
+      },
+      maxSteps: 2,
+      temperature: 0.4,
+      maxTokens: 1000,
+    });
+
+    const parsed = parseJsonFromAiText(text);
+    return parsed;
   } catch (error: any) {
-    console.error('AI stream or parsing error:', error);
+    console.error('AI response error:', error);
     throw new Error(`AI response error:\n\n${error.message}`);
-  } finally {
-    client.close();
   }
 }
