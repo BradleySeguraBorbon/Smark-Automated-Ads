@@ -61,6 +61,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       temperature: 0.4,
     });
 
+    console.log('AI Result', result);
     const response = result.toDataStreamResponse();
     console.log('AI Stream Reponse', response);
     if (!response.body) throw new Error('No response body from data stream');
