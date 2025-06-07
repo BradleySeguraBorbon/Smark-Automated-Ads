@@ -4,7 +4,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { parseAIResponse } from '@/lib/ai/parseAiResponse';
+import { parseJsonFromAiText } from '@/lib/ai/parseAiResponse';
 
 const SYSTEM_PROMPT = `
 You are a segmentation assistant for marketing campaigns.
@@ -73,7 +73,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
 
   console.log('Full stream response from AI:', fullText);
 
-  const parsed = parseAIResponse(fullText);
+  const parsed = parseJsonFromAiText(fullText);
 
   console.log('Parsed AI response:', parsed);
 

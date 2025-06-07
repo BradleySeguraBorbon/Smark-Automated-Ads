@@ -1,15 +1,16 @@
-export function parseAIResponse(text: string) {
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)```/);
-  const rawJson = jsonMatch ? jsonMatch[1].trim() : text.trim();
-
-  const cleanJson = rawJson
-    .replace(/^[^\{]*?/, '') 
-    .replace(/[\s\S]*?({[\s\S]*})[\s\S]*/, '$1'); 
-
+export function parseJsonFromAiText(text: string): any {
   try {
-    return JSON.parse(cleanJson);
-  } catch (err) {
-    console.error('JSON parse failed. Raw input:', cleanJson);
+    const cleaned = text.replace(/```json|```/g, '').trim();
+
+    const firstCurly = cleaned.indexOf('{');
+    const lastCurly = cleaned.lastIndexOf('}');
+    const jsonString = cleaned.slice(firstCurly, lastCurly + 1);
+
+    const parsed = JSON.parse(jsonString);
+
+    return JSON.parse(JSON.stringify(parsed));
+  } catch (e: any) {
+    console.error('JSON parse failed. Raw input:', text);
     throw new Error('Failed to parse AI response as valid JSON');
   }
 }
