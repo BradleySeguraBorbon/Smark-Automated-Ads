@@ -22,6 +22,7 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
     const [prompt, setPrompt] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<string | null>(null);
 
     const token = useAuthStore((state) => state.token);
 
@@ -36,6 +37,7 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
         try {
             const response = await runMcpAi({ prompt });
             onStrategyLoaded(response);
+            setFeedback(response.message ?? null);
         } catch (err: any) {
             console.error('MCP AI error:', err);
             setError(err.message || 'Unexpected error');
@@ -86,6 +88,12 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
                     Generate Strategy
                 </Button>
             </div>
+
+            {feedback && (
+                <div className="text-center text-sm text-foreground/80 mt-4">
+                    {feedback}
+                </div>
+            )}
 
             {error && (
                 <div className="text-red-600 text-sm mt-2">

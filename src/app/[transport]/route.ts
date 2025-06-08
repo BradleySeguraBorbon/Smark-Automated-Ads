@@ -19,7 +19,7 @@ const handler = createMcpHandler(
                                 description: 'Field to filter by',
                             },
                             match: {
-                                type: 'string',
+                                type: ['string', 'array'],
                                 optional: true,
                             },
                             currentMonth: {

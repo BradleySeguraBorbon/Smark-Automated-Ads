@@ -6,7 +6,7 @@ export const segmentAudience = tool({
     parameters: z.object({
         filters: z.array(z.object({
             field: z.string(),
-            match: z.string().optional(),
+            match: z.union([z.string(), z.array(z.string())]).optional(),
             currentMonth: z.boolean().optional(),
             min: z.string().optional(),
             max: z.string().optional(),
