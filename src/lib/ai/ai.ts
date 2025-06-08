@@ -26,6 +26,18 @@ If the user asks to maximize total audience coverage or to group clients by shar
 
 Always respond by calling a tool with correct parameters. Do not explain or guess.
 
+Always return JSON in the exact format required by the application. Do not explain your reasoning. Never return Markdown or lists. Return only a single valid JSON object matching this structure:
+{
+  coverage: number,
+  totalClients: number,
+  selectedClients: string[],
+  segmentGroups: { 
+    criterion: string,
+    value: string,
+    clientIds: string[],
+    reason: string 
+  }[]
+}
 `.trim();
 
 export async function runMcpAi({ prompt }: { prompt: string }) {
