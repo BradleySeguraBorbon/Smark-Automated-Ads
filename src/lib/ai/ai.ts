@@ -6,6 +6,7 @@ import { ToolSet } from 'ai';
 import {generateText, streamText} from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { parseJsonFromAiText } from '@/lib/ai/parseAiResponse';
+import getTools from '@/lib/ai/aiTools';
 
 const SYSTEM_PROMPT = `
 You are a segmentation assistant for marketing campaigns.
@@ -52,15 +53,14 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     await client.connect(transport);
     console.log('[MCP] Connected to MCP server');
 
-    const tools = await client.listTools();
-    const toolSet = tools as ToolSet;
-    console.log('[MCP] Tools available to AI:', toolSet);
+    const tools = await getTools();
+    console.log('[MCP] Tools available to AI:', tools);
 
     const { text } = await generateText({
       model: openai('gpt-4o-mini'),
       messages: [{ role: 'user', content: prompt }],
       system: SYSTEM_PROMPT,
-      tools: toolSet,
+      tools: tools,
       maxTokens: 1000,
       temperature: 0.4,
     });

@@ -50,23 +50,18 @@ const handler = createMcpHandler(
             },
             async (params) => {
                 try {
-                    const result = await generateCampaignStrategy(params);
-                    return {
-                        content: [
-                            {
-                                type: 'text',
-                                text: JSON.stringify(result, null, 2),
-                            },
-                        ],
-                    };
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/clients/segment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(params),
+                    });
+
+                    if (!response.ok) throw new Error(`Status ${response.status}: ${await response.text()}`);
+                    const json = await response.json();
+                    return json;
                 } catch (err: any) {
                     return {
-                        content: [
-                            {
-                                type: 'text',
-                                text: `Error segmenting audience: ${err.message || 'Unknown error'}`,
-                            },
-                        ],
+                        content: [{ type: 'text', text: `Error segmenting audience: ${err.message || 'Unknown error'}` }],
                         isError: true,
                     };
                 }
