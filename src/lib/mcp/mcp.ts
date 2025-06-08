@@ -1,6 +1,7 @@
 import Clients from '@/models/Client';
 import { IClient } from '@/types/Client';
 import { decryptClient } from '@/lib/clientEncryption';
+import connectDB from '@/config/db';
 
 export interface SimplifiedClient {
   _id: string;
@@ -64,6 +65,7 @@ function extractGroupValue(client: SimplifiedClient, criterion: keyof Simplified
 
 export async function generateCampaignStrategy(custom?: CustomSegmentRequest): Promise<CampaignStrategyResult> {
   try {
+    connectDB();
     const rawClients = await Clients.find({}, {
       _id: 1,
       firstName: 1,
