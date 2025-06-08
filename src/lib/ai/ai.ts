@@ -63,6 +63,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       tools: tools,
       maxTokens: 1000,
       temperature: 0.4,
+      maxSteps: 2,
     });
     console.log('[AI] Full response text:', JSON.stringify(text));
 
