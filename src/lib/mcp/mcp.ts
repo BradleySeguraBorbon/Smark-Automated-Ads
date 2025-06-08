@@ -65,7 +65,7 @@ function extractGroupValue(client: SimplifiedClient, criterion: keyof Simplified
 
 export async function generateCampaignStrategy(custom?: CustomSegmentRequest): Promise<CampaignStrategyResult> {
   try {
-    connectDB();
+    await connectDB();
     const rawClients = await Clients.find({}, {
       _id: 1,
       firstName: 1,

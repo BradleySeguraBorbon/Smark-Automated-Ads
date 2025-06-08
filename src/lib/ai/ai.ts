@@ -64,7 +64,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
       maxTokens: 1000,
       temperature: 0.4,
     });
-    console.log('[AI] Full response text:', text);
+    console.log('[AI] Full response text:', JSON.stringify(text));
 
     const parsed = parseJsonFromAiText(text);
 
