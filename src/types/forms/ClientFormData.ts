@@ -11,6 +11,9 @@ export interface ClientFormData {
     subscriptions: string[];
     birthDate: Date;
     preferences: string[];
+    gender?: 'male' | 'female' | 'non-binary' | 'prefer_not_to_say';
+    country?: string;
+    languages?: string[];
     tags: TagRef[];
     adInteractions: AdInteractions[];
     tagsPending: boolean;

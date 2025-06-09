@@ -1,7 +1,6 @@
 "use client"
 
 import { UseFormReturn } from "react-hook-form"
-import { IClient } from "@/types/Client"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -10,6 +9,15 @@ import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import {ClientFormData} from "@/types/forms";
+import {CLIENT_LANGUAGES} from "@/types/ClientLanguages";
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem
+} from "@/components/ui/select";
+import MultiSelectField from "@/components/MultiSelectField";
 
 interface ClientInfoFieldsProps {
     form: UseFormReturn<ClientFormData>
@@ -120,6 +128,58 @@ export default function ClientInfoFields({ form }: ClientInfoFieldsProps) {
                         </Popover>
                         <FormMessage />
                     </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Costa Rica" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Gender</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select gender" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                                <SelectItem value="non-binary">Non-binary</SelectItem>
+                                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="languages"
+                render={({ field }) => (
+                    <MultiSelectField
+                        field={field}
+                        label="Languages"
+                        options={CLIENT_LANGUAGES}
+                        placeholder="Select languages"
+                        capitalizeOptions={false}
+                    />
                 )}
             />
         </div>

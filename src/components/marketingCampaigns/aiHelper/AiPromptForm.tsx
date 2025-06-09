@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { MCPStrategyResponse } from '@/types/MCP';
 import { Loader2 } from 'lucide-react';
+import { runMcpAi } from '@/lib/ai/ai';
 import { useAuthStore } from '@/lib/store';
 
 interface AiPromptFormProps {
@@ -21,6 +22,7 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
     const [prompt, setPrompt] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<string | null>(null);
 
     const token = useAuthStore((state) => state.token);
 
@@ -33,24 +35,11 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/mcp/aiStrategy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ prompt }),
-            });
-
-            const data = await res.json();
-            console.log('MCP IA Response:', data);
-
-            if (!res.ok || !data.response?.strategy || data.response?.strategy?.coverage === undefined) {
-                throw new Error(data.response?.error || data.error || 'Failed to generate strategy');
-            }
-
-            onStrategyLoaded(data.response.strategy);
+            const response = await runMcpAi({ prompt });
+            onStrategyLoaded(response);
+            setFeedback(response.message ?? null);
         } catch (err: any) {
+            console.error('MCP AI error:', err);
             setError(err.message || 'Unexpected error');
         } finally {
             setLoading(false);
@@ -99,6 +88,12 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
                     Generate Strategy
                 </Button>
             </div>
+
+            {feedback && (
+                <div className="text-center text-sm text-foreground/80 mt-4">
+                    {feedback}
+                </div>
+            )}
 
             {error && (
                 <div className="text-red-600 text-sm mt-2">

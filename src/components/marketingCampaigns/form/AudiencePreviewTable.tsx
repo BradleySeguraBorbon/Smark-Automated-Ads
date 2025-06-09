@@ -44,7 +44,7 @@ export function AudiencePreviewTable({
               setClients(data.audience);
             }
           })
-          .catch(err => console.error('Error loading AI audience:', err))
+          .catch(err => console.error('Error loading ai audience:', err))
           .finally(() => setLoading(false));
     }
   }, [isAiGenerated, campaignId]);

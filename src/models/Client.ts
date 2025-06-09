@@ -23,7 +23,20 @@ const clientSchema = new Schema<IClientRaw>({
     tokenKey: { type: String },
     chatId: { type: String },
     isConfirmed: { type: Boolean, default: false },
-  }
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'non-binary', 'prefer_not_to_say'],
+    required: false,
+  },
+  country: {
+    type: String,
+    required: false,
+  },
+  languages: {
+    type: [String],
+    required: false,
+  },
 }, {
   timestamps: true,
   validateBeforeSave: true,

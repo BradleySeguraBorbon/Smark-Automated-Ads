@@ -22,8 +22,7 @@ interface CampaignFormTabsProps {
   form: ReturnType<typeof useForm<MarketingCampaignFormData>>;
   campaignId?: string;
   isAiGenerated?: boolean;
-  aiCriterion?: string;
-  aiValue?: string;
+  audienceClientIds?: string[];
 }
 
 export function CampaignFormTabs({
@@ -32,9 +31,9 @@ export function CampaignFormTabs({
   allTags,
   allUsers,
   form,
+  campaignId,
   isAiGenerated = false,
-  aiCriterion,
-  aiValue
+  audienceClientIds
 }: CampaignFormTabsProps) {
   const [audience, setAudience] = useState<ClientRef[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,37 +47,33 @@ export function CampaignFormTabs({
       try {
         setIsLoading(true);
 
-        if (isAiGenerated && aiCriterion && aiValue) {
-          const mcpRes = await fetch('/api/mcp/strategy', {
+        if (formData.isAiGenerated && mode === 'edit' && campaignId) {
+          const res = await fetch(`/api/campaignAudiences/${campaignId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await res.json();
+          setAudience(data.audience || []);
+        }
+
+        if (formData.isAiGenerated && mode === 'new' && audienceClientIds?.length) {
+          const res = await fetch(`/api/clients/bulk`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({
-              filters: [{ field: aiCriterion, match: aiValue }],
-            }),
+            body: JSON.stringify({ ids: audienceClientIds }),
           });
-          const mcpData = await mcpRes.json();
-
-          const ids = mcpData.strategy?.selectedClients || [];
-
-          const fullClientRes = await fetch('/api/clients/bulk', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ ids }),
-          });
-          const fullClientData = await fullClientRes.json();
-          setAudience(fullClientData.results || []);
+          const data = await res.json();
+          setAudience(data.results || []);
         }
 
         if (!formData.isAiGenerated && formData.tags.length > 0) {
           const tagQueryParams = formData.tags
-              .map((tag) => `tagIds[]=${tag._id}`)
-              .join('&');
+            .map((tag) => `tagIds[]=${tag._id}`)
+            .join('&');
 
           const res = await fetch(`/api/clients?${tagQueryParams}&limit=10&page=1`, {
             headers: {
@@ -104,9 +99,9 @@ export function CampaignFormTabs({
     formData.tags,
     formData._id,
     mode,
+    campaignId,
     isAiGenerated,
-    aiCriterion,
-    aiValue
+    audienceClientIds
   ]);
 
 
@@ -135,9 +130,9 @@ export function CampaignFormTabs({
             </div>
           ) : audience ? (
             <AudiencePreviewTable
-                clients={audience}
-                isAiGenerated={form.watch('isAiGenerated')}
-                campaignId={String(form.watch('_id'))}
+              clients={audience}
+              isAiGenerated={form.watch('isAiGenerated')}
+              campaignId={String(form.watch('_id'))}
             />
           ) : (
             <div className="container mx-auto py-10">
