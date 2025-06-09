@@ -7,6 +7,7 @@ import { IUser } from '@/types/User';
 export function transformMarketingCampaignForSave(data: MarketingCampaignFormData) {
     return {
         ...data,
+        isAiGenerated: data.isAiGenerated,
         tags: data.tags.map(tag => tag._id),
         users: data.users.map(user => user._id),
     };
