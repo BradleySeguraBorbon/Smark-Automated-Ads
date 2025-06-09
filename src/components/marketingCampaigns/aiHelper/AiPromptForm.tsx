@@ -39,11 +39,11 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
 
             if (!segmentId) throw new Error('No segmentId returned by MCP');
 
-            const res = await fetch(`/api/segments/${segmentId}`);
+            const res = await fetch(`/api/segments/${segmentId}`,{method: 'DELETE'});
             if (!res.ok) throw new Error('Failed to retrieve segment data');
 
-            const segmentData = await res.json();
-            onStrategyLoaded(segmentData);
+            const segment = await res.json();
+            onStrategyLoaded(segment);
 
             setFeedback(message ?? null);
         } catch (err: any) {

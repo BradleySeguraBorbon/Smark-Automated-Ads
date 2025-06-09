@@ -59,20 +59,8 @@ const handler = createMcpHandler(
                     });
 
                     if (!response.ok) throw new Error(`Status ${response.status}: ${await response.text()}`);
-                    const result = await response.json();
-
-                    await connectDB();
-                    const saved = await SegmentedAudience.create({
-                        coverage: result.coverage,
-                        totalClients: result.totalClients,
-                        selectedClients: result.selectedClients,
-                        segmentGroups: result.segmentGroups,
-                    });
-
-                    return {
-                        content: [{ type: 'text', text: `Segment stored with ID: ${saved._id}` }],
-                        segmentId: saved._id,
-                    };
+                    const json = await response.json();
+                    return json;
                 } catch (err: any) {
                     return {
                         content: [{ type: 'text', text: `Error segmenting audience: ${err.message || 'Unknown error'}` }],

@@ -1,5 +1,7 @@
 import { generateCampaignStrategy } from '@/lib/mcp/mcp';
 import { NextRequest, NextResponse } from 'next/server';
+import connectDB from "@/config/db";
+import SegmentedAudience from "@/models/SegmentedAudience";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,10 +11,21 @@ export async function POST(req: NextRequest) {
 
     console.log('[SEGMENT] Strategy result:', result);
 
-    //Guardar en BD la segmentacion
-
+    await connectDB();
+    const saved = await SegmentedAudience.create({
+      coverage: result.coverage,
+      totalClients: result.totalClients,
+      selectedClients: result.selectedClients,
+      segmentGroups: result.segmentGroups,
+    });
+    console.log("[AI] Segment saved:", saved);
     return NextResponse.json({
-      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({ segmentId: String(saved._id) }),
+        },
+      ],
     });
   } catch (err: any) {
     console.error('[API] Segment error:', err);

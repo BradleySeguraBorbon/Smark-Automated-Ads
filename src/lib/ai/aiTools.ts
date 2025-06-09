@@ -20,16 +20,14 @@ export const segmentAudience = tool({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(args),
         });
-
         if (!response.ok) {
             const errorText = await response.text();
             console.error('[TOOL] Segment endpoint error:', errorText);
             throw new Error(`Segment endpoint failed with status ${response.status}`);
         }
-
         const json = await response.json();
         const text = json?.content?.[0]?.text ?? '';
-        return JSON.parse(text);
+        return JSON.parse(text)
     },
 });
 
