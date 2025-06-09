@@ -21,8 +21,8 @@ import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
 function NewCampaignPage() {
     const searchParams = useSearchParams();
     const isAiGenerated = searchParams.get('ai') === 'true';
-    const initialCriterion = searchParams.get('criterion') || '';
-    const initialValue = searchParams.get('value') || '';
+    const initialAudience = searchParams.get('audience');
+    const parsedAudience = initialAudience ? JSON.parse(initialAudience) : [];
 
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
@@ -105,20 +105,8 @@ function NewCampaignPage() {
         try {
             let allClientIds: string[] = [];
 
-            if (isAiGenerated && initialCriterion && initialValue) {
-                const mcpRes = await fetch('/api/mcp/strategy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        filters: [{ field: initialCriterion, match: initialValue }],
-                    }),
-                });
-
-                const mcpData = await mcpRes.json();
-                allClientIds = mcpData?.strategy?.selectedClients || [];
+            if (isAiGenerated) {
+                allClientIds = parsedAudience;
             } else {
                 const tagQuery = payload.tags.map((id) => `tagIds[]=${id}`).join('&');
                 const clientRes = await fetch(`/api/clients?${tagQuery}`, {
@@ -196,8 +184,7 @@ function NewCampaignPage() {
                                     allUsers={allUsers}
                                     form={form}
                                     isAiGenerated={isAiGenerated}
-                                    aiCriterion={initialCriterion}
-                                    aiValue={initialValue}
+                                    audienceClientIds={parsedAudience}
                                 />
                             </div>
                             <div className="lg:col-span-1">
