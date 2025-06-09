@@ -6,9 +6,9 @@ import connectDB from '@/config/db';
 /* --------------------------------------------------
  *  Constants – tweak here only
  * --------------------------------------------------*/
-export const MIN_GROUP_SIZE = 3;   // at least 3 clients per audience
-export const MAX_SEGMENT_GROUPS = 5;   // never return more than 5 audiences
-export const MAX_CRITERIA_TRIED = 8;   // how many different fields to inspect
+export const MIN_GROUP_SIZE = 3;
+export const MAX_SEGMENT_GROUPS = 5;
+export const MAX_CRITERIA_TRIED = 8;
 
 /* --------------------------------------------------
  *  Types – unchanged
@@ -66,7 +66,12 @@ const intersect = (a: string[], b: string[]) =>
 const getFieldValues = (c: SimplifiedClient, f: keyof SimplifiedClient) => {
   if (f === 'birthDate') {
     const d = new Date(c.birthDate);
-    return isNaN(d.getTime()) ? ['Unknown'] : [`Month-${d.getMonth() + 1}`];
+    if (isNaN(d.getTime())) return ['Unknown'];
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return [`Age-${age}`];
   }
   const raw: any = c[f];
   if (raw === undefined || raw === null) return ['Unknown'];
@@ -85,7 +90,6 @@ function selectTopGroups(
   const covered = new Set<string>();
 
   while (chosen.length < MAX_SEGMENT_GROUPS && all.length) {
-    // pick the group that adds the most *new* clients
     all.sort(
       (a, b) =>
         b.clientIds.filter(id => !covered.has(id)).length -
@@ -93,7 +97,7 @@ function selectTopGroups(
     );
     const best = all.shift()!;
     const newClients = best.clientIds.filter(id => !covered.has(id));
-    if (newClients.length < MIN_GROUP_SIZE) break; // not useful
+    if (newClients.length < MIN_GROUP_SIZE) break;
     chosen.push(best);
     newClients.forEach(id => covered.add(id));
   }
@@ -135,7 +139,6 @@ export async function generateCampaignStrategy(
       const matchesAtLeastOne = custom.filters!.some(f => {
         const values = getFieldValues(client, f.field);
 
-        // special birthDate rules
         if (f.field === 'birthDate') {
           const birth = new Date(client.birthDate);
           if (isNaN(birth.getTime())) return false;
@@ -156,18 +159,41 @@ export async function generateCampaignStrategy(
 
       if (!matchesAtLeastOne) return;
 
-      // add client to segments *only* for allowed value(s)
-      custom.filters!.forEach(({ field, match }) => {
+      // ✅ Agrupar por field (máximo 1 grupo por campo)
+      custom.filters!.forEach(({ field, match, min, max, currentMonth }) => {
         const allowed = toArray(match);
-        getFieldValues(client, field).forEach(v => {
-          if (allowed.length && !allowed.includes(v)) return;
+        const values = getFieldValues(client, field);
 
-          const key = `${field}:${v}`;
-          const list = buckets[key] ?? (buckets[key] = []);
-          let group = list[0];
-          if (!group) list.push((group = { criterion: field, value: v, clientIds: [], reason: `Clients with ${field} = ${v}` }));
+        const key = `${field}:merged`;
+        const list = buckets[key] ?? (buckets[key] = []);
+        let group = list[0];
+        if (!group) {
+          list.push(group = {
+            criterion: field,
+            value: 'merged',
+            clientIds: [],
+            reason: `Clients matching any value for ${field}`,
+          });
+        }
+
+        if (field === 'birthDate') {
+          const birth = new Date(client.birthDate);
+          if (isNaN(birth.getTime())) return;
+          if (currentMonth && birth.getMonth() !== new Date().getMonth()) return;
+          if (min && birth < new Date(min)) return;
+          if (max && birth > new Date(max)) return;
           group.clientIds.push(client._id);
-        });
+          return;
+        }
+
+        if (allowed.length) {
+          const wantsMissing = allowed.includes('__MISSING__');
+          const isMissing = values.every(v => v === 'Unknown' || v === '');
+          const matched = wantsMissing ? isMissing : intersect(values, allowed);
+          if (!matched) return;
+        }
+
+        group.clientIds.push(client._id);
       });
     });
   }

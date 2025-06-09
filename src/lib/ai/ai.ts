@@ -23,9 +23,14 @@ const SYSTEM_PROMPT = `
   - subscriptions: active channels, e.g., 'email', 'telegram'.
   - preferredContactMethod: one of 'email', 'telegram'.
   - telegramConfirmed: boolean, true or false.
-  - tags: assigned tags in the platform.
+  - firstName: client's first name. For example: "clients named John" → filter by firstName: ["John"].
+  - lastName: client's last name. For example: "clients with last name Smith" → filter by lastName: ["Smith"].
+  - email: client's email address. Use it for direct matching when an email is mentioned.
 
-  If the user requests to target "young people", infer an age below 30 (use birthDate > 1995). For "older people", use age > 50 (birthDate < 1975).
+  If the user mentions an age condition (e.g., "older than 60", "younger than 25", "clients over 40"), convert it into a birthDate range:
+  - For "older than N", set 'max' to the ISO date of (today - N years).
+  - For "younger than N", set 'min' to the ISO date of (today - N years).
+  Always provide the computed 'min' or 'max' as a string in "YYYY-MM-DD" format.
 
   For "this month", compare the birthDate's month with the current month.
 
@@ -35,7 +40,10 @@ const SYSTEM_PROMPT = `
 
   If the user says 'detect market niches automatically', call segmentAudience with an empty object {}.
 
-  Always respond by calling a tool with correct parameters. Do not explain or guess.
+  Always call the 'segmentAudience' tool once per request. 
+  If the user prompt implies multiple conditions, combine them in a single call by including all filters together inside the 'filters' array.
+
+  Do not call the tool more than once. Only one invocation should be returned, containing all filters needed.
 
   Always provide filter.match as an array of strings, even when there is only one value.
 
