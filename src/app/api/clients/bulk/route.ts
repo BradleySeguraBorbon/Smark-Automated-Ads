@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Clients } from '@/models/models';
 import connectToDB from '@/config/db';
 import { getUserFromRequest } from '@/lib/auth';
+import {decryptClient} from "@/lib/clientEncryption";
+import {IClient} from "@/types/Client";
 
 export async function POST(req: NextRequest) {
     try {
@@ -26,7 +28,8 @@ export async function POST(req: NextRequest) {
             .limit(10)
             .lean();
 
-        return NextResponse.json({ results: clients }, { status: 200 });
+        const decrypted = clients.map(client => decryptClient(client as unknown as IClient));
+        return NextResponse.json({ results: decrypted }, { status: 200 });
     } catch (err: any) {
         console.error('Error in bulk client fetch:', err);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

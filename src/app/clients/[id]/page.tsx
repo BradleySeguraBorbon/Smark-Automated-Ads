@@ -93,6 +93,16 @@ export default function ClientViewPage() {
                     <p><span className="font-medium">Preferred Contact:</span> {client.preferredContactMethod}</p>
                     <p><span className="font-medium">Subscriptions:</span> {client.subscriptions.join(", ")}</p>
                     <p><span className="font-medium">Birth Date:</span> {new Date(client.birthDate).toLocaleDateString()}</p>
+                    <p><span className="font-medium">Country:</span> {client.country}</p>
+                    <p><span className="font-medium">Gender:</span> {client.gender}</p>
+                    <p><span className="font-medium">Languages:</span></p>
+                    {client.languages && client.languages.length > 0 ? (
+                        client.languages.map((pref, idx) => (
+                            <span key={idx} className="px-3 py-1 rounded-full text-sm">{pref}</span>
+                        ))
+                    ) : (
+                        <p className="text-muted-foreground">No languages set.</p>
+                    )}
                 </CardContent>
             </Card>
 
