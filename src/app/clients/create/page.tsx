@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import ClientForm from "@/components/clients/clientForm/ClientForm"
+import ClientForm from "@/components/clients/ClientForm"
 import BreadcrumbHeader from "@/components/BreadcrumbHeader"
 import CustomAlertDialog from "@/components/CustomAlertDialog"
 import {useRef} from "react";
