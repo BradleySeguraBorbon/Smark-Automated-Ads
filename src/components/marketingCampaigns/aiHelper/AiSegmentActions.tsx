@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MCPStrategyResponse } from '@/types/MCP';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox  } from '@/components/ui/checkbox';
 import { Sparkles } from 'lucide-react';
 
 interface AiSegmentActionsProps {
@@ -40,7 +40,7 @@ export default function AiSegmentActions({ strategy }: AiSegmentActionsProps) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-yellow-500" />
-                    Select Segments for Campaign
+                    Select Segments for a new Campaign
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
