@@ -1,158 +1,100 @@
-'use client';
+'use client'
 
-import {useAuthStore} from '@/lib/store';
-import {useEffect, useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {useRouter} from 'next/navigation';
-import {Card, CardContent} from '@/components/ui/card';
-import UserForm from '@/components/users/UserForm';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import {decodeToken} from "@/lib/utils/decodeToken";
-import BreadcrumbHeader from "@/components/BreadcrumbHeader";
-import CustomAlertDialog from "@/components/CustomAlertDialog";
-import {UserFormData} from "@/types/forms/UserFormData"
-
-interface CreateUserFormData {
-    username: string;
-    password: string;
-    email: string;
-    role?: string;
-}
+import {useRouter} from 'next/navigation'
+import {useForm} from 'react-hook-form'
+import {useState} from 'react'
+import {useAuthStore} from '@/lib/store'
+import {Card, CardContent} from '@/components/ui/card'
+import BreadcrumbHeader from '@/components/BreadcrumbHeader'
+import CustomAlertDialog from '@/components/CustomAlertDialog'
+import {Form} from '@/components/ui/form'
+import {Button} from '@/components/ui/button'
+import UserBasicFields from '@/components/users/UserBasicFields'
+import UserContactFields from '@/components/users/UserContactFields'
+import {UserFormData} from '@/types/forms'
 
 export default function CreateUserPage() {
-    const token = useAuthStore((state) => state.token);
-    const [userInfo, setUserInfo] = useState<{ username: string; role: string } | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [apiError, setApiError] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const router = useRouter();
-    const [alertOpen, setAlertOpen] = useState(false);
-    const [alertType, setAlertType] = useState<"success" | "error">("success");
-    const [alertMessage, setAlertMessage] = useState("");
+    const router = useRouter()
+    const token = useAuthStore((s) => s.token)
+    const userRole = useAuthStore((s) => s.user?.role || '')
+
+    type AlertType = 'info' | 'error' | 'warning' | 'success'
+    const [dialog, setDialog] = useState<{ open: boolean, type: AlertType, message: string }>
+    ({open: false, type: 'success', message: ''})
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const form = useForm<UserFormData>({
         defaultValues: {
             username: '',
             password: '',
             email: '',
-            role: 'employee',
-        },
-    });
-
-    useEffect(() => {
-        if (!token) {
-            return;
+            role: 'employee'
         }
+    })
 
-        async function checkToken() {
-            //console.log("Antes de decodeToken");
-            const user = await decodeToken(token);
-            console.log("User: ", user);
-            setUserInfo(user);
-        }
-
-        checkToken()
-        setLoading(false);
-    }, [token, router]);
-
-    const handleSubmit = async (data: CreateUserFormData) => {
-        setIsSubmitting(true);
-        setApiError(null);
-
+    const onSubmit = async (data: UserFormData) => {
+        setIsSubmitting(true)
         try {
             const payload = {
-                username: data.username,
-                password: data.password,
-                email: data.email,
-                role: userInfo?.role === 'developer' ? data.role : 'employee',
-            };
+                ...data,
+                role: userRole === 'developer' ? data.role : 'employee'
+            }
 
-            const response = await fetch('/api/users', {
+            const res = await fetch('/api/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify(payload),
-            });
+                body: JSON.stringify(payload)
+            })
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                const errorMessage = result.message || result.error || 'Failed to create user.';
-                setAlertType("error");
-                setAlertMessage(errorMessage);
-                setAlertOpen(true);
-            } else {
-                setAlertType("success");
-                setAlertMessage("User created successfully!");
-                setAlertOpen(true);
-                setTimeout(() => {
-                    router.push('/users');
-                }, 3000);
+            const result = await res.json()
+            if (!res.ok) {
+                setDialog({
+                    open: true,
+                    type: 'error',
+                    message: result.message || result.error || 'Failed to create user.'
+                })
+                return
             }
-        } catch (error) {
-            console.error('Error creating user:', error);
-            setAlertType("error");
-            setAlertMessage("Unexpected error occurred.");
-            setAlertOpen(true);
+            setDialog({open: true, type: 'success', message: 'User created successfully!'})
+            setTimeout(() => router.push('/users'), 3000)
+        } catch {
+            setDialog({open: true, type: 'error', message: 'Unexpected error occurred.'})
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false)
         }
-    };
-
-
-    if (loading) {
-        return (
-            <div className="container mx-auto py-10">
-                <LoadingSpinner/>
-            </div>
-        );
-    }
-
-    if (userInfo?.role !== 'admin' && userInfo?.role !== 'developer') {
-        return (
-            <div className="container mx-auto py-10 text-center">
-                <p className="text-red-500">You do not have permission to create users.</p>
-            </div>
-        );
     }
 
     return (
-        <>
-            <div className="container mx-auto py-10 max-w-lg">
-                <header>
-                    <BreadcrumbHeader backHref="/users" title="Create a New User"/>
-                </header>
+        <div className="container mx-auto py-10 max-w-lg">
+            <BreadcrumbHeader backHref="/users" title="Create a New User"/>
+            <Card>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <UserBasicFields form={form}/>
+                            <UserContactFields form={form} userRole={userRole}/>
+                            <div className="flex justify-end">
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Creating...' : 'Create User'}
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </CardContent>
+            </Card>
 
-                <Card>
-                    <CardContent>
-                        {apiError && (
-                            <div className="text-red-500 bg-red-100 p-3 rounded mb-4">{apiError}</div>
-                        )}
-                        <UserForm
-                            form={form}
-                            onSubmitAction={handleSubmit}
-                            userRole={userInfo?.role || ''}
-                            isSubmitting={isSubmitting}
-                        />
-                    </CardContent>
-                </Card>
-            </div>
             <CustomAlertDialog
-                open={alertOpen}
-                type={alertType}
-                title={alertType === "success" ? "Success" : "Error"}
-                description={alertMessage}
+                open={dialog.open}
+                type={dialog.type}
+                title={dialog.type === 'success' ? 'Success' : 'Error'}
+                description={dialog.message}
                 confirmLabel="OK"
-                onConfirmAction={() => {
-                    if(alertType!=='error'){
-                        setAlertOpen(false);
-                        router.back();
-                    }
-                }}
-                onOpenChangeAction={setAlertOpen}
+                onConfirmAction={() => setDialog({...dialog, open: false})}
+                onOpenChangeAction={(open) => !open && setDialog({...dialog, open: false})}
             />
-        </>
-    );
+        </div>
+    )
 }

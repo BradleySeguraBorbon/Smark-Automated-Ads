@@ -7,7 +7,7 @@ import CustomAlertDialog from '@/components/CustomAlertDialog';
 import { useAuthStore } from '@/lib/store';
 import { useNotificationStore } from '@/lib/store';
 
-export default function ClientImportForm() {
+export default function ClientImportForm({ onSuccess }: { onSuccess: (message: string) => void }) {
     const [loading, setLoading] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
     const [errorOpen, setErrorOpen] = useState(false);
@@ -75,7 +75,7 @@ export default function ClientImportForm() {
             }
 
             setSuccessMessage(result.message + " Tag assignment will be done in the background.");
-            setSuccessOpen(true);
+            onSuccess(result.message);
             setLoading(false);
 
             try {

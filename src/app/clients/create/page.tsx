@@ -59,7 +59,6 @@ export default function CreateClientPage() {
                 return
             }
 
-            console.log("Client created:", result)
             setSuccessOpen(true)
         } catch (error: unknown) {
             console.error("Network or unexpected error:", error)

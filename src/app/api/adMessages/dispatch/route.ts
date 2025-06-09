@@ -5,12 +5,6 @@ import connectDB from '@/config/db';
 export async function GET(req: Request) {
     try {
         const url = new URL(req.url);
-        const token = url.searchParams.get('token');
-        const expected = process.env.CRON_SECRET;
-
-        if (token !== expected) {
-            return new Response('Unauthorized', { status: 401 });
-        }
         await connectDB();
 
         const endOfToday = new Date();

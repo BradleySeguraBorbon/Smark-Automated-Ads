@@ -1,136 +1,54 @@
-'use client';
+'use client'
 
-import {IUser} from "@/types/User";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Trash2, Eye} from "lucide-react";
-import CustomAlertDialog from "@/components/CustomAlertDialog";
-import {useState} from "react";
-import {useAuthStore} from '@/lib/store';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { IUser } from '@/types/User'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useDeleteUser } from './hooks/useDeleteUser'
+import UserCardBody from './UserCardBody'
+import CustomAlertDialog from '@/components/CustomAlertDialog'
 
-interface UserCardProps {
-    user: IUser;
-    currentUserRole: string;
-    currentUserId?: string;
-    onDeleteAction: (id: string) => void;
+interface Props {
+    user: IUser
+    currentUserRole: string
+    currentUserId?: string
+    onDeleteAction: (id: string) => void
 }
 
-export default function UserCard({user, currentUserRole, currentUserId, onDeleteAction}: UserCardProps) {
-    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+export default function UserCard({
+                                     user,
+                                     currentUserRole,
+                                     currentUserId,
+                                     onDeleteAction
+                                 }: Props) {
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
 
-    const [feedbackDialog, setFeedbackDialog] = useState<{
-        open: boolean;
-        type: 'success' | 'error';
-        title: string;
-        description: string;
-    }>({
-        open: false,
-        type: 'success',
-        title: '',
-        description: '',
-    });
+    const {
+        feedbackDialog,
+        setFeedbackDialog,
+        handleDelete
+    } = useDeleteUser(user._id as string, onDeleteAction)
 
-    const token = useAuthStore((state) => state.token);
-
-    const handleDelete = async () => {
-        try {
-            const response = await fetch(`/api/users/${user._id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                setFeedbackDialog({
-                    open: true,
-                    type: 'error',
-                    title: 'Error',
-                    description: result.message || result.error || 'Failed to delete user.',
-                });
-            } else {
-                onDeleteAction(user._id as string);
-                setFeedbackDialog({
-                    open: true,
-                    type: 'success',
-                    title: 'Success',
-                    description: 'User deleted successfully.',
-                });
-            }
-        } catch (error) {
-            console.error('Delete error:', error);
-            setFeedbackDialog({
-                open: true,
-                type: 'error',
-                title: 'Error',
-                description: 'Unexpected error occurred while deleting the user.',
-            });
-        } finally {
-            setConfirmDialogOpen(false);
-        }
-    };
+    const canDelete =
+        (currentUserRole === 'developer' ||
+            (currentUserRole === 'admin' && user.role === 'employee')) &&
+        user._id !== currentUserId
 
     return (
         <>
-            <Card className="relative hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row justify-between items-start">
-                    <div>
-                        <CardTitle>
-                            {user.username}
-                        </CardTitle>
-                    </div>
-                    <div className="flex gap-2">
-                        {/*currentUserRole !== 'employee' && (
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => router.push(`/users/${user._id}`)}
-                            >
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">View</span>
-                            </Button>
-                        )*/}
-
-                        {(currentUserRole === 'developer' ||
-                                (currentUserRole === 'admin' && user.role === 'employee')) &&
-                            user._id !== currentUserId && (
-                                <Button
-                                    variant="secondary"
-                                    className={"bg-teal-600 hover:bg-teal-800"}
-                                    size="icon"
-                                    onClick={() => setConfirmDialogOpen(true)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
-                                </Button>
-                            )}
-                    </div>
-                </CardHeader>
-
-                <CardContent>
-                    <div className="space-y-2">
-                        <p className="text-sm">
-                            <span className="font-medium">Email:</span> {user.email}
-                        </p>
-                        <p className="text-sm">
-                            <span className="font-medium">Role:</span> {user.role}
-                        </p>
-                        {user.marketingCampaigns.length > 0 && (
-                            <p className="text-sm">
-                                <span className="font-medium">Marketing Campaigns:</span>{' '}
-                                {user.marketingCampaigns.map((mc) => mc._id).join(', ')}
-                            </p>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                            Created At: {new Date(user.createdAt!).toLocaleString()}
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
+            <UserCardBody user={user}>
+                {canDelete && (
+                    <Button
+                        variant="secondary"
+                        className="bg-teal-600 hover:bg-teal-800"
+                        size="icon"
+                        onClick={() => setConfirmDialogOpen(true)}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                    </Button>
+                )}
+            </UserCardBody>
 
             <CustomAlertDialog
                 open={confirmDialogOpen}
@@ -139,7 +57,10 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                 description={`Are you sure you want to delete ${user.username}? This action cannot be undone.`}
                 confirmLabel="Delete"
                 cancelLabel="Cancel"
-                onConfirmAction={handleDelete}
+                onConfirmAction={() => {
+                    handleDelete()
+                    setConfirmDialogOpen(false)
+                }}
                 onCancelAction={() => setConfirmDialogOpen(false)}
                 onOpenChangeAction={setConfirmDialogOpen}
             />
@@ -150,9 +71,9 @@ export default function UserCard({user, currentUserRole, currentUserId, onDelete
                 title={feedbackDialog.title}
                 description={feedbackDialog.description}
                 confirmLabel="OK"
-                onConfirmAction={() => setFeedbackDialog({...feedbackDialog, open: false})}
-                onOpenChangeAction={(open) => setFeedbackDialog((prev) => ({...prev, open}))}
+                onConfirmAction={() => setFeedbackDialog({ ...feedbackDialog, open: false })}
+                onOpenChangeAction={(open) => setFeedbackDialog((prev) => ({ ...prev, open }))}
             />
         </>
-    );
+    )
 }

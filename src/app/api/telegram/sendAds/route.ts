@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
 
     const { adMessageId } = await req.json();
     try {
-        const { adMessage, contacts } = await getAudience(adMessageId, 'telegramChatId');
+        const { adMessage, contacts } = await getAudience(adMessageId, 'telegram.chatId');
 
         await sendTelegramMessages(contacts, adMessage.content.telegram.message || '');
 

@@ -2,7 +2,7 @@ import { AdMessages, CampaignAudiences } from '@/models/models';
 import connectDB from '@/config/db';
 import {decryptClient} from "@/lib/clientEncryption";
 
-export async function getAudience(adMessageId: string, field: 'email' | 'telegramChatId') {
+export async function getAudience(adMessageId: string, field: 'email' | 'telegram.chatId') {
     await connectDB();
 
     const adMessage = await AdMessages.findById(adMessageId);

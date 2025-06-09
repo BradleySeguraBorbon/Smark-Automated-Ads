@@ -129,12 +129,6 @@ export default function ProfilePage() {
                                 </ul>
                             </div>
                         )}
-
-                        {/*<div className="pt-4">
-                            <Button variant="outline" onClick={() => router.back()}>
-                                Back
-                            </Button>
-                        </div>*/}
                     </CardContent>
                 </Card>
             </div>

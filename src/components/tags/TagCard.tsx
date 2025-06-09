@@ -29,14 +29,12 @@ export default function TagCard({ tag, refreshAction, onSuccessDelete, currentUs
                     Authorization: `Bearer ${token}`,
                 },
             })
-
             const result = await res.json()
 
             if (!res.ok) {
                 console.error(result)
                 return
             }
-
             refreshAction()
             onSuccessDelete?.(`Tag "${tag.name}" was deleted successfully.`)
         } catch (err) {

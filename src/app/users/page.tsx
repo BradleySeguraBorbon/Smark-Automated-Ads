@@ -1,110 +1,61 @@
-'use client';
+'use client'
 
-import {useState, useEffect} from 'react';
-import {Button} from '@/components/ui/button';
-import {PlusCircle} from 'lucide-react';
-import Link from 'next/link';
-import {IUser} from '@/types/User';
-import UsersList from '@/components/users/UsersList';
-import SearchInput from '@/components/SearchInput';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import PaginationControls from '@/components/PaginationControls';
-import {useAuthStore} from '@/lib/store';
-import {decodeToken} from '@/lib/utils/decodeToken';
-import BreadcrumbHeader from "@/components/BreadcrumbHeader";
-import {useRouter} from "next/navigation";
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { PlusCircle } from 'lucide-react'
+import Link from 'next/link'
+import { useUsersFetcher } from '@/components/users/hooks/useUsersFetcher'
+import { useCurrentUserInfo } from '@/components/users/hooks/useCurrentUserInfo'
+import UsersList from '@/components/users/UsersList'
+import SearchInput from '@/components/SearchInput'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import PaginationControls from '@/components/PaginationControls'
+import BreadcrumbHeader from '@/components/BreadcrumbHeader'
 
 export default function UsersPage() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [apiError, setApiError] = useState<string | null>(null);
-    const [fetchedUsers, setFetchedUsers] = useState<IUser[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const {
+        loading,
+        apiError,
+        users,
+        totalPages,
+        setUsers,
+        fetchUsers
+    } = useUsersFetcher(currentPage)
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const router = useRouter();
-
-    const token = useAuthStore((state) => state.token);
-    const [userInfo, setUserInfo] = useState<{ username: string; role: string; id?: string } | null>(null);
-    const _hasHydrated = useAuthStore((state) => state._hasHydrated);
-
-    const fetchUsers = async (page: number = 1) => {
-        try {
-            setLoading(true);
-            const response = await fetch(`/api/users?page=${page}&limit=10`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                const errorMessage = result.message || result.error || 'Unknown error occurred';
-                setApiError(errorMessage);
-                return;
-            }
-            setFetchedUsers(result.results);
-            setTotalPages(result.totalPages);
-            setApiError(null);
-        } catch (error) {
-            console.error('Fetch error:', error);
-            setApiError('Unexpected error occurred.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { userInfo, isReady } = useCurrentUserInfo()
 
     useEffect(() => {
-        if(!_hasHydrated) return;
-        const init = async () => {
-            if (!token) {
-                setUserInfo(null);
-                router.push('/auth/login');
-                return;
-            }
+        if (isReady) fetchUsers()
+    }, [isReady, currentPage])
 
-            const user = await decodeToken(token);
-            if (!user) {
-                router.push('/auth/login');
-                return;
-            }
-
-            setUserInfo(user);
-            fetchUsers(currentPage);
-        };
-
-        init();
-    }, [_hasHydrated, token, currentPage]);
-
-    const filteredUsers = fetchedUsers.filter((user) =>
+    const filteredUsers = users.filter((user) =>
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    )
 
     return (
-        <div className="max-w-6xl mx-auto mt-8 lg:px-44 md:px-20 px-10 transition-all duration-300 ease-in-out">
+        <div className="max-w-6xl mx-auto mt-8 lg:px-36 md:px-24 px-10 transition-all duration-300 ease-in-out">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
-                <BreadcrumbHeader backHref="/" title="User Management"/>
+                <BreadcrumbHeader backHref="/" title="User Management" />
                 {(userInfo?.role === 'developer' || userInfo?.role === 'admin') && (
                     <Link href="/users/new">
                         <Button className="w-full sm:w-auto bg-purple-700 hover:bg-purple-900" variant="secondary">
-                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            <PlusCircle className="mr-2 h-4 w-4" />
                             Add New User
                         </Button>
                     </Link>
                 )}
             </div>
 
-            <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder={"Search Users..."}/>
+            <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder="Search Users..." />
 
             {apiError && (
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
             )}
 
             {loading ? (
-                <LoadingSpinner/>
+                <LoadingSpinner />
             ) : (
                 <>
                     <UsersList
@@ -112,18 +63,18 @@ export default function UsersPage() {
                         currentUserRole={userInfo?.role}
                         currentUserId={userInfo?.id}
                         onDelete={(deletedId) =>
-                            setFetchedUsers((prev) => prev.filter((u) => u._id as string !== deletedId))
+                            setUsers((prev) => prev.filter((u) => u._id !== deletedId))
                         }
                     />
                     {totalPages > 1 && (
                         <PaginationControls
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChangeAction={(page) => setCurrentPage(page)}
+                            onPageChangeAction={setCurrentPage}
                         />
                     )}
                 </>
             )}
         </div>
-    );
+    )
 }

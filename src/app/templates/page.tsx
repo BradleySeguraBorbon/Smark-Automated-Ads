@@ -1,162 +1,127 @@
-'use client'
+'use client';
 
-import {useState, useEffect} from "react"
-import {useRouter} from "next/navigation"
-import Link from "next/link"
-import {Button} from "@/components/ui/button"
-import {PlusCircle} from "lucide-react"
-import BreadcrumbHeader from "@/components/BreadcrumbHeader"
-import SearchInput from "@/components/SearchInput"
-import LoadingSpinner from "@/components/LoadingSpinner"
-import PaginationControls from "@/components/PaginationControls"
-import {useAuthStore} from '@/lib/store';
-import {decodeToken} from '@/lib/utils/decodeToken';
-import CustomAlertDialog from "@/components/CustomAlertDialog"
-import {ITemplate} from "@/types/Template"
-import TemplateRow from "@/components/templates/TemplateRow";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import BreadcrumbHeader from '@/components/BreadcrumbHeader';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import CustomAlertDialog from '@/components/CustomAlertDialog';
+import { useAuthStore } from '@/lib/store';
+import { decodeToken } from '@/lib/utils/decodeToken';
+import { ITemplate } from '@/types/Template';
+import TemplateTable from '@/components/templates/TemplateTable';
 
 export default function TemplatesPage() {
-    const [templates, setTemplates] = useState<ITemplate[]>([])
-    const [searchTerm, setSearchTerm] = useState("")
-    const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(1)
-    const [loading, setLoading] = useState(true)
-    const [apiError, setApiError] = useState<string | null>(null)
-    const [deletingId, setDeletingId] = useState<string | null>(null)
-    const [successOpen, setSuccessOpen] = useState(false)
-    const [alertOpen, setAlertOpen] = useState(false)
+    const [templates, setTemplates] = useState<ITemplate[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [successOpen, setSuccessOpen] = useState(false);
+    const [alertOpen, setAlertOpen] = useState(false);
 
-    const token = useAuthStore((state) => state.token)
-    const _hasHydrated = useAuthStore((state) => state._hasHydrated)
-    const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null)
+    const token = useAuthStore((s) => s.token);
+    const _hasHydrated = useAuthStore((s) => s._hasHydrated);
+    const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
 
-    const router = useRouter()
+    const router = useRouter();
 
     useEffect(() => {
-        if (!_hasHydrated) return
+        if (!_hasHydrated) return;
 
         const init = async () => {
-            if (!token) return router.push('/auth/login')
-            const user = await decodeToken(token)
-            if (!user) return router.push('/auth/login')
-            if(user.role !=='developer' && user.role !== 'admin') return router.push('/')
-            setUserInfo(user)
-            fetchTemplates(currentPage)
-        }
+            if (!token) return router.push('/auth/login');
+            const user = await decodeToken(token);
+            if (!user) return router.push('/auth/login');
+            if (!['developer', 'admin'].includes(user.role)) return router.push('/');
+            setUserInfo(user);
+            fetchTemplates(currentPage);
+        };
 
-        init()
-    }, [_hasHydrated, token, currentPage])
+        init();
+    }, [_hasHydrated, token, currentPage]);
 
     const fetchTemplates = async (page: number = 1) => {
         try {
-            setLoading(true)
+            setLoading(true);
             const response = await fetch(`/api/templates?page=${page}&limit=10`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-            const result = await response.json()
-            if (!response.ok) throw new Error(result.message || result.error)
-            setTemplates(result.results)
-            setTotalPages(result.totalPages)
-            setApiError(null)
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || result.error);
+            setTemplates(result.results);
+            setTotalPages(result.totalPages);
+            setApiError(null);
         } catch (error: any) {
-            setApiError(error.message || 'Error fetching templates.')
+            setApiError(error.message || 'Error fetching templates.');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const confirmDelete = (id: string) => {
-        setDeletingId(id)
-        setAlertOpen(true)
-    }
+        setDeletingId(id);
+        setAlertOpen(true);
+    };
 
     const handleDelete = async () => {
-        if (!deletingId) return
+        if (!deletingId) return;
         try {
             const response = await fetch(`/api/templates/${deletingId}`, {
                 method: 'DELETE',
-                headers: {Authorization: `Bearer ${token}`},
-            })
-            const result = await response.json()
-            if (!response.ok) throw new Error(result.message || result.error)
-            setTemplates(prev => prev.filter(t => t._id !== deletingId))
-            setSuccessOpen(true)
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || result.error);
+            setTemplates((prev) => prev.filter((t) => t._id !== deletingId));
+            setSuccessOpen(true);
         } catch (error: any) {
-            setApiError(error.message || 'Error deleting template.')
+            setApiError(error.message || 'Error deleting template.');
         } finally {
-            setAlertOpen(false)
-            setDeletingId(null)
+            setAlertOpen(false);
+            setDeletingId(null);
         }
-    }
-
-    const filteredTemplates = templates.filter(template =>
-        template.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    };
 
     return (
         <>
-            <div className="mx-auto mt-8 lg:px-36 lx:px-44 md:px-28 sm:px-20 transition-all duration-300 ease-in-out">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 mt-6 gap-4">
-                    <BreadcrumbHeader backHref='/' title='Templates Management'/>
+            <div className="mx-auto mt-8 lg:px-36 md:px-28 sm:px-20">
+                <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+                    <BreadcrumbHeader backHref="/" title="Templates Management" />
                     {['developer', 'admin'].includes(userInfo?.role || '') && (
                         <Link href="/templates/new">
-                            <Button variant="secondary" className="w-full sm:w-auto bg-purple-700 hover:bg-purple-900">
-                                <PlusCircle className="mr-2 h-4 w-4"/>
+                            <Button className="bg-purple-700 hover:bg-purple-900">
+                                <PlusCircle className="mr-2 h-4 w-4" />
                                 Add New Template
                             </Button>
                         </Link>
                     )}
                 </div>
 
-                <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder="Search templates..."/>
-
-                {apiError && (
-                    <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
-                )}
-
+                {apiError && <div className="text-red-500 bg-red-100 rounded-md p-4">{apiError}</div>}
                 {loading ? (
-                    <LoadingSpinner/>
+                    <LoadingSpinner />
                 ) : (
-                    <table className="w-full text-left border rounded-md overflow-hidden mt-6">
-                        <thead className="bg-muted text-muted-foreground">
-                        <tr>
-                            <th className="px-4 py-3">Name</th>
-                            <th className="px-4 py-3">Type</th>
-                            {/*<th className="px-4 py-3">Placeholders</th>*/}
-                            <th className="px-4 py-3">Last Update</th>
-                            <th className="px-4 py-3">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody className="">
-                        {filteredTemplates.map(template => (
-                            <TemplateRow
-                                key={template._id as string}
-                                template={template}
-                                userRole={userInfo?.role || ''}
-                                onDeleteAction={confirmDelete}
-                            />
-                        ))}
-                        </tbody>
-                    </table>
-                )}
-
-                {totalPages > 1 && (
-                    <PaginationControls
+                    <TemplateTable
+                        templates={templates}
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChangeAction={(page) => setCurrentPage(page)}
+                        userInfo={userInfo}
+                        loading={loading}
+                        apiError={apiError}
+                        successOpen={successOpen}
+                        alertOpen={alertOpen}
+                        onDelete={handleDelete}
+                        confirmDelete={confirmDelete}
+                        setCurrentPage={setCurrentPage}
+                        setSuccessOpen={setSuccessOpen}
+                        setAlertOpen={setAlertOpen}
                     />
                 )}
             </div>
-            <CustomAlertDialog
-                open={alertOpen}
-                type="warning"
-                title="Delete Template"
-                description="Are you sure you want to delete this template? This action cannot be undone."
-                onConfirmAction={handleDelete}
-                onCancelAction={() => setAlertOpen(false)}
-                onOpenChangeAction={setAlertOpen}
-            />
 
             <CustomAlertDialog
                 open={successOpen}
@@ -167,7 +132,6 @@ export default function TemplatesPage() {
                 onConfirmAction={() => setSuccessOpen(false)}
                 onOpenChangeAction={setSuccessOpen}
             />
-
         </>
-    )
+    );
 }
