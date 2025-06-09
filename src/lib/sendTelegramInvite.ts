@@ -2,7 +2,14 @@ import sendEmail from "@/lib/utils/mailer";
 
 export async function sendTelegramInvite(clientEmail: string, tokenKey: string) {
     try {
+console.log("Sending invite to:", clientEmail);
         const botUsername = process.env.TELEGRAM_BOT_USERNAME;
+
+        if (!botUsername) {
+            console.warn(`[EMAIL] TELEGRAM_BOT_USERNAME is missing. Invite not sent to ${clientEmail}`);
+            return;
+        }
+
         const link = `https://t.me/${botUsername}?start=${tokenKey}`;
         const subject = "Activate Telegram Notifications";
 
@@ -12,7 +19,7 @@ export async function sendTelegramInvite(clientEmail: string, tokenKey: string) 
       <p><a href="${link}">${link}</a></p>
       <p>If you didn't request this, you can ignore this email.</p>
     `;
-
+console.log("Before sending email in sendTelegramInvite:", clientEmail);
         await sendEmail(clientEmail, subject, html);
         console.log(`[EMAIL] Telegram invite sent to ${clientEmail}`);
     } catch (error) {

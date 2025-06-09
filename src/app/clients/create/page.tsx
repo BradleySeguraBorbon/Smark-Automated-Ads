@@ -52,6 +52,29 @@ export default function CreateClientPage() {
 
             const result = await response.json()
 
+            if (response.ok) {
+                setSuccessOpen(true)
+
+                try {
+                    fetch("/api/clients/post-process", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            clientId: result.clientId,
+                            email: result.email,
+                            preferences: form.getValues("preferences"),
+                            subscriptions: form.getValues("subscriptions")
+                        }),
+                    })
+                } catch (err) {
+                    console.error("Error during post-processing:", err)
+                }
+
+                return
+            }
+
             if (!response.ok) {
                 const errorMessage = result.message || result.error || "An unknown error has happened."
                 setErrorMessage(errorMessage)

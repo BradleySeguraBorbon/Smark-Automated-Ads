@@ -25,6 +25,7 @@ export default function ClientsPage() {
     const [showErrorDialog, setShowErrorDialog] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [showImportModal, setShowImportModal] = useState(false);
+    const [importSuccessMessage, setImportSuccessMessage] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
@@ -165,7 +166,7 @@ export default function ClientsPage() {
                 open={showSuccessDialog}
                 type="success"
                 title="Client deleted successfully"
-                description="The client was removed from the list."
+                description={importSuccessMessage || "The client was removed from the list."}
                 confirmLabel="OK"
                 onConfirmAction={() => setShowSuccessDialog(false)}
                 onOpenChangeAction={setShowSuccessDialog}
@@ -180,7 +181,16 @@ export default function ClientsPage() {
                 onConfirmAction={() => setShowErrorDialog(false)}
                 onOpenChangeAction={setShowErrorDialog}
             />
-            <ClientImportModal open={showImportModal} onCloseAction={() => setShowImportModal(false)} />
+            <ClientImportModal
+                open={showImportModal}
+                onCloseAction={() => setShowImportModal(false)}
+                onImportSuccess={(message) => {
+                    setImportSuccessMessage(message);
+                    setShowSuccessDialog(true);
+                    setShowImportModal(false);
+                    fetchClients();
+                }}
+            />
         </div>
     )
 }
