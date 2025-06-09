@@ -26,30 +26,42 @@ async function validateObjectIdsExist(ids: string[], model: any, fieldName: stri
 
 function convertResponseIntoArray(response: string): string[] {
     try {
-        const parsed = JSON.parse(response);
+        const cleaned = response
+            .replace(/```json|```/g, '')
+            .trim();
+
+        const parsed = JSON.parse(cleaned);
+
         if (Array.isArray(parsed.tagIds)) {
-            const validIds = parsed.tagIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id));
+            const validIds = parsed.tagIds.filter((id: string) =>
+                mongoose.Types.ObjectId.isValid(id)
+            );
             if (validIds.length === 0) {
-                console.warn('No valid ObjectIds found in ai response:', response);
+                console.warn('No valid ObjectIds found in AI response:', response);
             }
             return validIds;
         } else {
-            console.warn('ai response does not contain tagIds array:', response);
+            console.warn('AI response does not contain tagIds array:', response);
             return [];
         }
     } catch (err) {
-        console.warn('Failed to parse ai response as JSON:', response);
+        console.warn('Failed to parse AI response as JSON:', response);
         return [];
     }
 }
 
 async function getTagsIdsBasedOnPreference(client: { name: string, preferences: string[] }, token: string) {
-    const tags = await Tags.find();
-    if (tags.length === 0) {
-        throw new Error("No tags found");
-    }
-    const tagsString = JSON.stringify(tags.map(tag => ({id: tag._id, keywords: tag.keywords})));
-    const prompt = `
+    try {
+        const tags = await Tags.find();
+        if (tags.length === 0) {
+            throw new Error("No tags found");
+        }
+
+        const tagsString = JSON.stringify(
+            tags.map(tag => ({ id: tag._id, keywords: tag.keywords }))
+        );
+
+        const prompt = `
 You are an expert marketing assistant AI. Based on the client preferences and the available tags, your task is to identify the most relevant tags by matching the client preferences with the keywords of each tag.
 
 --- Client Information (JSON) ---
@@ -74,25 +86,28 @@ Instructions:
 ⚠️ Do NOT include any explanation, markdown, commentary, or other text. Return only the JSON.
 `.trim();
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${apiUrl}/api/chat/`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        const response = await fetch(`${apiUrl}/api/chat/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({prompt})
+            body: JSON.stringify({ prompt }),
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+            console.log("Data: ", data);
+            throw new Error('Error fetching tags from AI');
         }
-    )
 
-    const data = await response.json();
-
-    if (!data.ok) {
-        console.log("Data: ", data)
-        throw new Error('Error fetching tags from ai');
+        return convertResponseIntoArray(data.response);
+    } catch (err) {
+        console.error('[AI-TAGGING] Error occurred, skipping AI tagging:', err);
+        return [];
     }
-
-    return convertResponseIntoArray(data.response);
 }
 
 export async function POST(request: Request) {
@@ -166,7 +181,7 @@ export async function POST(request: Request) {
             } catch (err) {
                 console.error("Tagging error:", err);
             }
-
+console.log("New client subscriptions:", newClient.subscriptions, body.subscriptions);
             try {
                 if (body.subscriptions?.includes("telegram") && body.email) {
                     const crypto = await import("crypto");
