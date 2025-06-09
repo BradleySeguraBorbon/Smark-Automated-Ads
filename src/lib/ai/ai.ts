@@ -39,18 +39,13 @@ const SYSTEM_PROMPT = `
 
   Always provide filter.match as an array of strings, even when there is only one value.
 
-  Always return JSON in the exact format required by the application. Do not explain your reasoning. Never return Markdown or lists. Return only a single valid JSON object matching this structure:
-  {
-    coverage: number,
-    totalClients: number,
-    selectedClients: string[],
-    segmentGroups: { 
-      criterion: string,
-      value: string,
-      clientIds: string[],
-      reason: string 
-    }[]
-  }
+  You must only respond by calling the segmentAudience tool with appropriate parameters.
+
+  Do not return any JSON manually. Do not include results, explanations, or summaries.
+
+  The server will execute the tool and return a segmentId. Do not attempt to build or return the segment object yourself.
+
+  Never use Markdown or comments. Only use tool calls.
 `.trim();
 
 export async function runMcpAi({ prompt }: { prompt: string }) {
@@ -92,11 +87,11 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     });
     console.log('[AI] Full response text:', JSON.stringify(text));
 
-    const parsed = parseJsonFromAiText(text);
+    //const parsed = parseJsonFromAiText(text);
 
-    console.log('[AI] Parsed response:', parsed);
+    //console.log('[AI] Parsed response:', parsed);
 
-    return JSON.parse(JSON.stringify(parsed));
+    return JSON.parse(JSON.stringify(text));
   } catch (error: any) {
     console.error('AI stream or parsing error:', error);
     throw new Error(`AI response error:\n\n${error.message}`);

@@ -35,11 +35,17 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
         setLoading(true);
 
         try {
-            const response = await runMcpAi({ prompt });
-            //fetch
+            const { segmentId, message } = await runMcpAi({ prompt });
 
-            onStrategyLoaded(response);
-            setFeedback(response.message ?? null);
+            if (!segmentId) throw new Error('No segmentId returned by MCP');
+
+            const res = await fetch(`/api/segments/${segmentId}`);
+            if (!res.ok) throw new Error('Failed to retrieve segment data');
+
+            const segmentData = await res.json();
+            onStrategyLoaded(segmentData);
+
+            setFeedback(message ?? null);
         } catch (err: any) {
             console.error('MCP AI error:', err);
             setError(err.message || 'Unexpected error');

@@ -1,5 +1,7 @@
 import { createMcpHandler } from '@vercel/mcp-adapter';
 import { generateCampaignStrategy } from '@/lib/mcp/mcp';
+import SegmentedAudience from "@/models/SegmentedAudience";
+import connectDB from "@/config/db";
 
 const handler = createMcpHandler(
     async (server) => {
@@ -57,8 +59,20 @@ const handler = createMcpHandler(
                     });
 
                     if (!response.ok) throw new Error(`Status ${response.status}: ${await response.text()}`);
-                    const json = await response.json();
-                    return json;
+                    const result = await response.json();
+
+                    await connectDB();
+                    const saved = await SegmentedAudience.create({
+                        coverage: result.coverage,
+                        totalClients: result.totalClients,
+                        selectedClients: result.selectedClients,
+                        segmentGroups: result.segmentGroups,
+                    });
+
+                    return {
+                        content: [{ type: 'text', text: `Segment stored with ID: ${saved._id}` }],
+                        segmentId: saved._id,
+                    };
                 } catch (err: any) {
                     return {
                         content: [{ type: 'text', text: `Error segmenting audience: ${err.message || 'Unknown error'}` }],
