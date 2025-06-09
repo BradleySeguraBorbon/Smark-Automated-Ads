@@ -16,10 +16,17 @@ export async function getAudience(adMessageId: string, field: 'email' | 'telegra
         throw new Error('No audience found for this campaign');
 
     const decryptedAudience = campaignAudience.audience.map((client: any) => decryptClient(client));
-
-    const contacts = decryptedAudience
-        .filter((client: any) => client[field])
-        .map((client: any) => client[field]);;
+    
+    let contacts: string[] = [];
+    if (field === 'email') {
+        contacts = decryptedAudience
+            .filter((client: any) => client.email)
+            .map((client: any) => client.email);
+    } else if (field === 'telegram.chatId') {
+        contacts = decryptedAudience
+            .filter((client: any) => client.telegram?.chatId)
+            .map((client: any) => client.telegram.chatId);
+    }
 
     return { adMessage, contacts };
 }
