@@ -23,6 +23,7 @@ function NewCampaignPage() {
     const isAiGenerated = searchParams.get('ai') === 'true';
     const initialAudience = searchParams.get('audience');
     const parsedAudience = initialAudience ? JSON.parse(initialAudience) : [];
+    const cameFromMCP = isAiGenerated && parsedAudience.length > 0;
 
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
@@ -100,6 +101,9 @@ function NewCampaignPage() {
     }, [token]);
 
     const handleCreate = async (data: MarketingCampaignFormData) => {
+        if (cameFromMCP) {
+            data.isAiGenerated = true;
+        }
         const payload = transformMarketingCampaignForSave(data);
 
         try {
