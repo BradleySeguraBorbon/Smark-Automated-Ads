@@ -8,6 +8,9 @@ export async function POST(req: NextRequest) {
     const result = await generateCampaignStrategy(body);
 
     console.log('[SEGMENT] Strategy result:', result);
+
+    //Guardar en BD la segmentacion
+
     return NextResponse.json({
       content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
     });

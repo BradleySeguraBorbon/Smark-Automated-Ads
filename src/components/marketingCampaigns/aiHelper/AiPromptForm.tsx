@@ -36,6 +36,8 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
 
         try {
             const response = await runMcpAi({ prompt });
+            //fetch
+
             onStrategyLoaded(response);
             setFeedback(response.message ?? null);
         } catch (err: any) {
