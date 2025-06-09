@@ -16,7 +16,7 @@ export async function getAudience(adMessageId: string, field: 'email' | 'telegra
         throw new Error('No audience found for this campaign');
 
     const decryptedAudience = campaignAudience.audience.map((client: any) => decryptClient(client));
-    
+
     let contacts: string[] = [];
     if (field === 'email') {
         contacts = decryptedAudience

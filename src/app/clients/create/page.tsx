@@ -39,7 +39,7 @@ export default function CreateClientPage() {
     })
 
     async function onSubmit(data: ClientFormData) {
-        data.tags = []
+        data.tags = [];
 
         try {
             const response = await fetch("/api/clients/register", {
@@ -48,22 +48,38 @@ export default function CreateClientPage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(data),
-            })
+            });
 
-            const result = await response.json()
+            const result = await response.json();
 
             if (!response.ok) {
-                const errorMessage = result.message || result.error || "An unknown error has happened."
-                setErrorMessage(errorMessage)
-                setErrorOpen(true)
-                return
+                const errorMessage = result.message || result.error || "An unknown error has happened.";
+                setErrorMessage(errorMessage);
+                setErrorOpen(true);
+                return;
             }
 
-            setSuccessOpen(true)
+            setSuccessOpen(true);
+
+            fetch("/api/clients/post-process", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+                },
+                body: JSON.stringify({
+                    clientId: result.result._id,
+                    email: result.result.email,
+                    preferences: result.result.preferences,
+                    subscriptions: result.result.subscriptions,
+                }),
+            }).catch((err) => {
+                console.error("[POST-PROCESS] Background processing failed:", err);
+            });
         } catch (error: unknown) {
-            console.error("Network or unexpected error:", error)
-            setErrorMessage("An unexpected error has occurred on network or server.")
-            setErrorOpen(true)
+            console.error("Network or unexpected error:", error);
+            setErrorMessage("An unexpected error has occurred on network or server.");
+            setErrorOpen(true);
         }
     }
 
