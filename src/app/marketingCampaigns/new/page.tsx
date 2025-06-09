@@ -66,7 +66,7 @@ function NewCampaignPage() {
 
         const fetchTags = async () => {
             try {
-                const response = await fetch('/api/tags', {
+                const response = await fetch('/api/tags?all=true', {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,

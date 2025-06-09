@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import { Tags } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
-import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
 
 export async function GET(request: Request) {
     try {
@@ -19,6 +19,9 @@ export async function GET(request: Request) {
         }
 
         const { searchParams } = new URL(request.url);
+
+        const getAll = searchParams.get('all') === 'true';
+
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
 
@@ -37,7 +40,9 @@ export async function GET(request: Request) {
         }
 
         const total = await Tags.countDocuments(filter);
-        const tags = await Tags.find(filter).skip(skip).limit(limit);
+        const tags = getAll
+            ? await Tags.find(filter)
+            : await Tags.find(filter).skip(skip).limit(limit);
 
         if (tags.length === 0) {
             return NextResponse.json({ message: 'No tags found' }, { status: 404 });
@@ -46,10 +51,10 @@ export async function GET(request: Request) {
         return NextResponse.json({
             message: 'Tags fetched successfully',
             results: tags,
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
+            total: getAll ? tags.length : total,
+            page: getAll ? 1 : page,
+            limit: getAll ? tags.length : limit,
+            totalPages: getAll ? 1 : Math.ceil(total / limit),
         });
     } catch (error) {
         console.error(error);
