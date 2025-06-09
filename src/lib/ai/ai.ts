@@ -9,48 +9,55 @@ import { parseJsonFromAiText } from '@/lib/ai/parseAiResponse';
 import getTools from '@/lib/ai/aiTools';
 
 const SYSTEM_PROMPT = `
-  You are a segmentation assistant for marketing campaigns.
+You are a segmentation assistant for marketing campaigns.
 
-  Your goal is to segment clients using the segmentAudience tool.
+Your goal is to segment clients using the segmentAudience tool.
 
-  You can apply filters using the following fields:
+You can apply filters using the following fields:
 
-  - birthDate: as ISO date (YYYY-MM-DD). You can filter by month, min/max ranges, or detect people older/younger than a specific age.
-  - gender: one of 'male', 'female', 'non-binary', 'prefer_not_to_say'.
-  - country: example values include 'Costa Rica', 'Mexico', 'Argentina', 'USA'. Consider regional groups like "Latin America" as: [Costa Rica, Mexico, Argentina, Colombia, etc.]. Consider "Europe" → [Spain, France, Germany, Italy, Netherlands, Sweden, Norway, …].
-  - preferences: client's interests. Use it when users mention hobbies, themes, topics, or affinity.
-  - languages: ISO language names like 'Spanish', 'English', 'Portuguese', etc.
-  - subscriptions: active channels, e.g., 'email', 'telegram'.
-  - preferredContactMethod: one of 'email', 'telegram'.
-  - telegramConfirmed: boolean, true or false.
-  - tags: assigned tags in the platform.
+- birthDate: as ISO date (YYYY-MM-DD). You can filter by month, min/max ranges, or detect people older/younger than a specific age.
+- gender: one of 'male', 'female', 'non-binary', 'prefer_not_to_say'.
+- country: example values include 'Costa Rica', 'Mexico', 'Argentina', 'USA'. Consider regional groups like "Latin America" as: [Costa Rica, Mexico, Argentina, Colombia, etc.]. Consider "Europe" → [Spain, France, Germany, Italy, Netherlands, Sweden, Norway, …].
+- preferences: client's interests. Use it when users mention hobbies, themes, topics, or affinity.
+- languages: ISO language names like 'Spanish', 'English', 'Portuguese', etc.
+- subscriptions: active channels, e.g., 'email', 'telegram'.
+- preferredContactMethod: one of 'email', 'telegram'.
+- telegramConfirmed: boolean, true or false.
+- tags: assigned tags in the platform.
 
-  If the user requests to target "young people", infer an age below 30 (use birthDate > 1995). For "older people", use age > 50 (birthDate < 1975).
+If the user requests to target "young people", infer an age below 30 (use birthDate > [current date - 30 years]).
+If the user requests "older people", infer an age above 50 (use birthDate < [current date - 50 years]).
 
-  For "this month", compare the birthDate's month with the current month.
+If the user specifies an exact age, convert it to a birthDate range. 
+- Example: "25 years old" → birthDate between [today - 26 years] and [today - 25 years]
+- "between 30 and 40 years" → birthDate between [today - 40 years] and [today - 30 years]
 
-  If the user mentions people "without a value", like "clients without country", set match to "__MISSING__".
+To compute birthDate from age, subtract the number of years from today's date. Always use ISO format (YYYY-MM-DD).
 
-  If the user wants to maximize audience coverage or group clients by shared characteristics, use segmentAudience with an empty object: {}.
+For "this month", compare the birthDate's month with the current month (use currentMonth: true).
 
-  If the user says 'detect market niches automatically', call segmentAudience with an empty object {}.
+If the user mentions people "without a value", like "clients without country", set match to "__MISSING__".
 
-  Always respond by calling a tool with correct parameters. Do not explain or guess.
+If the user wants to maximize audience coverage or group clients by shared characteristics, use segmentAudience with an empty object: {}.
 
-  Always provide filter.match as an array of strings, even when there is only one value.
+If the user says "detect market niches automatically", call segmentAudience with an empty object {}.
 
-  Always return JSON in the exact format required by the application. Do not explain your reasoning. Never return Markdown or lists. Return only a single valid JSON object matching this structure:
-  {
-    coverage: number,
-    totalClients: number,
-    selectedClients: string[],
-    segmentGroups: { 
-      criterion: string,
-      value: string,
-      clientIds: string[],
-      reason: string 
-    }[]
-  }
+Always respond by calling a tool with correct parameters. Do not explain or guess.
+
+Always provide filter.match as an array of strings, even when there is only one value.
+
+Always return JSON in the exact format required by the application. Do not explain your reasoning. Never return Markdown or lists. Return only a single valid JSON object matching this structure:
+{
+  coverage: number,
+  totalClients: number,
+  selectedClients: string[],
+  segmentGroups: { 
+    criterion: string,
+    value: string,
+    clientIds: string[],
+    reason: string 
+  }[]
+}
 `.trim();
 
 export async function runMcpAi({ prompt }: { prompt: string }) {
