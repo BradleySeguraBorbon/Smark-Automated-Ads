@@ -21,10 +21,11 @@ import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
 function NewCampaignPage() {
     const searchParams = useSearchParams();
     const isAiGenerated = searchParams.get('ai') === 'true';
+    console.log('Is AI Generated:', isAiGenerated);
     const initialAudience = searchParams.get('audience');
     const parsedAudience = initialAudience ? JSON.parse(initialAudience) : [];
     const cameFromMCP = isAiGenerated && parsedAudience.length > 0;
-
+console.log("Came from MCP:", cameFromMCP);
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
@@ -101,9 +102,8 @@ function NewCampaignPage() {
     }, [token]);
 
     const handleCreate = async (data: MarketingCampaignFormData) => {
-        if (cameFromMCP) {
-            data.isAiGenerated = true;
-        }
+        data.isAiGenerated = cameFromMCP;
+
         const payload = transformMarketingCampaignForSave(data);
 
         try {

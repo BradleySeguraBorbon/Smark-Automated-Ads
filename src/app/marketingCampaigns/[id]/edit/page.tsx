@@ -63,7 +63,7 @@ export default function EditCampaignPage() {
 
     const fetchTags = async () => {
         try {
-            const response = await fetch('/api/tags', {
+            const response = await fetch('/api/tags?all=true', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

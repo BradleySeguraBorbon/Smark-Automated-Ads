@@ -153,7 +153,8 @@ export async function POST(request: Request) {
                 totalEmailsOpened: 0,
                 telegramMessagesSent: 0,
                 telegramMessagesOpened: 0
-            }
+            },
+            isAiGenerated: body.isAiGenerated || false
         });
 
         const campaign = await MarketingCampaigns.findById(newCampaign._id)
