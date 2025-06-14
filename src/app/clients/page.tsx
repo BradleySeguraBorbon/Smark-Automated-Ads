@@ -160,11 +160,13 @@ export default function ClientsPage() {
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
             )}
             <SearchInput value={searchTerm}
-                onDebouncedChange={(val) => {
-                    setSearchTerm(val);
-                    setCurrentPage(1);
-                }}
-                placeholder="Search clients by name"
+                         onDebouncedChange={(val) => {
+                             if (val !== searchTerm) {
+                                 setSearchTerm(val);
+                                 setCurrentPage(1);
+                             }
+                         }}
+                         placeholder="Search clients by name"
             />
 
             {loading ? (

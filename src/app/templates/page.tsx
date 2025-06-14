@@ -112,8 +112,10 @@ export default function TemplatesPage() {
                 <SearchInput
                     value={searchTerm}
                     onDebouncedChange={(val) => {
-                        setSearchTerm(val);
-                        setCurrentPage(1);
+                        if (val !== searchTerm) {
+                            setSearchTerm(val);
+                            setCurrentPage(1);
+                        }
                     }}
                     placeholder="Search templates by name"
                 />
