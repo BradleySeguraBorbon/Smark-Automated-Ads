@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.DEEPSEEK_OPENROUTER_API_KEY,
-
+  apiKey: process.env.OPENAI_API_KEY,
 });
+
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'deepseek/deepseek-prover-v2:free',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'user',
