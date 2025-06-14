@@ -34,21 +34,9 @@ export async function GET(request: Request) {
 
         const filter: Record<string, any> = {};
 
-        if (searchParams.has('preferredContactMethod')) {
-            filter.preferredContactMethod = searchParams.get('preferredContactMethod');
-        }
-        if (searchParams.has('subscription')) {
-            filter.subscriptions = { $in: [searchParams.get('subscription')] };
-        }
-        if (searchParams.has('tag')) {
-            filter.tags = { $in: [searchParams.get('tag')] };
-        }
-        const tagIds = searchParams.getAll('tagIds[]');
-        if (tagIds.length > 0) {
-            const validTagIds = tagIds.filter(id => mongoose.Types.ObjectId.isValid(id));
-            if (validTagIds.length > 0) {
-                filter.tags = { $in: validTagIds };
-            }
+        if (searchParams.has('name')) {
+            const name = searchParams.get('name');
+            filter.firstName = { $regex: name, $options: 'i' };
         }
 
         const page = parseInt(searchParams.get('page') || '1');

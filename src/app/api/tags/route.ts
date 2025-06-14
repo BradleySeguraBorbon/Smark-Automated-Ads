@@ -9,17 +9,14 @@ export async function GET(request: Request) {
         await connectDB();
 
         const allowedRoles = ['developer', 'admin', 'employee'];
-
         const user = getUserFromRequest(request);
 
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
         if (!allowedRoles.includes(user.role as string)) {
             return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
         }
 
         const { searchParams } = new URL(request.url);
-
         const getAll = searchParams.get('all') === 'true';
 
         const page = parseInt(searchParams.get('page') || '1');
@@ -30,8 +27,7 @@ export async function GET(request: Request) {
         const filter: Record<string, any> = {};
 
         if (searchParams.has('name')) {
-            const name = searchParams.get('name') as string;
-            filter.name = { $regex: name, $options: 'i' };
+            filter.name = { $regex: searchParams.get('name') as string, $options: 'i' };
         }
 
         if (searchParams.has('keywords')) {
@@ -41,10 +37,6 @@ export async function GET(request: Request) {
 
         const total = await Tags.countDocuments(filter);
         const tags = await Tags.find(filter).skip(skip).limit(limit);
-
-        if (tags.length === 0) {
-            return NextResponse.json({ message: 'No tags found' }, { status: 404 });
-        }
 
         return NextResponse.json({
             message: 'Tags fetched successfully',

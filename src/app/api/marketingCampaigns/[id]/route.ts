@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import mongoose from 'mongoose';
-import { MarketingCampaigns, AdMessages, Tags, Users, Clients } from '@/models/models';
+import { MarketingCampaigns, AdMessages, Tags, Users, Clients, CampaignAudiences } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
 import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
 
@@ -166,6 +166,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
       await AdMessages.deleteMany({ _id: { $in: adMessageIds } });
     }
+
+    await CampaignAudiences.deleteOne({ campaign: id });
 
     await Users.updateMany(
       { marketingCampaigns: id },

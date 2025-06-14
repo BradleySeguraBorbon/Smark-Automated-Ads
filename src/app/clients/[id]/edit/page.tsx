@@ -38,6 +38,7 @@ export default function EditClientPage() {
                 isConfirmed: false,
             },
             preferredContactMethod: "email",
+            country:"",
             birthDate: new Date(),
             preferences: [],
             tags: [],
