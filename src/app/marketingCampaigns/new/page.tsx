@@ -67,7 +67,7 @@ console.log("Came from MCP:", cameFromMCP);
 
         const fetchTags = async () => {
             try {
-                const response = await fetch('/api/tags?all=true', {
+                const response = await fetch('/api/tags?page=1&limit=1000', {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,

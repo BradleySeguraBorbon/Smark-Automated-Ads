@@ -89,7 +89,7 @@ export default function EditClientPage() {
 
         const fetchTags = async () => {
             try {
-                const response = await fetch("/api/tags", {
+                const response = await fetch("/api/tags?page=1&limit=1000", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

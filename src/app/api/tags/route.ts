@@ -40,9 +40,7 @@ export async function GET(request: Request) {
         }
 
         const total = await Tags.countDocuments(filter);
-        const tags = getAll
-            ? await Tags.find(filter)
-            : await Tags.find(filter).skip(skip).limit(limit);
+        const tags = await Tags.find(filter).skip(skip).limit(limit);
 
         if (tags.length === 0) {
             return NextResponse.json({ message: 'No tags found' }, { status: 404 });
@@ -51,10 +49,10 @@ export async function GET(request: Request) {
         return NextResponse.json({
             message: 'Tags fetched successfully',
             results: tags,
-            total: getAll ? tags.length : total,
-            page: getAll ? 1 : page,
-            limit: getAll ? tags.length : limit,
-            totalPages: getAll ? 1 : Math.ceil(total / limit),
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
         });
     } catch (error) {
         console.error(error);
