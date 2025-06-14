@@ -50,8 +50,10 @@ export default function TagsPageLayout({
                 <SearchInput
                     value={searchTerm}
                     onDebouncedChange={(val) => {
-                        setSearchTerm(val);
-                        setCurrentPage(1);
+                        if (val !== searchTerm) {
+                            setSearchTerm(val);
+                            setCurrentPage(1);
+                        }
                     }}
                     placeholder="Search tags by name"
                 />

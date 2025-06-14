@@ -36,6 +36,7 @@ export function CampaignFormTabs({
   audienceClientIds
 }: CampaignFormTabsProps) {
   const [audience, setAudience] = useState<ClientRef[]>([]);
+  const [audienceCount, setAudienceCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'connections' | 'audience'>('details');
   const token = useAuthStore((state) => state.token);
@@ -83,6 +84,15 @@ export function CampaignFormTabs({
 
           const data = await res.json();
           setAudience(data.results || []);
+
+          const countRes = await fetch(`/api/clients/count?${tagQueryParams}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const countData = await countRes.json();
+          setAudienceCount(countData.total || 0);
+
         }
       } catch (err) {
         console.error('Failed to fetch audience:', err);
@@ -133,6 +143,9 @@ export function CampaignFormTabs({
               clients={audience}
               isAiGenerated={form.watch('isAiGenerated')}
               campaignId={String(form.watch('_id'))}
+              fullCount={formData.isAiGenerated
+                ? (audienceClientIds?.length ?? audience.length)
+                : audienceCount}
             />
           ) : (
             <div className="container mx-auto py-10">

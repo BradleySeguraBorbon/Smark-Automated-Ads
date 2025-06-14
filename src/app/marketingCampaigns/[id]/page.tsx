@@ -28,6 +28,7 @@ export default function MarketingCampaignDetailPage() {
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
     const [audience, setAudience] = useState<ClientRef[]>([]);
     const [audiencePage, setAudiencePage] = useState(1);
+    const [totalClients, setTotalClients] = useState(0);
     const [audienceTotalPages, setAudienceTotalPages] = useState(1);
     const [successData, setSuccessData] = useState<SuccessSentData | null>(null);
 

@@ -137,8 +137,10 @@ export default function AdMessagesPage() {
             <SearchInput
                 value={searchTerm}
                 onDebouncedChange={(val) => {
-                  setSearchTerm(val);
-                  setCurrentPage(1);
+                  if (val !== searchTerm) {
+                    setSearchTerm(val);
+                    setCurrentPage(1);
+                  }
                 }}
                 placeholder="Search ad messages by name"
             />

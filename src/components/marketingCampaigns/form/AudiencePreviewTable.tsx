@@ -20,11 +20,13 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 export function AudiencePreviewTable({
   clients: fallbackClients,
   isAiGenerated,
-  campaignId
+  campaignId,
+  fullCount
 }: {
   clients?: ClientRef[];
   isAiGenerated?: boolean;
   campaignId?: string;
+  fullCount?: number;
 }) {
   const [clients, setClients] = useState<ClientRef[]>(fallbackClients || []);
   const [loading, setLoading] = useState(false);
@@ -59,7 +61,7 @@ export function AudiencePreviewTable({
               <Label>Estimated Reach</Label>
               <div className="p-4 border rounded-md mt-2 bg-muted/50">
                 <p className="text-sm">Based on your current selection:</p>
-                <p className="font-medium mt-1">{clients.length} clients will receive Ads from this campaign</p>
+                <p className="font-medium mt-1">{fullCount ?? clients.length} clients will receive Ads from this campaign</p>
               </div>
             </div>
             <div>
@@ -67,7 +69,7 @@ export function AudiencePreviewTable({
                 <Label>Client Preview</Label>
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Users className="h-3 w-3 mr-1" />
-                  {Math.min(10, clients.length)} of {clients.length} clients
+                  {Math.min(10, clients.length)} of {fullCount ?? clients.length} clients
                 </Badge>
               </div>
               <div className="border rounded-md overflow-hidden">

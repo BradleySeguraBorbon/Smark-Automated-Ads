@@ -50,8 +50,10 @@ export default function UsersPage() {
 
             <SearchInput value={searchTerm}
                          onDebouncedChange={(val) => {
-                             setSearchTerm(val);
-                             setCurrentPage(1);
+                             if (val !== searchTerm) {
+                                 setSearchTerm(val);
+                                 setCurrentPage(1);
+                             }
                          }}
                          placeholder="Search users by username"
             />
