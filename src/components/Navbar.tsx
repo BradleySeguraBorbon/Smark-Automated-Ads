@@ -31,7 +31,6 @@ interface NavbarProps {
 
 export function Navbar({ currentPath }: NavbarProps) {
     const allRoutes = [
-        { href: "/", label: "Dashboard" },
         { href: "/marketingCampaigns", label: "Campaigns" },
         { href: "/adMessages", label: "Ad-Messages" },
         { href: "/clients", label: "Clients" },

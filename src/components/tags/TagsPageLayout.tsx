@@ -47,12 +47,23 @@ export default function TagsPageLayout({
                     </Link>
                 </div>
 
-                <SearchInput value={searchTerm} onChangeAction={setSearchTerm} placeholder="Search tags..." />
+                <SearchInput
+                    value={searchTerm}
+                    onDebouncedChange={(val) => {
+                        setSearchTerm(val);
+                        setCurrentPage(1);
+                    }}
+                    placeholder="Search tags by name"
+                />
 
-                {apiError && <div className="text-center text-red-500 bg-red-100 p-3 rounded">{apiError}</div>}
+                {apiError && (
+                    <div className="text-center text-red-500 bg-red-100 p-3 rounded">{apiError}</div>
+                )}
 
                 {loading ? (
-                    <LoadingSpinner />
+                    <div className="mt-10 text-center text-muted-foreground">Loading tags...</div>
+                ) : tags.length === 0 ? (
+                    <div className="mt-10 text-center text-muted-foreground">No matching tags found.</div>
                 ) : (
                     <>
                         <TagsList

@@ -10,12 +10,14 @@ import CampaignsListHeader from '@/components/marketingCampaigns/CampaignsListHe
 import { IMarketingCampaign } from '@/types/MarketingCampaign'
 import PaginationControls from '@/components/PaginationControls'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import SearchInput from '@/components/SearchInput';
 
 export default function MarketingCampaignsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasFetched, setHasFetched] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const token = useAuthStore((state) => state.token);
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
@@ -27,17 +29,16 @@ export default function MarketingCampaignsPage() {
     const clearCampaigns = useMarketingCampaignStore((state) => state.clearCampaigns);
     const campaignsHydrated = useMarketingCampaignStore((state) => state.hasHydrated);
 
-    const fetchCampaigns = async () => {
+    const fetchCampaigns = async (name: string = '') => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/marketingCampaigns?page=${currentPage}&limit=10`, {
+            const response = await fetch(`/api/marketingCampaigns?page=${currentPage}&limit=10&name=${name}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
-            })
+            });
             const data = await response.json();
             setCampaigns(data.results as IMarketingCampaign[]);
-            console.log("Campaigns received:", data.results);
             setTotalPages(data.totalPages);
         } catch (error) {
             console.error('Failed to fetch campaigns:', error);
@@ -50,26 +51,33 @@ export default function MarketingCampaignsPage() {
 
     useEffect(() => {
         if (!_hasHydrated) return;
+        if (!token) {
+            setTimeout(() => router.push('/auth/login'), 100);
+            return;
+        }
 
         const init = async () => {
-            if (!token) {
-                router.push('/auth/login');
-                return;
-            }
-
             const user = await decodeToken(token);
             if (!user) {
                 router.push('/auth/login');
                 return;
             }
-
             setUserInfo(user);
-            await fetchCampaigns();
-            setHasFetched(true);
         };
 
         init();
-    }, [_hasHydrated, token, currentPage]);
+    }, [_hasHydrated, token]);
+
+    useEffect(() => {
+        if (!_hasHydrated || !token || !userInfo) return;
+
+        const run = async () => {
+            await fetchCampaigns(searchTerm);
+            setHasFetched(true);
+        };
+
+        run();
+    }, [_hasHydrated, token, userInfo, currentPage, searchTerm]);
 
     const handleDelete = async (campaignId: string) => {
         try {
@@ -93,7 +101,9 @@ export default function MarketingCampaignsPage() {
     };
 
     const isReady = _hasHydrated && hasFetched && campaignsHydrated && userInfo;
-    if (!isReady || loading) return <LoadingSpinner />
+    const initialLoading = !isReady;
+
+    if (initialLoading) return <LoadingSpinner />;
 
     return (
         <div>
@@ -102,8 +112,20 @@ export default function MarketingCampaignsPage() {
                     {userInfo &&
                         <CampaignsListHeader userRole={userInfo.role} />
                     }
+
+                    <SearchInput
+                        value={searchTerm}
+                        onDebouncedChange={(val) => {
+                            setSearchTerm(val);
+                            setCurrentPage(1);
+                        }}
+                        placeholder="Search campaigns by name"
+                    />
+
                     {loading ? (
-                        <LoadingSpinner />
+                        <div className="mt-10 text-center text-muted-foreground">Loading campaigns...</div>
+                    ) : campaigns.length === 0 ? (
+                        <div className="mt-10 text-center text-muted-foreground">No matching campaigns found.</div>
                     ) : (
                         <>
                             <CampaignList
@@ -123,5 +145,5 @@ export default function MarketingCampaignsPage() {
                 </div>
             </main>
         </div>
-    )
+    );
 }

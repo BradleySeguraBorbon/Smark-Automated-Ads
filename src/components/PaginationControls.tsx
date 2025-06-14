@@ -16,30 +16,35 @@ interface PaginationControlsProps {
 }
 
 function getPageNumbers(current: number, total: number): (number | string)[] {
-    const delta = 1;
-    const range: (number | string)[] = [];
-    const left = Math.max(2, current - delta);
-    const right = Math.min(total - 1, current + delta);
+    const visiblePages = 4;
+    const pages: (number | string)[] = [];
 
-    range.push(1); 
+    if (total <= visiblePages) {
+        for (let i = 1; i <= total; i++) {
+            pages.push(i);
+        }
+    } else {
+        const left = Math.max(2, current - 2);
+        const right = Math.min(total - 1, current + 2);
 
-    if (left > 2) {
-        range.push("...");
+        pages.push(1);
+
+        if (left > 2) {
+            pages.push("...");
+        }
+
+        for (let i = left; i <= right; i++) {
+            pages.push(i);
+        }
+
+        if (right < total - 1) {
+            pages.push("...");
+        }
+
+        pages.push(total);
     }
 
-    for (let i = left; i <= right; i++) {
-        range.push(i);
-    }
-
-    if (right < total - 1) {
-        range.push("...");
-    }
-
-    if (total > 1) {
-        range.push(total);
-    }
-
-    return range;
+    return pages;
 }
 
 export default function PaginationControls({ currentPage, totalPages, onPageChangeAction }: PaginationControlsProps) {

@@ -18,6 +18,7 @@ export default function CreateClientPage() {
     const [successOpen, setSuccessOpen] = useState(false)
     const [errorOpen, setErrorOpen] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
+    const [successMessage, setSuccessMessage] = useState("You have been registered successfully.");
 
     const form = useForm<ClientFormData>({
         defaultValues: {
@@ -31,8 +32,11 @@ export default function CreateClientPage() {
                 isConfirmed: false
             },
             preferredContactMethod: "email",
+            country: "",
+            gender:"male",
             birthDate: new Date(2005, 1,1),
             preferences: [],
+            tagsPending:true,
             tags: [],
             subscriptions: [],
         },
@@ -57,6 +61,14 @@ export default function CreateClientPage() {
                 setErrorMessage(errorMessage);
                 setErrorOpen(true);
                 return;
+            }
+
+            const isTelegramSubscribed = data.subscriptions.includes("telegram");
+
+            if (isTelegramSubscribed) {
+                setSuccessMessage("You have been registered successfully. Please check your Telegram.");
+            } else {
+                setSuccessMessage("You have been registered successfully.");
             }
 
             setSuccessOpen(true);
@@ -108,7 +120,7 @@ export default function CreateClientPage() {
                 open={successOpen}
                 type="success"
                 title="¡You have been register successfully!"
-                description="Please Check your email, we have sent you an email."
+                description={successMessage}
                 confirmLabel="Accept"
                 onConfirmAction={() => {
                     setSuccessOpen(false)

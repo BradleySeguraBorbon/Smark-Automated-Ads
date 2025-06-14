@@ -15,6 +15,7 @@ import {useRouter} from "next/navigation";
 import BreadcrumbHeader from "@/components/BreadcrumbHeader";
 import CustomAlertDialog from "@/components/CustomAlertDialog";
 import ClientImportModal from "@/components/clients/ClientImportModal";
+import SearchInput from "@/components/SearchInput";
 
 export default function ClientsPage() {
     const [apiError, setApiError] = useState<string | null>(null);
@@ -22,6 +23,7 @@ export default function ClientsPage() {
     const [loadingIds, setLoadingIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const [showErrorDialog, setShowErrorDialog] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [showImportModal, setShowImportModal] = useState(false);
@@ -35,10 +37,10 @@ export default function ClientsPage() {
     const _hasHydrated = useAuthStore((state) => state._hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
 
-    const fetchClients = async (page: number = 1) => {
+    const fetchClients = async (page: number = 1, name: string = '') => {
         try {
             setLoading(true)
-            const response = await fetch(`/api/clients?page=${page}&limit=9`, {
+            const response = await fetch(`/api/clients?page=${page}&limit=9&name=${name}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,13 +69,12 @@ export default function ClientsPage() {
 
     useEffect(() => {
         if (!_hasHydrated) return;
+        if (!token) {
+            router.push('/auth/login');
+            return;
+        }
 
         const init = async () => {
-            if (!token) {
-                router.push('/auth/login');
-                return;
-            }
-
             const user = await decodeToken(token);
             if (!user) {
                 router.push('/auth/login');
@@ -81,11 +82,16 @@ export default function ClientsPage() {
             }
 
             setUserInfo(user);
-            fetchClients(currentPage);
-        };
+        }
 
         init();
-    }, [_hasHydrated, token, currentPage]);
+    }, [_hasHydrated, token]);
+
+    useEffect(() => {
+        if (_hasHydrated && token && userInfo) {
+            fetchClients(currentPage, searchTerm);
+        }
+    }, [_hasHydrated, token, userInfo, currentPage, searchTerm]);
 
     const handleDelete = async (clientId: string) => {
         setLoadingIds((prev) => [...prev, clientId])
@@ -147,6 +153,13 @@ export default function ClientsPage() {
             {apiError && (
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
             )}
+            <SearchInput value={searchTerm}
+                onDebouncedChange={(val) => {
+                    setSearchTerm(val);
+                    setCurrentPage(1);
+                }}
+                placeholder="Search clients by name"
+            />
 
             {loading ? (
                 <LoadingSpinner/>
@@ -188,7 +201,7 @@ export default function ClientsPage() {
                     setImportSuccessMessage(message);
                     setShowSuccessDialog(true);
                     setShowImportModal(false);
-                    fetchClients();
+                    fetchClients(currentPage, searchTerm);
                 }}
             />
         </div>

@@ -3,10 +3,18 @@ import { Clients, Tags } from "@/models/models";
 import connectDB from "@/config/db";
 import mongoose from "mongoose";
 
+function sanitizeJsonResponse(raw: string): string {
+    return raw
+        .trim()
+        .replace(/^```json\n?/, '')
+        .replace(/^```\n?/, '')
+        .replace(/```$/, '');
+}
 
 function convertResponseIntoArray(response: string): string[] {
     try {
-        const parsed = JSON.parse(response);
+        const sanitized = sanitizeJsonResponse(response);
+        const parsed = JSON.parse(sanitized);
         if (Array.isArray(parsed.tagIds)) {
             const validIds = parsed.tagIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id));
             if (validIds.length === 0) {
@@ -68,7 +76,6 @@ Instructions:
     const data = await response.json();
 
     if (!data.ok) {
-        console.log("Data: ", data)
         throw new Error('Error fetching tags from ai');
     }
 
@@ -81,15 +88,14 @@ export async function POST(req: NextRequest) {
         const { clientId, email, preferences, subscriptions } = await req.json();
         const token = req.headers.get("authorization")?.split(" ")[1] || "";
 
-        // Tags
         try {
             const tagIds = await getTagsIdsBasedOnPreference({ name: email, preferences }, token);
-            if (tagIds.length > 0) await Clients.findByIdAndUpdate(clientId, { tags: tagIds });
+            const tagsPending = tagIds.length <= 0;
+            if (tagIds.length > 0) await Clients.findByIdAndUpdate(clientId, { tags: tagIds, tagsPending:tagsPending});
         } catch (err) {
             console.error("[POST-PROCESS] Tags error:", err);
         }
 
-        // Telegram
         try {
             if (subscriptions?.includes("telegram") && email) {
                 const crypto = await import("crypto");
