@@ -19,6 +19,7 @@ export default function useTagsData() {
     const fetchTags = async (page: number = 1) => {
         try {
             setLoading(true);
+
             const q = new URLSearchParams({ page: `${page}`, limit: '12' });
             if (searchTerm.trim()) q.set('name', searchTerm);
 

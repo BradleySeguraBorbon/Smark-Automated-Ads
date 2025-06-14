@@ -42,14 +42,9 @@ export async function GET(request: Request) {
                 return NextResponse.json({error: 'Invalid user ID format'}, {status: 400});
             }
         }
-        if (searchParams.has('status')) {
-            filter.status = searchParams.get('status');
-        }
-        if (searchParams.has('startDate')) {
-            filter.startDate = {$gte: new Date(searchParams.get('startDate') as string)};
-        }
-        if (searchParams.has('endDate')) {
-            filter.endDate = {$lte: new Date(searchParams.get('endDate') as string)};
+        if (searchParams.has('name')) {
+            const name = searchParams.get('name');
+            filter.name = { $regex: name, $options: 'i' };
         }
 
         const page = parseInt(searchParams.get('page') || '1');

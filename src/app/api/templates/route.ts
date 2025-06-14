@@ -21,8 +21,9 @@ export async function GET(request: Request) {
         const {searchParams} = new URL(request.url);
 
         const filter: Record<string, any> = {};
-        if (searchParams.has('type')) {
-            filter.type = searchParams.get('type');
+        if (searchParams.has('name')) {
+            const name = searchParams.get('name');
+            filter.name = { $regex: name, $options: 'i' };
         }
 
         const page = parseInt(searchParams.get('page') || '1');

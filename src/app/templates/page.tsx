@@ -12,6 +12,7 @@ import { useAuthStore } from '@/lib/store';
 import { decodeToken } from '@/lib/utils/decodeToken';
 import { ITemplate } from '@/types/Template';
 import TemplateTable from '@/components/templates/TemplateTable';
+import SearchInput from '@/components/SearchInput';
 
 export default function TemplatesPage() {
     const [templates, setTemplates] = useState<ITemplate[]>([]);
@@ -22,32 +23,17 @@ export default function TemplatesPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [successOpen, setSuccessOpen] = useState(false);
     const [alertOpen, setAlertOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const token = useAuthStore((s) => s.token);
     const _hasHydrated = useAuthStore((s) => s._hasHydrated);
     const [userInfo, setUserInfo] = useState<{ username: string; role: string; id: string } | null>(null);
-
     const router = useRouter();
 
-    useEffect(() => {
-        if (!_hasHydrated) return;
-
-        const init = async () => {
-            if (!token) return router.push('/auth/login');
-            const user = await decodeToken(token);
-            if (!user) return router.push('/auth/login');
-            if (!['developer', 'admin'].includes(user.role)) return router.push('/');
-            setUserInfo(user);
-            fetchTemplates(currentPage);
-        };
-
-        init();
-    }, [_hasHydrated, token, currentPage]);
-
-    const fetchTemplates = async (page: number = 1) => {
+    const fetchTemplates = async (name: string = '') => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/templates?page=${page}&limit=10`, {
+            const response = await fetch(`/api/templates?page=${currentPage}&limit=10&name=${name}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const result = await response.json();
@@ -61,6 +47,28 @@ export default function TemplatesPage() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!_hasHydrated) return;
+        if (!token) {
+            router.push('/auth/login');
+            return;
+        }
+
+        const init = async () => {
+            const user = await decodeToken(token);
+            if (!user) return router.push('/auth/login');
+            if (!['developer', 'admin'].includes(user.role)) return router.push('/');
+            setUserInfo(user);
+        };
+
+        init();
+    }, [_hasHydrated, token]);
+
+    useEffect(() => {
+        if (!_hasHydrated || !token || !userInfo) return;
+        fetchTemplates(searchTerm);
+    }, [_hasHydrated, token, userInfo, currentPage, searchTerm]);
 
     const confirmDelete = (id: string) => {
         setDeletingId(id);
@@ -101,9 +109,21 @@ export default function TemplatesPage() {
                     )}
                 </div>
 
+                <SearchInput
+                    value={searchTerm}
+                    onDebouncedChange={(val) => {
+                        setSearchTerm(val);
+                        setCurrentPage(1);
+                    }}
+                    placeholder="Search templates by name"
+                />
+
                 {apiError && <div className="text-red-500 bg-red-100 rounded-md p-4">{apiError}</div>}
+
                 {loading ? (
-                    <LoadingSpinner />
+                    <div className="mt-10 text-center text-muted-foreground">Loading templates...</div>
+                ) : templates.length === 0 ? (
+                    <div className="mt-10 text-center text-muted-foreground">No matching templates found.</div>
                 ) : (
                     <TemplateTable
                         templates={templates}
