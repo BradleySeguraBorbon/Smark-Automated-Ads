@@ -1,4 +1,4 @@
-import {Tags} from "@/models/models";
+import { Tags } from "@/models/models";
 import mongoose from "mongoose";
 
 function convertResponseIntoArray(response: string) {
@@ -31,33 +31,43 @@ export async function getTagsIdsBasedOnPreference(client: { name: string, prefer
     if (tags.length === 0) {
         throw new Error("No tags found");
     }
-    const tagsString = JSON.stringify(tags.map(tag => ({id: tag._id, keywords: tag.keywords})));
-    const prompt = fillPrompt(`Te proporciono la información de un cliente y una lista de tags (cada una con su ID, nombre y keywords).
+    const tagsString = JSON.stringify(tags.map(tag => ({ id: tag._id, keywords: tag.keywords })));
+    const prompt = fillPrompt(`
+        Eres una IA experta en marketing. Recibirás los datos de un cliente y una lista de tags. 
 
-1. Analiza las preferencias del cliente.
-2. Relaciona esas preferencias con las keywords de las tags (busca coincidencias directas o sinónimos).
-3. Devuelve SOLO la lista de _id de las tags que mejor coincidan, separados por comas.
+        Cada tag contiene:
+        - un ID
+        - una lista de palabras clave relacionadas
 
-NO des explicaciones adicionales ni otro formato!!
+        Tu tarea es:
+        1. Analizar las preferencias del cliente (temas, intereses, gustos).
+        2. Buscar coincidencias directas o semánticas entre estas preferencias y las palabras clave de las tags.
+        3. Seleccionar solo los IDs de las tags que mejor coincidan.
 
-Si ninguna tag coincide, devuelve un string vacío.
+        IMPORTANTE:
+        - Devuelve SOLO los _id de las tags separados por comas.
+        - No incluyas explicaciones, ni comillas, ni formato JSON, ni saltos de línea.
+        - Si no hay coincidencias, devuelve un string vacío.
 
-Cliente:
-\${client}
+        --- Cliente ---
+        ${client}
 
-Tags disponibles (array de objetos):
-\${tags}
-`
-        , {client: JSON.stringify(client), tags: tagsString});
+        --- Tags disponibles ---
+        ${tags}
+        `, {
+            client: JSON.stringify(client),
+            tags: tagsString
+        });
+
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${apiUrl}/api/chat/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({prompt})
-        }
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ prompt })
+    }
     )
 
     const data = await response.json();
