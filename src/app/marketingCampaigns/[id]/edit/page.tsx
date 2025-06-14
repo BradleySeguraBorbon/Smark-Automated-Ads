@@ -39,6 +39,9 @@ export default function EditCampaignPage() {
     const setUsers = useUserListStore((state) => state.setUsers);
     const usersHydrated = useUserListStore((state) => state.hasHydrated);
 
+    const [isAiGeneratedFlag, setIsAiGeneratedFlag] = useState(false);
+
+
     const [successOpen, setSuccessOpen] = useState(false);
 
     const form = useForm<MarketingCampaignFormData>({
@@ -105,8 +108,9 @@ export default function EditCampaignPage() {
                     startDate: data.result.startDate ? new Date(data.result.startDate) : new Date(),
                     endDate: data.result.endDate ? new Date(data.result.endDate) : new Date(),
                 };
+                setIsAiGeneratedFlag(campaign.isAiGenerated);
                 Object.entries(campaign).forEach(([key, value]) => {
-                    setValue(key as keyof MarketingCampaignFormData, value as string | boolean | Date | TagRef[] | UserRef[] | ObjectId | undefined);
+                    setValue(key as keyof MarketingCampaignFormData, value as any);
                 });
             } else {
                 console.error('Failed to fetch campaign:', data);
@@ -226,7 +230,7 @@ export default function EditCampaignPage() {
                                     allUsers={allUsers}
                                     form={form}
                                     campaignId={id as string}
-                                    isAiGenerated={form.watch('isAiGenerated')}
+                                    isAiGenerated={isAiGeneratedFlag}
                                 />
                             </div>
                             <div className="lg:col-span-1">

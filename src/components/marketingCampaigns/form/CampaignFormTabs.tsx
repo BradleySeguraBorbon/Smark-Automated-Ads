@@ -48,7 +48,7 @@ export function CampaignFormTabs({
       try {
         setIsLoading(true);
 
-        if (formData.isAiGenerated && mode === 'edit' && campaignId) {
+        if (isAiGenerated && mode === 'edit' && campaignId) {
           const res = await fetch(`/api/campaignAudiences/${campaignId}`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -58,7 +58,7 @@ export function CampaignFormTabs({
           setAudience(data.audience || []);
         }
 
-        if (formData.isAiGenerated && mode === 'new' && audienceClientIds?.length) {
+        if (isAiGenerated && mode === 'new' && audienceClientIds?.length) {
           const res = await fetch(`/api/clients/bulk`, {
             method: 'POST',
             headers: {
@@ -71,7 +71,7 @@ export function CampaignFormTabs({
           setAudience(data.results || []);
         }
 
-        if (!formData.isAiGenerated && formData.tags.length > 0) {
+        if (!isAiGenerated && formData.tags.length > 0) {
           const tagQueryParams = formData.tags
             .map((tag) => `tagIds[]=${tag._id}`)
             .join('&');
@@ -143,7 +143,7 @@ export function CampaignFormTabs({
               clients={audience}
               isAiGenerated={form.watch('isAiGenerated')}
               campaignId={String(form.watch('_id'))}
-              fullCount={formData.isAiGenerated
+              fullCount={isAiGenerated
                 ? (audienceClientIds?.length ?? audience.length)
                 : audienceCount}
             />
