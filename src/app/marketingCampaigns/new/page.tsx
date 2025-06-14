@@ -113,7 +113,7 @@ console.log("Came from MCP:", cameFromMCP);
                 allClientIds = parsedAudience;
             } else {
                 const tagQuery = payload.tags.map((id) => `tagIds[]=${id}`).join('&');
-                const clientRes = await fetch(`/api/clients?${tagQuery}`, {
+                const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
