@@ -34,7 +34,7 @@ export default function TagsPage() {
 
             fetchTags(currentPage);
         });
-    }, [hydrated, token, currentPage]);
+    }, [hydrated, token, currentPage, searchTerm]);
 
     return (
         <TagsPageLayout

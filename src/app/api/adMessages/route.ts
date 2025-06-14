@@ -27,13 +27,9 @@ export async function GET(request: Request) {
 
         const filter: Record<string, any> = {};
 
-        if (searchParams.has('status')) {
-            filter.status = searchParams.get('status');
-        }
-
-        if (searchParams.has('type')) {
-            const types = searchParams.getAll('type');
-            filter.type = {$in: types};
+        if (searchParams.has('name')) {
+            const name = searchParams.get('name');
+            filter.name = { $regex: name, $options: 'i' };
         }
 
         const page = parseInt(searchParams.get('page') || '1');
