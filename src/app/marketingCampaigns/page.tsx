@@ -29,10 +29,10 @@ export default function MarketingCampaignsPage() {
     const clearCampaigns = useMarketingCampaignStore((state) => state.clearCampaigns);
     const campaignsHydrated = useMarketingCampaignStore((state) => state.hasHydrated);
 
-    const fetchCampaigns = async (name: string = '') => {
+    const fetchCampaigns = async (page: number = 1, name: string = '') => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/marketingCampaigns?page=${currentPage}&limit=10&name=${name}`, {
+            const response = await fetch(`/api/marketingCampaigns?page=${page}&limit=10&name=${name}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -72,7 +72,7 @@ export default function MarketingCampaignsPage() {
         if (!_hasHydrated || !token || !userInfo) return;
 
         const run = async () => {
-            await fetchCampaigns(searchTerm);
+            await fetchCampaigns(currentPage, searchTerm);
             setHasFetched(true);
         };
 
@@ -116,8 +116,10 @@ export default function MarketingCampaignsPage() {
                     <SearchInput
                         value={searchTerm}
                         onDebouncedChange={(val) => {
-                            setSearchTerm(val);
-                            setCurrentPage(1);
+                            if (val !== searchTerm) {
+                                setSearchTerm(val);
+                                setCurrentPage(1);
+                            }
                         }}
                         placeholder="Search campaigns by name"
                     />

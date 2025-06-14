@@ -70,7 +70,7 @@ export default function ClientsPage() {
     useEffect(() => {
         if (!_hasHydrated) return;
         if (!token) {
-            router.push('/auth/login');
+            setTimeout(() => router.push('/auth/login'), 100);
             return;
         }
 
@@ -88,6 +88,12 @@ export default function ClientsPage() {
     }, [_hasHydrated, token]);
 
     useEffect(() => {
+        if (!_hasHydrated) return;
+        if (!token) {
+            setTimeout(() => router.push('/auth/login'), 100);
+            return;
+        }
+
         if (_hasHydrated && token && userInfo) {
             fetchClients(currentPage, searchTerm);
         }
@@ -154,11 +160,13 @@ export default function ClientsPage() {
                 <div className="text-center py-4 text-red-500 bg-red-100 rounded-md">{apiError}</div>
             )}
             <SearchInput value={searchTerm}
-                onDebouncedChange={(val) => {
-                    setSearchTerm(val);
-                    setCurrentPage(1);
-                }}
-                placeholder="Search clients by name"
+                         onDebouncedChange={(val) => {
+                             if (val !== searchTerm) {
+                                 setSearchTerm(val);
+                                 setCurrentPage(1);
+                             }
+                         }}
+                         placeholder="Search clients by name"
             />
 
             {loading ? (
