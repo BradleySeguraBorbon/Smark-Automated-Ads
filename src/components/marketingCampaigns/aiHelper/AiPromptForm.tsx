@@ -49,7 +49,7 @@ export default function AiPromptForm({ onStrategyLoaded }: AiPromptFormProps) {
     return (
         <div className="space-y-4 justify-center mb-6">
             <div className="text-center space-y-2 mt-5">
-                <h1 className="text-3xl font-bold">Hi, welcome to AutoSmark AI-Powered Campaigns</h1>
+                <h1 className="text-3xl font-bold">Hi!, welcome to AutoSmark AI-Powered Campaigns</h1>
                 <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
                     Type the criteria you want to use to segment audiences for a new campaign.
                 </p>
