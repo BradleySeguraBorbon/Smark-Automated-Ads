@@ -51,6 +51,12 @@ export function AudiencePreviewTable({
     }
   }, [isAiGenerated, campaignId]);
 
+  useEffect(() => {
+  if (!isAiGenerated && fallbackClients) {
+    setClients(fallbackClients);
+  }
+}, [fallbackClients, isAiGenerated]);
+
   if (loading) return <LoadingSpinner />;
 
   return (

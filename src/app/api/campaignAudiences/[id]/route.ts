@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import connectDB from '@/config/db';
 import { CampaignAudiences } from '@/models/models';
 import { getUserFromRequest } from '@/lib/auth';
-import {sanitizeRequest} from "@/lib/utils/sanitizeRequest";
+import { sanitizeRequest } from "@/lib/utils/sanitizeRequest";
 import Clients from "@/models/Client";
 
 function isValidObjectId(id: string) {
@@ -64,24 +64,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: 'Forbidden: insufficient permissions' }, { status: 403 });
     }
 
-    const { id } = await params;
-    if (!id || !isValidObjectId(id)) {
+    const { id: campaignId } = await params;
+    if (!campaignId || !isValidObjectId(campaignId)) {
         return NextResponse.json({ message: 'Invalid or missing ID' }, { status: 400 });
     }
 
     const result = await sanitizeRequest(request, {
-        requiredFields: ['campaign', 'audience', 'status'],
+        requiredFields: ['audience', 'status'],
         enumArrays: [{ field: 'audience', allowed: [] }],
         enums: [{ field: 'status', allowed: ['approved', 'pending', 'rejected'] }]
     });
 
     if (!result.ok) return result.response;
-    const body = result.data;
-    const { campaign, audience } = body;
-
-    if (!isValidObjectId(campaign)) {
-        return NextResponse.json({ message: 'Invalid campaign ID' }, { status: 400 });
-    }
+    const { audience, status } = result.data;
 
     const audienceValidation = await validateObjectIdsExist(audience, Clients, 'audience');
     if (audienceValidation) {
@@ -89,16 +84,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     try {
-        const updated = await CampaignAudiences.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+        const updated = await CampaignAudiences.findOneAndUpdate(
+            { campaign: campaignId },
+            { audience, status },
+            { new: true, runValidators: true }
+        );
         if (!updated) {
             return NextResponse.json({ message: 'Campaign audience not found' }, { status: 404 });
         }
 
-        const campaignAudience = await CampaignAudiences.findById(id)
+        const campaignAudience = await CampaignAudiences.findOne({ campaign: campaignId })
             .populate('campaign', '_id name description status')
             .populate('audience', '_id email firstName lastName birthDate preferredContactMethod');
 
-        return NextResponse.json({ message: 'Campaign audience updated successfully', result: campaignAudience });
+        return NextResponse.json({
+            message: 'Campaign audience updated successfully',
+            result: campaignAudience
+        });
     } catch (error: any) {
         console.error(error);
         return NextResponse.json(

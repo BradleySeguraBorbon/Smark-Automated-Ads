@@ -148,19 +148,6 @@ export default function EditCampaignPage() {
     const handleUpdate = async (data: MarketingCampaignFormData) => {
         const payload = transformMarketingCampaignForSave(data);
         try {
-            let allClientIds: string[] = [];
-
-            if (!data.isAiGenerated) {
-                const tagQuery = payload.tags.map(id => `tagIds[]=${id}`).join('&');
-                const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const clientData = await clientRes.json();
-                allClientIds = clientData.results.map((c: IClient) => c._id);
-            }
-
             const response = await fetch(`/api/marketingCampaigns/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -179,14 +166,26 @@ export default function EditCampaignPage() {
             console.log('Campaign updated:', result.result);
 
             if (!data.isAiGenerated) {
-                await fetch(`/api/campaignAudiences/${id}`, {
+                const tagQuery = (payload.tags as (string | { _id: string })[])
+                    .map(tag => typeof tag === 'string' ? tag : tag._id)
+                    .map(id => `tagIds[]=${id}`)
+                    .join('&');
+
+                const clientRes = await fetch(`/api/clients?${tagQuery}&limit=10000`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const clientData = await clientRes.json();
+                const allClientIds = clientData.results.map((c: IClient) => c._id);
+
+                await fetch(`/api/campaignAudiences/byCampaign/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
-                        campaign: id,
                         audience: allClientIds,
                         status: 'approved',
                     }),
@@ -198,6 +197,7 @@ export default function EditCampaignPage() {
             console.error('Error updating campaign:', error);
         }
     };
+
 
     if (!tagsHydrated || !usersHydrated || isLoading) {
         return (

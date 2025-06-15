@@ -13,6 +13,7 @@ import { ClientRef } from '@/types/Client';
 import { MarketingCampaignFormData } from '@/types/MarketingCampaign';
 import { useAuthStore } from '@/lib/store';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useWatch } from 'react-hook-form';
 
 interface CampaignFormTabsProps {
   mode: 'new' | 'edit';
@@ -42,6 +43,10 @@ export function CampaignFormTabs({
   const token = useAuthStore((state) => state.token);
 
   const formData = form.watch();
+  const watchedTags = useWatch({
+    control: form.control,
+    name: 'tags',
+  });
 
   useEffect(() => {
     const fetchAudience = async () => {
@@ -71,9 +76,14 @@ export function CampaignFormTabs({
           setAudience(data.results || []);
         }
 
-        if (!isAiGenerated && formData.tags.length > 0) {
-          const tagQueryParams = formData.tags
-            .map((tag) => `tagIds[]=${tag._id}`)
+        if (!isAiGenerated) {
+          if (!watchedTags || watchedTags.length === 0) {
+            setAudience([]);
+            setAudienceCount(0);
+            return;
+          }
+          const tagQueryParams = watchedTags
+            .map(tag => `tagIds[]=${typeof tag === 'string' ? tag : tag._id}`)
             .join('&');
 
           const res = await fetch(`/api/clients?${tagQueryParams}&limit=10&page=1`, {
@@ -106,8 +116,8 @@ export function CampaignFormTabs({
     }
   }, [
     activeTab,
-    formData.tags,
-    formData._id,
+    watchedTags,
+    form.watch('_id'),
     mode,
     campaignId,
     isAiGenerated,
