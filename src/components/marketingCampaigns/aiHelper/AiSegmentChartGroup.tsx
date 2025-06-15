@@ -12,6 +12,8 @@ import {
 } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
@@ -35,6 +37,10 @@ export default function AiSegmentChartGroup({ strategy }: { strategy: MCPStrateg
     const allSegmentedClientIds = new Set(segmentGroups.flatMap(s => s.clientIds));
     const unsegmented = totalClients - allSegmentedClientIds.size;
 
+    const segmentedColors = [
+        '#38bdf8', '#22c55e', '#f97316', '#a855f7', '#ef4444', '#10b981', '#eab308'
+    ];
+
     const individualData = {
         labels: [
             ...segmentGroups.map(s => `${s.criterion} = ${getFriendlyValue(s.criterion, s.value)}`),
@@ -46,9 +52,14 @@ export default function AiSegmentChartGroup({ strategy }: { strategy: MCPStrateg
                 ...(unsegmented > 0 ? [unsegmented] : [])
             ],
             backgroundColor: [
-                '#38bdf8', '#22c55e', '#f97316', '#a855f7', '#ef4444',
-                ...(unsegmented > 0 ? ['#9ca3af'] : [])
-            ]
+                ...segmentedColors.slice(0, segmentGroups.length),
+                ...(unsegmented > 0 ? ['rgba(156,163,175,0.3)'] : []) // Light gray transparent
+            ],
+            borderColor: [
+                ...Array(segmentGroups.length).fill('#ffffff'),
+                ...(unsegmented > 0 ? ['rgba(107,114,128,0.5)'] : []) // border for gray
+            ],
+            borderWidth: 1
         }]
     };
 
@@ -69,18 +80,49 @@ export default function AiSegmentChartGroup({ strategy }: { strategy: MCPStrateg
                     <CardTitle>Audience Coverage by Segment</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Pie data={individualData} />
+                    <div className="flex justify-center w-full">
+                        <div className="max-w-[320px] w-full">
+                            <Pie data={individualData} />
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Raw Client Distribution</CardTitle>
+                    <CardTitle>Segment Highlights</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Bar data={overlapData} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {segmentGroups.map((group, index) => {
+                            const count = group.clientIds.length;
+                            const percentage = ((count / totalClients) * 100).toFixed(1);
+
+                            return (
+                                <div key={index} className="flex flex-col items-center space-y-2">
+                                    <div className="w-24 h-24">
+                                        <CircularProgressbar
+                                            value={parseFloat(percentage)}
+                                            text={`${percentage}%`}
+                                            styles={buildStyles({
+                                                textSize: '16px',
+                                                pathColor: '#4f46e5',
+                                                textColor: '#e4e5e6',
+                                                trailColor: '#e5e7eb',
+                                            })}
+                                        />
+                                    </div>
+                                    <div className="text-sm font-medium text-center">
+                                        {group.criterion} = {getFriendlyValue(group.criterion, group.value)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">{count} clients</div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </CardContent>
             </Card>
+
 
             {/* Puedes agregar más gráficas aquí */}
         </div>
