@@ -60,6 +60,17 @@ const SYSTEM_PROMPT = `
     }[]
   }
 
+  If the prompt does not mention any criteria that can be mapped to the available filters, respond with a JSON object:
+  {
+    coverage: 0,
+    totalClients: 0,
+    selectedClients: [],
+    segmentGroups: [],
+    message: "Segmentation cannot be performed with given criteria"
+  }
+  Do not call the segmentAudience tool in this case.
+
+
   After calling the segmentAudience tool, you will receive a raw JSON response. You must rewrite the "reason" field in each segmentGroup to be short, clear, and user-friendly.
 
   For example:
@@ -118,7 +129,7 @@ export async function runMcpAi({ prompt }: { prompt: string }) {
     return JSON.parse(JSON.stringify(parsed));
   } catch (error: any) {
     console.error('AI stream or parsing error:', error);
-    throw new Error(`AI response error:\n\n${error.message}`);
+    throw new Error(`Segmentation could not be performed`);
   } finally {
     client.close();
   }

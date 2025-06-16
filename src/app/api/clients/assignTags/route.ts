@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
         const { token } = await req.json();
 
-        const pendingClients = await Clients.find({ tagsPending: true }).lean(); // lean() evita documentos Mongoose
+        const pendingClients = await Clients.find({ tagsPending: true }).lean(); 
 
         const updatedClients: string[] = [];
 
@@ -20,10 +20,9 @@ export async function POST(req: NextRequest) {
                     token
                 );
 
-                // Acá usamos directamente findByIdAndUpdate
                 await Clients.findByIdAndUpdate(client._id, {
                     $set: {
-                        tags: tagIds, // ← directamente como string[], Mongoose los convierte a ObjectId[]
+                        tags: tagIds, 
                         tagsPending: false,
                     },
                 });
