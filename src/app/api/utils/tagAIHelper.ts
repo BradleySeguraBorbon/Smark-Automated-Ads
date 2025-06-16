@@ -32,7 +32,7 @@ export async function getTagsIdsBasedOnPreference(client: { name: string, prefer
         throw new Error("No tags found");
     }
 
-    const formattedClient = `Nombre: ${client.name}\nPreferencias: ${client.preferences.join(", ")}`;
+    const formattedClient = `Name: ${client.name}\nPreferences: ${client.preferences.join(", ")}`;
     const tagsString = JSON.stringify(tags.map(tag => ({ id: tag._id, keywords: tag.keywords })));
 
     const prompt = fillPrompt(`

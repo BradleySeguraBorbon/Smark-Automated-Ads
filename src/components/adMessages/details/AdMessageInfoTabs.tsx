@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmailPreview } from '@/components/adMessages/forms/EmailPreview';
 import { IAdMessage } from '@/types/AdMessage';
 import { Card } from '@/components/ui/card';
+import MarkdownIt from "markdown-it";
 
 interface AdMessageInfoTabsProps {
     adMessage: IAdMessage;
@@ -47,19 +48,19 @@ export default function AdMessageInfoTabs({ adMessage }: AdMessageInfoTabsProps)
                 <Card className="p-4">
                     <h3 className="font-semibold text-lg mb-2">Telegram Preview</h3>
                     {adMessage.content.telegram ? (
-                        <div className="bg-gray-100 p-3 rounded-lg max-w-md text-sm whitespace-pre-wrap text-muted-foreground">
-                            {adMessage.content.telegram?.message}
+                        <div className="bg-gray-100 p-3 rounded-lg max-w-md text-sm text-muted-foreground">
+                            <div
+                                dangerouslySetInnerHTML={{
+                                    __html: new MarkdownIt().render(adMessage.content.telegram.message),
+                                }}
+                            />
                             {Array.isArray(adMessage.content.telegram.buttons) && adMessage.content.telegram.buttons.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-3">
-                                    {adMessage.content.telegram?.buttons?.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-3">
-                                            {adMessage.content.telegram.buttons.map((btn, index) => (
-                                                <div key={index} className="text-blue-600 underline cursor-pointer">
-                                                    {btn.text}
-                                                </div>
-                                            ))}
+                                    {adMessage.content.telegram.buttons.map((btn, index) => (
+                                        <div key={index} className="text-blue-600 underline cursor-pointer">
+                                            {btn.text}
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
                             )}
                         </div>

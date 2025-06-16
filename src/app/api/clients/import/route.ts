@@ -3,7 +3,7 @@ import connectDB from "@/config/db";
 import { Clients } from "@/models/models";
 import crypto from "crypto";
 import { sendTelegramInvite } from "@/lib/sendTelegramInvite";
-import { encryptClient } from "@/lib/clientEncryption";
+import {decryptClient, encryptClient} from "@/lib/clientEncryption";
 
 export async function POST(req: NextRequest) {
     try {
@@ -116,8 +116,8 @@ export async function POST(req: NextRequest) {
         }
 
         const inserted = await Clients.insertMany(validClients, { ordered: false });
-
-        for (const client of inserted) {
+        const decrypted = inserted.map(decryptClient);
+        for (const client of decrypted) {
             if (
                 client.subscriptions?.includes("telegram") &&
                 client.telegram?.tokenKey &&
