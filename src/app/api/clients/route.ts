@@ -46,9 +46,9 @@ export async function GET(request: Request) {
             }
         }
 
-        if (searchParams.has('name')) {
-            const name = searchParams.get('name');
-            filter.firstName = { $regex: name, $options: 'i' };
+        const ids = searchParams.getAll('ids[]');
+        if (ids.length > 0) {
+            filter._id = { $in: ids };
         }
 
         const page = parseInt(searchParams.get('page') || '1');
