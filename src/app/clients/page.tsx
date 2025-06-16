@@ -40,7 +40,7 @@ export default function ClientsPage() {
     const fetchClients = async (page: number = 1, name: string = '') => {
         try {
             setLoading(true)
-            const response = await fetch(`/api/clients?page=${page}&limit=9&name=${name}`, {
+            const response = await fetch(`/api/clients?page=${page}&limit=9`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,6 +64,41 @@ export default function ClientsPage() {
             setApiError('Unexpected error occurred.')
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function searchClientsByName(name: string, token: string, page: number): Promise<{ results: IClient[], totalPages: number }> {
+        try {
+            const idsResponse = await fetch('/api/clients/idsAndNames', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!idsResponse.ok) throw new Error('Failed to fetch client names');
+
+            const allClients = await idsResponse.json();
+
+            const matchingIds = allClients
+                .filter((client: { _id: string; firstName: string }) =>
+                    client.firstName.toLowerCase().includes(name.toLowerCase())
+                )
+                .map((client: { _id: string }) => client._id);
+
+            const totalPages = Math.ceil(matchingIds.length / 9);
+            const pageIds = matchingIds.slice((page - 1) * 9, page * 9);
+            if (pageIds.length === 0) return { results: [], totalPages: 1 };
+
+            const query = pageIds.map((id: string) => `ids[]=${id}`).join('&');
+            const fullResponse = await fetch(`/api/clients?page=1&limit=9&${query}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!fullResponse.ok) throw new Error('Failed to fetch client details');
+
+            const result = await fullResponse.json();
+            return { results: result.results || [], totalPages };
+        } catch (error) {
+            console.error('Error searching clients by name:', error);
+            return { results: [], totalPages: 1 };
         }
     }
 
@@ -94,9 +129,20 @@ export default function ClientsPage() {
             return;
         }
 
-        if (_hasHydrated && token && userInfo) {
-            fetchClients(currentPage, searchTerm);
-        }
+        const loadClients = async () => {
+            setLoading(true);
+            if (searchTerm.trim() === '') {
+                fetchClients(currentPage);
+                setTotalPages(1);
+            } else {
+                const { results, totalPages } = await searchClientsByName(searchTerm, token, currentPage);
+                setFetchedClients(results);
+                setTotalPages(totalPages);
+            }
+            setLoading(false);
+        };
+
+        loadClients();
     }, [_hasHydrated, token, userInfo, currentPage, searchTerm]);
 
     const handleDelete = async (clientId: string) => {
