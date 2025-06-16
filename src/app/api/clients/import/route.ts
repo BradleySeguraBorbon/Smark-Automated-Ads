@@ -3,6 +3,7 @@ import connectDB from "@/config/db";
 import { Clients } from "@/models/models";
 import crypto from "crypto";
 import { sendTelegramInvite } from "@/lib/sendTelegramInvite";
+import { encryptClient } from "@/lib/clientEncryption";
 
 export async function POST(req: NextRequest) {
     try {
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
                 continue;
             }
 
-            const alreadyExists = await Clients.findOne({email});
+            const alreadyExists = await Clients.findOne({ email });
 
             if (alreadyExists) {
                 console.warn(`Duplicate in DB skipped: ${email}`);
@@ -106,7 +107,8 @@ export async function POST(req: NextRequest) {
                 )
             );
 
-            validClients.push(sanitized);
+            const encrypted = encryptClient(sanitized);
+            validClients.push(encrypted);
         }
 
         if (validClients.length === 0) {
