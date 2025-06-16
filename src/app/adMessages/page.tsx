@@ -114,65 +114,63 @@ export default function AdMessagesPage() {
   if (initialLoading) return <LoadingSpinner />;
 
   return (
-      <div>
-        <main>
-          <div className="container mx-auto py-8 lg:px-44 md:px-20 px-10 transition-all duration-300 ease-in-out">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">Ad Messages</h1>
-                <p className="text-muted-foreground">Manage your email and telegram messages</p>
-              </div>
-              <div className="flex gap-4">
-                {userInfo?.role !== 'employee' && (
-                    <Button className="bg-purple-700 hover:bg-purple-900 text-white" asChild>
-                      <Link href="/adMessages/new">
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        New Ad
-                      </Link>
-                    </Button>
-                )}
-              </div>
+    <div>
+      <main>
+        <div className="container mx-auto py-8 lg:px-44 md:px-20 px-10 transition-all duration-300 ease-in-out">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">Ad Messages</h1>
+              <p className="text-muted-foreground">Manage your email and telegram messages</p>
             </div>
-
-            <SearchInput
-                value={searchTerm}
-                onDebouncedChange={(val) => {
-                  if (val !== searchTerm) {
-                    setSearchTerm(val);
-                    setCurrentPage(1);
-                  }
-                }}
-                placeholder="Search ad messages by name"
-            />
-
-            {loading ? (
-                <div className="mt-10 text-center text-muted-foreground">Loading ad messages...</div>
-            ) : adMessages.length === 0 ? (
-                <div className="mt-10 text-center text-muted-foreground">No matching ad messages found.</div>
-            ) : (
-                <>
-                  <div className="grid gap-6">
-                    {adMessages.map((message) => (
-                        <AdMessageCard
-                            key={String(message._id)}
-                            adMessage={message}
-                            onDelete={() => handleDelete(String(message._id))}
-                            userRole={userInfo?.role as string}
-                        />
-                    ))}
-                  </div>
-
-                  {totalPages > 1 && (
-                      <PaginationControls
-                          currentPage={currentPage}
-                          totalPages={totalPages}
-                          onPageChangeAction={(page) => setCurrentPage(page)}
-                      />
-                  )}
-                </>
-            )}
+            <div className="flex gap-4">
+              <Button className="bg-purple-700 hover:bg-purple-900 text-white" asChild>
+                <Link href="/adMessages/new">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  New Ad
+                </Link>
+              </Button>
+            </div>
           </div>
-        </main>
-      </div>
+
+          <SearchInput
+            value={searchTerm}
+            onDebouncedChange={(val) => {
+              if (val !== searchTerm) {
+                setSearchTerm(val);
+                setCurrentPage(1);
+              }
+            }}
+            placeholder="Search ad messages by name"
+          />
+
+          {loading ? (
+            <div className="mt-10 text-center text-muted-foreground">Loading ad messages...</div>
+          ) : adMessages.length === 0 ? (
+            <div className="mt-10 text-center text-muted-foreground">No matching ad messages found.</div>
+          ) : (
+            <>
+              <div className="grid gap-6">
+                {adMessages.map((message) => (
+                  <AdMessageCard
+                    key={String(message._id)}
+                    adMessage={message}
+                    onDelete={() => handleDelete(String(message._id))}
+                    userRole={userInfo?.role as string}
+                  />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChangeAction={(page) => setCurrentPage(page)}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }

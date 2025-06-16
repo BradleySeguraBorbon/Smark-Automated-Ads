@@ -11,6 +11,7 @@ import TemplateHtmlView from '@/components/templates/TemplateHtmlView'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import EmailPreview from "@/components/templates/EmailPreview";
 
 export default function ViewTemplatePage() {
     const { id } = useParams()
@@ -71,7 +72,7 @@ export default function ViewTemplatePage() {
     return (
         <div className="container mx-auto py-8 max-w-4xl space-y-6">
             <BreadcrumbHeader backHref="/templates" title={template.name} />
-            <TemplateHtmlView html={template.html} />
+            <EmailPreview html={template.html} />
             <Card>
                 <CardHeader>
                     <CardTitle>Metadata</CardTitle>

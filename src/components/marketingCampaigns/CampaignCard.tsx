@@ -42,18 +42,12 @@ const CampaignCardComponent = ({ campaign, onDelete, userRole }: CampaignCardPro
                         <CardDescription>Created on {format(new Date(campaign.startDate), 'yyyy-MM-dd')}</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span
-                            className={
-                                `rounded-full px-2 py-0.5 text-xs font-medium 
-                                    ${campaign.status === "active"
-                                    ? "bg-green-100 text-green-800"
-                                    : campaign.status === "inactive"
-                                        ? "border border-gray-400 text-gray-600"
-                                        : "bg-gray-300 text-gray-700"}`
-                            }
+                        <Badge
+                            variant={"outline"}
+                            className="mr-39"
                         >
                             {campaign.status}
-                        </span>
+                        </Badge>
                         {userRole !== 'employee' &&
                             <Button variant="secondary" className="bg-teal-600 hover:bg-teal-800" size="icon" onClick={() => setAlertOpen(true)}>
                                 <Trash2 className="h-4 w-4" />
