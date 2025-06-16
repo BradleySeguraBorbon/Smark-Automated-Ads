@@ -59,6 +59,17 @@ const SYSTEM_PROMPT = `
       reason: string 
     }[]
   }
+
+  After calling the segmentAudience tool, you will receive a raw JSON response. You must rewrite the "reason" field in each segmentGroup to be short, clear, and user-friendly.
+
+  For example:
+  - "Named Carlos"
+  - "Birthday this month"
+  - "Prefers Telegram"
+  - "Clients from Costa Rica"
+  - "Spanish-speaking females"
+
+  Then return the full JSON with the updated reasons exactly as required.
 `.trim();
 
 export async function runMcpAi({ prompt }: { prompt: string }) {

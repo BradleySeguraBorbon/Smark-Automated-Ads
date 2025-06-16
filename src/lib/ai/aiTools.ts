@@ -29,7 +29,7 @@ export const segmentAudience = tool({
 
         const json = await response.json();
         const text = json?.content?.[0]?.text ?? '';
-        return JSON.parse(text);
+        return text;
     },
 });
 

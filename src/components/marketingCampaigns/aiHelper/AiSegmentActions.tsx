@@ -56,7 +56,7 @@ export default function AiSegmentActions({ strategy }: AiSegmentActionsProps) {
                             >
                                 <div className="flex justify-between items-center mb-2">
                                     <div className="text-sm font-semibold text-white">
-                                        {group.criterion} = {group.value}
+                                        {group.reason}
                                     </div>
                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
                                         ${isSelected ? 'bg-blue-600 border-white' : 'border-gray-300'}`}>

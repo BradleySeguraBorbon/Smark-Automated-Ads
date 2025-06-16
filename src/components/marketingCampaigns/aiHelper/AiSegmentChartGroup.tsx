@@ -43,7 +43,7 @@ export default function AiSegmentChartGroup({ strategy }: { strategy: MCPStrateg
 
     const individualData = {
         labels: [
-            ...segmentGroups.map(s => `${s.criterion} = ${getFriendlyValue(s.criterion, s.value)}`),
+            ...segmentGroups.map(s => s.reason),
             ...(unsegmented > 0 ? ['Unsegmented Clients'] : [])
         ],
         datasets: [{
@@ -113,7 +113,7 @@ export default function AiSegmentChartGroup({ strategy }: { strategy: MCPStrateg
                                         />
                                     </div>
                                     <div className="text-sm font-medium text-center">
-                                        {group.criterion} = {getFriendlyValue(group.criterion, group.value)}
+                                        {group.reason}
                                     </div>
                                     <div className="text-xs text-muted-foreground">{count} clients</div>
                                 </div>

@@ -3,16 +3,10 @@ import { IClient } from '@/types/Client';
 import { decryptClient } from '@/lib/clientEncryption';
 import connectDB from '@/config/db';
 
-/* --------------------------------------------------
- *  Constants – tweak here only
- * --------------------------------------------------*/
 export const MIN_GROUP_SIZE = 3;
 export const MAX_SEGMENT_GROUPS = 5;
 export const MAX_CRITERIA_TRIED = 8;
 
-/* --------------------------------------------------
- *  Types – unchanged
- * --------------------------------------------------*/
 export interface SimplifiedClient {
   _id: string;
   firstName: string;
@@ -54,9 +48,6 @@ export interface CustomSegmentRequest {
   minGroupSize?: number;
 }
 
-/* --------------------------------------------------
- *  Helpers
- * --------------------------------------------------*/
 const toArray = (v?: string | string[]) =>
   Array.isArray(v) ? v : v ? [v] : [];
 
@@ -80,9 +71,6 @@ const getFieldValues = (c: SimplifiedClient, f: keyof SimplifiedClient) => {
   return [raw as string];
 };
 
-/* --------------------------------------------------
- *  Greedy selector – maximises unique coverage
- * --------------------------------------------------*/
 function selectTopGroups(
   all: SegmentGroup[]
 ): { chosen: SegmentGroup[]; coveredIds: Set<string> } {
@@ -104,9 +92,6 @@ function selectTopGroups(
   return { chosen, coveredIds: covered };
 }
 
-/* --------------------------------------------------
- *  Main entry
- * --------------------------------------------------*/
 export async function generateCampaignStrategy(
   custom?: CustomSegmentRequest
 ): Promise<CampaignStrategyResult> {
@@ -133,7 +118,6 @@ export async function generateCampaignStrategy(
   const total = clients.length;
   const buckets: Record<string, SegmentGroup[]> = {};
 
-  /* ---------- 1. CUSTOM FILTERS ---------- */
   if (custom?.filters?.length) {
     clients.forEach(client => {
       const matchesAtLeastOne = custom.filters!.some(f => {
@@ -159,7 +143,6 @@ export async function generateCampaignStrategy(
 
       if (!matchesAtLeastOne) return;
 
-      // ✅ Agrupar por field (máximo 1 grupo por campo)
       custom.filters!.forEach(({ field, match, min, max, currentMonth }) => {
         const allowed = toArray(match);
         const values = getFieldValues(client, field);
